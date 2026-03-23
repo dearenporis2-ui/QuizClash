@@ -1591,14 +1591,12 @@ function v(id){return document.getElementById(id).value.trim();}
 
 // ── STATS ──
 // ── ADMIN SYSTEM ──
-const ADMIN_EMAILS = ['admin', 'test', 'dev']; // emails containing these get admin
+const ADMIN_EMAIL = 'dearen406@gmail.com';
 let isAdmin = false;
 
 function checkAdmin() {
   if (!currentUser) return false;
-  const email = (currentUser.email || '').toLowerCase();
-  const name = (currentUser.displayName || '').toLowerCase();
-  return ADMIN_EMAILS.some(k => email.includes(k) || name.includes(k));
+  return currentUser.email.toLowerCase() === ADMIN_EMAIL;
 }
 
 // Call this in console: giveCoins(9999999) to set coins manually
@@ -3298,7 +3296,6 @@ async function saveAvatar(){
 }
 
 // ── ADMIN ──
-const ADMIN_EMAIL='dearen406@gmail.com';
 async function loadAdmin(){
   if(!currentUser||currentUser.email!==ADMIN_EMAIL)return;
   const usersSnap=await db.collection('users').get();let totalQ=0;
@@ -5534,33 +5531,7 @@ document.addEventListener('DOMContentLoaded', initLang);
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchend', onMouseUp);
 
-  // Custom cursor — hide default ONLY when mouse is actually moving over background
-  // Keep pointer on interactive elements
-  const interactiveTags = new Set(['INPUT','BUTTON','TEXTAREA','A','SELECT','LABEL']);
-  let cursorHidden = false;
-
-  function updateCursorStyle(target) {
-    let el = target;
-    // Walk up the DOM to check if we're on something interactive
-    while (el && el !== document.body) {
-      if (interactiveTags.has(el.tagName) || el.classList.contains('option-btn') ||
-          el.classList.contains('subject-btn') || el.classList.contains('topic-chip') ||
-          el.classList.contains('diff-btn') || el.classList.contains('start-btn') ||
-          el.classList.contains('bnav-btn') || el.classList.contains('auth-btn') ||
-          el.classList.contains('lesson-topic-item') || el.classList.contains('star-btn') ||
-          el.style.cursor === 'pointer' || window.getComputedStyle(el).cursor === 'pointer') {
-        document.body.style.cursor = 'pointer';
-        cursorHidden = false;
-        return;
-      }
-      el = el.parentElement;
-    }
-    document.body.style.cursor = 'none';
-    cursorHidden = true;
-  }
-
-  document.addEventListener('mouseover', (e) => updateCursorStyle(e.target));
-  document.addEventListener('mouseleave', () => { document.body.style.cursor = 'auto'; });
+  // Cursor remains fully visible — no hiding
 })();
 
 // ── NAV RIPPLE ──
