@@ -911,7 +911,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 </svg>
 
 <!-- AUTH -->
-<canvas id="auth-particles" aria-hidden="true"></canvas>
+<canvas id="app-bg-canvas" aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:0;"></canvas>
 <div class="page">
 <div id="auth-screen">
   <div class="auth-logo">
@@ -1144,6 +1144,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
     <div class="avatar-preview-wrap">
       <div style="position:relative;display:inline-block;margin-bottom:16px;">
+        <canvas id="frame-canvas" style="position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);pointer-events:none;z-index:10;border-radius:50%;"></canvas>
         <div class="avatar-display" id="av-preview" style="background:#1c202c;border:3px solid var(--accent);">
           <span id="av-hat-preview" style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:28px;display:none;"></span>
           <span id="av-base-preview">🧑</span>
@@ -1926,8 +1927,11 @@ async function loadLeaderboard(){
       const isMe=currentUser&&u.uid===currentUser.uid;
       const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
       const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
-      const frameBorder=u.avFrame==='rainbow'?'animation:rainbow-border 2s linear infinite;border-color:#4f8ef7;':`border-color:${u.avFrame};`;
-      const frameClass=u.avFrame==='rainbow'?'frame-rainbow-outer':u.avFrame==='#a78bfa'?'frame-rare':u.avFrame==='#f0a050'||u.avFrame==='#f0c060'?'frame-legendary':'frame-common';
+      const canvasFrameColors={'forest':'#3ecf8e','lava':'#ff4500','storm':'#88ccff','ocean':'#0099ff','gold':'#ffd700','shadow':'#8800cc','aurora':'#ff88ff','crystal':'#aaddff'};
+      const isCanvasFrame=canvasFrameColors.hasOwnProperty(u.avFrame);
+      const fbColor=isCanvasFrame?canvasFrameColors[u.avFrame]:(u.avFrame==='rainbow'?'#4f8ef7':u.avFrame);
+      const frameBorder=`border-color:${fbColor};box-shadow:0 0 10px ${fbColor}55;`;
+      const frameClass=u.avFrame==='gold'?'frame-legendary':u.avFrame==='aurora'||u.avFrame==='shadow'?'frame-legendary':u.avFrame==='storm'||u.avFrame==='forest'||u.avFrame==='lava'||u.avFrame==='ocean'?'frame-rare':'frame-common';
       // Level badge colour by tier
       const lvlColor=u.level>=15?'#f0a050':u.level>=10?'#a78bfa':u.level>=5?'#3ecf8e':'#7a80a0';
       const d=document.createElement('div');d.className='board-item'+(isMe?' me':'');
@@ -2805,7 +2809,7 @@ const AVATAR_COLORS=['#1c202c','#2d1b4e','#1a3a2a','#3a1a1a','#1a2a3a','#2a2a1a'
 const SHOP_ITEMS={
   hats:[{id:'h_grad',icon:'🎓',name:'Grad Cap',price:5},{id:'h_crown',icon:'👑',name:'Crown',price:15},{id:'h_tophat',icon:'🎩',name:'Top Hat',price:10},{id:'h_party',icon:'🎉',name:'Party Hat',price:8},{id:'h_cowboy',icon:'🤠',name:'Cowboy',price:12},{id:'h_santa',icon:'🎅',name:'Santa Hat',price:10},{id:'h_wizard',icon:'🧙',name:'Wizard',price:20},{id:'h_viking',icon:'⛑️',name:'Helmet',price:15},{id:'h_none',icon:'❌',name:'No Hat',price:0}],
   glasses:[{id:'g_glasses',icon:'👓',name:'Glasses',price:5},{id:'g_sungl',icon:'🕶️',name:'Sunglasses',price:8},{id:'g_monocle',icon:'🧐',name:'Monocle',price:12},{id:'g_none',icon:'❌',name:'None',price:0}],
-  frames:[{id:'f_blue',icon:'🔵',name:'Blue Frame',price:5,frameColor:'#4f8ef7'},{id:'f_gold',icon:'✨',name:'Gold Frame ✦',price:25,frameColor:'#f0c060'},{id:'f_green',icon:'🟢',name:'Green Frame',price:8,frameColor:'#3ecf8e'},{id:'f_red',icon:'🔴',name:'Red Frame',price:8,frameColor:'#f56565'},{id:'f_purple',icon:'💜',name:'Mystic Frame',price:18,frameColor:'#a78bfa'},{id:'f_rainbow',icon:'🌈',name:'Aurora Frame ★',price:50,frameColor:'rainbow'},{id:'f_none',icon:'⬜',name:'Default',price:0,frameColor:'var(--accent)'}],
+  frames:[{id:'f_none',icon:'⬜',name:'Default',price:0,frameColor:'default'},{id:'f_blue',icon:'🔵',name:'Crystal Frame',price:5,frameColor:'crystal'},{id:'f_forest',icon:'🍃',name:'Forest Frame',price:15,frameColor:'forest'},{id:'f_lava',icon:'🌋',name:'Lava Frame',price:20,frameColor:'lava'},{id:'f_storm',icon:'⚡',name:'Storm Frame',price:25,frameColor:'storm'},{id:'f_ocean',icon:'🌊',name:'Ocean Frame',price:18,frameColor:'ocean'},{id:'f_gold',icon:'✨',name:'Gold Frame',price:30,frameColor:'gold'},{id:'f_shadow',icon:'💀',name:'Shadow Frame',price:40,frameColor:'shadow'},{id:'f_aurora',icon:'🌈',name:'Aurora Frame',price:60,frameColor:'aurora'}],
   effects:[{id:'e_pulse',icon:'💓',name:'Pulse',price:15,effect:'pulse'},{id:'e_glow',icon:'✨',name:'Glow',price:20,effect:'glow'},{id:'e_rainbow',icon:'🌈',name:'Rainbow Glow',price:30,effect:'rainbow'},{id:'e_none',icon:'❌',name:'No Effect',price:0,effect:'none'}]
 };
 
@@ -2833,24 +2837,16 @@ function initAvatarView(){
 function renderAvatarPreview(){
   const el=document.getElementById('av-preview'),base=document.getElementById('av-base-preview'),hat=document.getElementById('av-hat-preview'),glasses=document.getElementById('av-glasses-preview');
   base.textContent=avatarState.base;el.style.background=avatarState.color;
-  const fc=avatarState.frame||'var(--accent)';
-  // Remove all frame/effect classes
+  const fc=avatarState.frame||'default';
   el.classList.remove('effect-rainbow','effect-pulse','effect-glow','frame-common','frame-rare','frame-legendary','frame-rainbow-outer');
   el.style.boxShadow='';
-  if(fc==='rainbow'){
-    el.style.borderColor='#4f8ef7';
-    el.classList.add('frame-rainbow-outer');
-  } else if(fc==='#a78bfa'){
-    el.style.borderColor=fc;
-    el.classList.add('frame-rare');
-  } else if(fc==='#f0a050'||fc==='#f0c060'){
-    el.style.borderColor='#f0c060';
-    el.classList.add('frame-legendary');
-  } else if(fc&&fc!=='var(--accent)'){
-    el.style.borderColor=fc;
-    el.classList.add('frame-common');
+  const canvasFrames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal'];
+  if(canvasFrames.includes(fc)){
+    el.style.border='3px solid transparent';
+    if(window.setAvatarFrame) window.setAvatarFrame(fc);
   } else {
-    el.style.borderColor='var(--accent)';
+    if(window.setAvatarFrame) window.setAvatarFrame('default');
+    el.style.border='3px solid var(--accent)';
     el.classList.add('frame-common');
   }
   if(avatarState.effect==='pulse') el.classList.add('effect-pulse');
@@ -4684,136 +4680,669 @@ document.addEventListener('DOMContentLoaded', initLang);
 
 
 // ══════════════════════════════════════════════════════
-// MAJESTIC AUTH PARTICLE SYSTEM
+// GLOBAL INTERACTIVE BACKGROUND
 // ══════════════════════════════════════════════════════
-(function initAuthParticles(){
-  const canvas = document.getElementById('auth-particles');
-  if(!canvas) return;
+(function initInteractiveBG() {
+  const canvas = document.getElementById('app-bg-canvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H, particles = [], animId;
-  const COLORS = ['rgba(79,142,247,', 'rgba(167,139,250,', 'rgba(62,207,142,', 'rgba(240,192,96,', 'rgba(245,101,101,'];
-  const COUNT = 70;
+  let W, H, animId;
+  const mouse = { x: -999, y: -999, active: false };
+  const clicks = [];
 
-  function resize(){
+  const COLORS = [
+    [79, 142, 247], [167, 139, 250], [62, 207, 142],
+    [240, 192, 96], [245, 101, 101], [100, 180, 255]
+  ];
+  const COUNT = 90;
+  let particles = [];
+
+  function resize() {
     W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
 
-  function mkParticle(){
-    const c = COLORS[Math.floor(Math.random()*COLORS.length)];
+  function mkP(x, y) {
+    const c = COLORS[Math.floor(Math.random() * COLORS.length)];
     return {
-      x: Math.random()*W,
-      y: H + 10,
-      r: Math.random()*2.5 + 0.5,
-      speed: Math.random()*0.6 + 0.2,
-      drift: (Math.random()-0.5)*0.4,
-      alpha: Math.random()*0.6 + 0.2,
+      x: x ?? Math.random() * W,
+      y: y ?? Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: Math.random() * 1.8 + 0.4,
       color: c,
-      twinkle: Math.random()*Math.PI*2,
-      twinkleSpeed: Math.random()*0.04 + 0.01,
+      alpha: Math.random() * 0.5 + 0.15,
+      tw: Math.random() * Math.PI * 2,
+      twS: Math.random() * 0.025 + 0.008,
     };
   }
 
-  function init(){
+  function init() {
     resize();
-    particles = [];
-    for(let i=0;i<COUNT;i++){
-      const p = mkParticle();
-      p.y = Math.random()*H; // scatter initially
-      particles.push(p);
-    }
+    particles = Array.from({ length: COUNT }, () => mkP());
   }
 
-  // Draw constellation lines between nearby particles
-  function drawLines(){
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist<100){
-          const alpha=(1-dist/100)*0.12;
+  function drawLines() {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      // Mouse attraction lines
+      if (mouse.active) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 140) {
+          const a = (1 - dist / 140) * 0.25;
           ctx.beginPath();
-          ctx.strokeStyle=`rgba(79,142,247,${alpha})`;
-          ctx.lineWidth=0.5;
-          ctx.moveTo(particles[i].x,particles[i].y);
-          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${a})`;
+          ctx.lineWidth = 0.8;
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.stroke();
+          // Gentle pull toward cursor
+          p.vx += -dx / dist * 0.012;
+          p.vy += -dy / dist * 0.012;
+        }
+      }
+      // Constellation lines between particles
+      for (let j = i + 1; j < particles.length; j++) {
+        const q = particles[j];
+        const dx = p.x - q.x, dy = p.y - q.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 95) {
+          const a = (1 - dist / 95) * 0.1;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${a})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
           ctx.stroke();
         }
       }
     }
   }
 
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    drawLines();
-    particles.forEach(p=>{
-      p.twinkle += p.twinkleSpeed;
-      const tw = Math.sin(p.twinkle)*0.3 + 0.7;
+  function drawClickRipples() {
+    for (let i = clicks.length - 1; i >= 0; i--) {
+      const c = clicks[i];
+      c.r += 3.5;
+      c.alpha -= 0.018;
+      if (c.alpha <= 0) { clicks.splice(i, 1); continue; }
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-      ctx.fillStyle = p.color + (p.alpha*tw).toFixed(2) + ')';
-      ctx.fill();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(79,142,247,${c.alpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // Second ring
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r * 0.6, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(167,139,250,${c.alpha * 0.5})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
 
-      // Glow ring on larger particles
-      if(p.r > 1.5){
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    drawLines();
+    drawClickRipples();
+    particles.forEach(p => {
+      p.tw += p.twS;
+      const tw = Math.sin(p.tw) * 0.35 + 0.65;
+      // Draw particle
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${(p.alpha * tw).toFixed(2)})`;
+      ctx.fill();
+      // Outer glow
+      if (p.r > 1.2) {
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+        g.addColorStop(0, `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${(p.alpha * tw * 0.2).toFixed(2)})`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r*2.5, 0, Math.PI*2);
-        ctx.fillStyle = p.color + (p.alpha*tw*0.15).toFixed(2) + ')';
+        ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+        ctx.fillStyle = g;
         ctx.fill();
       }
-
-      p.y -= p.speed;
-      p.x += p.drift;
-      if(p.y < -10 || p.x < -20 || p.x > W+20){
-        Object.assign(p, mkParticle());
-      }
+      // Speed cap
+      const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+      if (spd > 1.5) { p.vx *= 0.97; p.vy *= 0.97; }
+      // Damping
+      p.vx *= 0.995;
+      p.vy *= 0.995;
+      // Drift
+      p.x += p.vx;
+      p.y += p.vy;
+      // Wrap
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10;
+      if (p.y > H + 10) p.y = -10;
     });
     animId = requestAnimationFrame(draw);
   }
 
-  // Only show on auth screen
-  const authScreen = document.getElementById('auth-screen');
-  const appScreen = document.getElementById('app-screen');
-  const observer = new MutationObserver(()=>{
-    const authVisible = authScreen && authScreen.style.display !== 'none';
-    const appVisible = appScreen && appScreen.style.display !== 'none';
-    if(appVisible && !authVisible){
-      canvas.style.display='none';
-      if(animId) cancelAnimationFrame(animId);
-    } else {
-      canvas.style.display='block';
-      if(!animId) draw();
-    }
+  window.addEventListener('mousemove', e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
   });
-  if(appScreen) observer.observe(appScreen, {attributes:true, attributeFilter:['style']});
+  window.addEventListener('mouseleave', () => { mouse.active = false; });
+  window.addEventListener('click', e => {
+    clicks.push({ x: e.clientX, y: e.clientY, r: 5, alpha: 0.7 });
+    // Burst nearby particles outward
+    particles.forEach(p => {
+      const dx = p.x - e.clientX, dy = p.y - e.clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100 && dist > 0) {
+        p.vx += (dx / dist) * 1.8;
+        p.vy += (dy / dist) * 1.8;
+      }
+    });
+  });
+  window.addEventListener('resize', resize);
+  // Touch support
+  window.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    mouse.x = t.clientX; mouse.y = t.clientY; mouse.active = true;
+  }, { passive: true });
+  window.addEventListener('touchend', () => { mouse.active = false; });
 
-  window.addEventListener('resize', ()=>{ resize(); });
   init();
   draw();
 })();
 
 // ══════════════════════════════════════════════════════
-// MAJESTIC NAV — add ripple click on nav buttons
+// 3D CANVAS FRAME RENDERER
 // ══════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', ()=>{
-  document.querySelectorAll('.bnav-btn').forEach(btn=>{
-    btn.addEventListener('click', function(e){
+(function initFrameRenderer() {
+  let frameAnimId = null;
+  let currentFrameType = 'default';
+  const t = { v: 0 }; // time
+
+  function getCanvas() { return document.getElementById('frame-canvas'); }
+
+  function stopFrame() {
+    if (frameAnimId) { cancelAnimationFrame(frameAnimId); frameAnimId = null; }
+    const c = getCanvas();
+    if (c) { const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); }
+  }
+
+  // ── FOREST frame ──
+  function drawForest(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    const leafCount = 18;
+    for (let i = 0; i < leafCount; i++) {
+      const base = (i / leafCount) * Math.PI * 2;
+      const wobble = Math.sin(time * 1.2 + i * 0.8) * 0.18;
+      const angle = base + time * 0.4 + wobble;
+      const orbitR = R + 14 + Math.sin(time * 0.9 + i * 1.3) * 6;
+      const x = cx + Math.cos(angle) * orbitR;
+      const y = cy + Math.sin(angle) * orbitR * 0.85; // squish for 3D
+      const z = Math.sin(angle) * 0.5 + 0.5; // 0-1 depth
+      const scale = 0.6 + z * 0.7;
+      const alpha = 0.5 + z * 0.5;
+      const hue = 100 + Math.sin(time + i) * 20;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle + Math.PI / 2);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = alpha;
+      // Leaf shape
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 5, 9, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `hsl(${hue},70%,${35 + z * 25}%)`;
+      ctx.fill();
+      // Vein
+      ctx.beginPath();
+      ctx.moveTo(0, -8); ctx.lineTo(0, 8);
+      ctx.strokeStyle = `hsla(${hue},80%,80%,0.4)`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+    // Glow ring base
+    const grad = ctx.createRadialGradient(cx, cy, R - 4, cx, cy, R + 6);
+    grad.addColorStop(0, 'rgba(62,207,100,0.0)');
+    grad.addColorStop(0.5, 'rgba(62,207,100,0.35)');
+    grad.addColorStop(1, 'rgba(62,207,100,0.0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 1, 0, Math.PI * 2);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+  }
+
+  // ── LAVA frame ──
+  function drawLava(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    // Outer lava glow
+    const glow = ctx.createRadialGradient(cx, cy, R - 8, cx, cy, R + 20);
+    glow.addColorStop(0, `rgba(255,80,0,${0.3 + Math.sin(time * 2) * 0.1})`);
+    glow.addColorStop(0.5, `rgba(200,40,0,0.2)`);
+    glow.addColorStop(1, 'rgba(255,80,0,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 14, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+    // Lava ring base
+    const lavaGrad = ctx.createLinearGradient(cx - R, cy, cx + R, cy);
+    lavaGrad.addColorStop(0, '#ff4500');
+    lavaGrad.addColorStop(0.3, '#ff8c00');
+    lavaGrad.addColorStop(0.6, '#ff2200');
+    lavaGrad.addColorStop(1, '#ff6600');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 4, 0, Math.PI * 2);
+    ctx.strokeStyle = lavaGrad;
+    ctx.lineWidth = 8;
+    ctx.stroke();
+    // Bubbles
+    const bubbleCount = 14;
+    for (let i = 0; i < bubbleCount; i++) {
+      const angle = (i / bubbleCount) * Math.PI * 2 + time * 0.8;
+      const wobble = Math.sin(time * 3 + i * 1.4) * 8;
+      const r2 = R + 4 + wobble;
+      const x = cx + Math.cos(angle) * r2;
+      const y = cy + Math.sin(angle) * r2 * 0.88;
+      const z = (Math.sin(angle) + 1) / 2;
+      const size = 2 + z * 4 + Math.abs(Math.sin(time * 2 + i)) * 2;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      const hot = Math.random() > 0.7;
+      ctx.fillStyle = hot ? `rgba(255,220,50,${0.6 + z * 0.4})` : `rgba(255,80,0,${0.5 + z * 0.5})`;
+      ctx.fill();
+      // Highlight on bubble
+      ctx.beginPath();
+      ctx.arc(x - size * 0.3, y - size * 0.3, size * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,200,${0.4 * z})`;
+      ctx.fill();
+    }
+  }
+
+  // ── STORM frame ──
+  function drawStorm(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    // Electric ring base
+    const elecGrad = ctx.createRadialGradient(cx, cy, R - 2, cx, cy, R + 8);
+    elecGrad.addColorStop(0, 'rgba(180,220,255,0.0)');
+    elecGrad.addColorStop(0.4, `rgba(100,200,255,${0.4 + Math.sin(time * 8) * 0.2})`);
+    elecGrad.addColorStop(1, 'rgba(180,220,255,0.0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = elecGrad;
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    // Lightning arcs
+    const arcCount = 8;
+    for (let i = 0; i < arcCount; i++) {
+      const seed = i * 137.5 + time * 120;
+      const startAngle = (i / arcCount) * Math.PI * 2 + time * 0.5;
+      const len = 12 + Math.sin(seed) * 8;
+      const sx = cx + Math.cos(startAngle) * R;
+      const sy = cy + Math.sin(startAngle) * R;
+      // Jagged lightning path
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      let ax = sx, ay = sy;
+      const segs = 4;
+      for (let s = 0; s < segs; s++) {
+        const prog = (s + 1) / segs;
+        const ex = cx + Math.cos(startAngle) * (R + len * prog);
+        const ey = cy + Math.sin(startAngle) * (R + len * prog);
+        const jitter = Math.sin(seed * (s + 1) * 7.3) * 5;
+        const px = ex + Math.cos(startAngle + Math.PI / 2) * jitter;
+        const py = ey + Math.sin(startAngle + Math.PI / 2) * jitter;
+        ctx.lineTo(px, py);
+        ax = px; ay = py;
+      }
+      const flash = Math.random() > 0.85;
+      ctx.strokeStyle = flash ? 'rgba(255,255,255,0.9)' : `rgba(120,200,255,${0.4 + Math.sin(time * 6 + i) * 0.4})`;
+      ctx.lineWidth = flash ? 1.5 : 0.8;
+      ctx.shadowColor = '#88ccff';
+      ctx.shadowBlur = flash ? 12 : 4;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    // Rotating glow dots
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 + time * 2;
+      const r2 = R + 2 + Math.sin(time * 4 + i) * 3;
+      const x = cx + Math.cos(a) * r2;
+      const y = cy + Math.sin(a) * r2;
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(180,230,255,${0.5 + Math.sin(time * 5 + i) * 0.5})`;
+      ctx.fill();
+    }
+  }
+
+  // ── OCEAN frame ──
+  function drawOcean(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    // Base ring
+    const oceanGrad = ctx.createLinearGradient(cx - R, cy, cx + R, cy);
+    oceanGrad.addColorStop(0, '#0066cc');
+    oceanGrad.addColorStop(0.5, '#00aaff');
+    oceanGrad.addColorStop(1, '#0077ee');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = oceanGrad;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    // Wave particles orbiting
+    const waveCount = 24;
+    for (let i = 0; i < waveCount; i++) {
+      const baseAngle = (i / waveCount) * Math.PI * 2;
+      const wave = Math.sin(time * 2 + i * 0.7) * 7;
+      const angle = baseAngle + time * 0.6;
+      const r2 = R + 4 + wave;
+      const x = cx + Math.cos(angle) * r2;
+      const y = cy + Math.sin(angle) * r2 * 0.87;
+      const z = (Math.sin(angle) + 1) / 2;
+      const alpha = 0.3 + z * 0.65;
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5 + z * 2, 0, Math.PI * 2);
+      const blue = Math.floor(180 + z * 75);
+      ctx.fillStyle = `rgba(0,${blue},255,${alpha})`;
+      ctx.fill();
+      // Foam highlight
+      if (z > 0.7) {
+        ctx.beginPath();
+        ctx.arc(x - 1, y - 1, 1, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${(z - 0.7) * 1.5})`;
+        ctx.fill();
+      }
+    }
+    // Glow
+    const glow = ctx.createRadialGradient(cx, cy, R - 5, cx, cy, R + 16);
+    glow.addColorStop(0, 'rgba(0,150,255,0)');
+    glow.addColorStop(0.5, `rgba(0,120,255,${0.15 + Math.sin(time) * 0.05})`);
+    glow.addColorStop(1, 'rgba(0,80,255,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 10, 0, Math.PI * 2);
+    ctx.fillStyle = glow;
+    ctx.fill();
+  }
+
+  // ── GOLD frame ──
+  function drawGold(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    // Outer glow
+    const outerGlow = ctx.createRadialGradient(cx, cy, R - 6, cx, cy, R + 20);
+    outerGlow.addColorStop(0, 'rgba(240,180,0,0)');
+    outerGlow.addColorStop(0.4, `rgba(240,180,0,${0.25 + Math.sin(time * 1.5) * 0.1})`);
+    outerGlow.addColorStop(1, 'rgba(240,180,0,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 14, 0, Math.PI * 2);
+    ctx.fillStyle = outerGlow;
+    ctx.fill();
+    // Main gold ring
+    const goldGrad = ctx.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+    goldGrad.addColorStop(0, '#b8860b');
+    goldGrad.addColorStop(0.25, '#ffd700');
+    goldGrad.addColorStop(0.5, '#ffec8b');
+    goldGrad.addColorStop(0.75, '#daa520');
+    goldGrad.addColorStop(1, '#b8860b');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 4, 0, Math.PI * 2);
+    ctx.strokeStyle = goldGrad;
+    ctx.lineWidth = 9;
+    ctx.stroke();
+    // Inner ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, R - 2, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,220,80,0.4)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Orbiting gems
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2 + time * 0.7;
+      const r2 = R + 5;
+      const x = cx + Math.cos(angle) * r2;
+      const y = cy + Math.sin(angle) * r2 * 0.88;
+      const z = (Math.sin(angle) + 1) / 2;
+      const size = 3 + z * 3;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle + time);
+      // Diamond shape
+      ctx.beginPath();
+      ctx.moveTo(0, -size);
+      ctx.lineTo(size * 0.7, 0);
+      ctx.lineTo(0, size);
+      ctx.lineTo(-size * 0.7, 0);
+      ctx.closePath();
+      const gemGrad = ctx.createLinearGradient(-size, -size, size, size);
+      gemGrad.addColorStop(0, `rgba(255,240,120,${0.6 + z * 0.4})`);
+      gemGrad.addColorStop(1, `rgba(200,140,0,${0.5 + z * 0.5})`);
+      ctx.fillStyle = gemGrad;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,200,0.6)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+    // Shimmer sparks
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + time * 2.5;
+      const sparkPhase = Math.sin(time * 4 + i * 2);
+      if (sparkPhase < 0.3) continue;
+      const x = cx + Math.cos(a) * (R + 8);
+      const y = cy + Math.sin(a) * (R + 8);
+      ctx.beginPath();
+      ctx.arc(x, y, sparkPhase * 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,200,${sparkPhase * 0.9})`;
+      ctx.fill();
+    }
+  }
+
+  // ── SHADOW frame ──
+  function drawShadow(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    // Dark void glow
+    const voidGlow = ctx.createRadialGradient(cx, cy, R - 8, cx, cy, R + 20);
+    voidGlow.addColorStop(0, 'rgba(80,0,120,0)');
+    voidGlow.addColorStop(0.5, `rgba(60,0,100,${0.3 + Math.sin(time) * 0.1})`);
+    voidGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 18, 0, Math.PI * 2);
+    ctx.fillStyle = voidGlow;
+    ctx.fill();
+    // Shadow ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 4, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(100,0,150,${0.7 + Math.sin(time * 2) * 0.3})`;
+    ctx.lineWidth = 7;
+    ctx.stroke();
+    // Skull/smoke tendrils
+    const tendrilCount = 10;
+    for (let i = 0; i < tendrilCount; i++) {
+      const baseAngle = (i / tendrilCount) * Math.PI * 2;
+      const phase = time * 1.3 + i * 0.9;
+      const angle = baseAngle + Math.sin(phase) * 0.3 + time * 0.3;
+      const r2 = R + 6 + Math.sin(phase * 2) * 8;
+      const x = cx + Math.cos(angle) * r2;
+      const y = cy + Math.sin(angle) * r2 * 0.87;
+      const z = (Math.sin(angle) + 1) / 2;
+      // Smoke puff
+      ctx.beginPath();
+      ctx.arc(x, y, 3 + z * 4, 0, Math.PI * 2);
+      const pur = Math.floor(60 + z * 80);
+      ctx.fillStyle = `rgba(${pur},0,${pur * 1.5},${0.3 + z * 0.5})`;
+      ctx.fill();
+      // Trailing smoke
+      ctx.beginPath();
+      ctx.arc(x + Math.cos(angle + Math.PI) * 4, y + Math.sin(angle + Math.PI) * 3, 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(40,0,80,${0.2 * z})`;
+      ctx.fill();
+    }
+    // Purple sparks
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 + time * 1.8;
+      const sp = Math.abs(Math.sin(time * 3 + i * 1.5));
+      if (sp < 0.5) continue;
+      const x = cx + Math.cos(a) * (R + 10);
+      const y = cy + Math.sin(a) * (R + 10);
+      ctx.beginPath();
+      ctx.arc(x, y, sp * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,100,255,${sp * 0.8})`;
+      ctx.fill();
+    }
+  }
+
+  // ── AURORA frame ──
+  function drawAurora(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    const steps = 180;
+    for (let pass = 0; pass < 3; pass++) {
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const angle = (i / steps) * Math.PI * 2;
+        const wave = Math.sin(angle * 4 + time * 1.5 + pass * 1.2) * 4
+          + Math.sin(angle * 7 + time * 2.2 + pass * 0.7) * 2;
+        const r2 = R + 4 + wave;
+        const x = cx + Math.cos(angle) * r2;
+        const y = cy + Math.sin(angle) * r2 * 0.87;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      const hue = (time * 40 + pass * 120) % 360;
+      const hue2 = (hue + 60) % 360;
+      const auroraGrad = ctx.createLinearGradient(cx - R, cy, cx + R, cy);
+      auroraGrad.addColorStop(0, `hsla(${hue},100%,65%,0.7)`);
+      auroraGrad.addColorStop(0.5, `hsla(${hue2},100%,70%,0.9)`);
+      auroraGrad.addColorStop(1, `hsla(${(hue + 180) % 360},100%,65%,0.7)`);
+      ctx.strokeStyle = auroraGrad;
+      ctx.lineWidth = 3 - pass * 0.5;
+      ctx.stroke();
+    }
+    // Sparkle ring
+    for (let i = 0; i < 20; i++) {
+      const angle = (i / 20) * Math.PI * 2 + time * 1.2;
+      const r2 = R + 6 + Math.sin(time * 3 + i) * 5;
+      const x = cx + Math.cos(angle) * r2;
+      const y = cy + Math.sin(angle) * r2;
+      const hue = (time * 60 + i * 18) % 360;
+      const sp = (Math.sin(time * 4 + i * 1.3) + 1) / 2;
+      ctx.beginPath();
+      ctx.arc(x, y, sp * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue},100%,75%,${sp * 0.9})`;
+      ctx.fill();
+    }
+  }
+
+  // ── CRYSTAL frame ──
+  function drawCrystal(ctx, W, H, cx, cy, R, time) {
+    ctx.clearRect(0, 0, W, H);
+    // Faceted ring
+    const facets = 16;
+    for (let i = 0; i < facets; i++) {
+      const a1 = (i / facets) * Math.PI * 2;
+      const a2 = ((i + 1) / facets) * Math.PI * 2;
+      const brightness = Math.sin(a1 + time * 0.8) * 0.5 + 0.5;
+      const inner = R;
+      const outer = R + 8 + brightness * 4;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a1) * inner, cy + Math.sin(a1) * inner * 0.87);
+      ctx.lineTo(cx + Math.cos(a1) * outer, cy + Math.sin(a1) * outer * 0.87);
+      ctx.lineTo(cx + Math.cos(a2) * outer, cy + Math.sin(a2) * outer * 0.87);
+      ctx.lineTo(cx + Math.cos(a2) * inner, cy + Math.sin(a2) * inner * 0.87);
+      ctx.closePath();
+      const blue = Math.floor(150 + brightness * 105);
+      ctx.fillStyle = `rgba(100,180,${blue},${0.4 + brightness * 0.5})`;
+      ctx.strokeStyle = `rgba(200,240,255,${0.3 + brightness * 0.5})`;
+      ctx.lineWidth = 0.5;
+      ctx.fill();
+      ctx.stroke();
+    }
+    // Inner highlight ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, R + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(200,240,255,${0.4 + Math.sin(time * 2) * 0.2})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Light refraction sparkles
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 + time * 0.5;
+      const r2 = R + 4;
+      const x = cx + Math.cos(a) * r2;
+      const y = cy + Math.sin(a) * r2;
+      const sp = Math.abs(Math.sin(time * 3 + i * 0.8));
+      if (sp < 0.4) continue;
+      // Star shape
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(time + i);
+      ctx.beginPath();
+      for (let s = 0; s < 4; s++) {
+        const sa = (s / 4) * Math.PI * 2;
+        const sa2 = sa + Math.PI / 4;
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(sa) * sp * 6, Math.sin(sa) * sp * 6);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(sa2) * sp * 3, Math.sin(sa2) * sp * 3);
+      }
+      ctx.strokeStyle = `rgba(220,240,255,${sp * 0.9})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // ── FRAME DRAW DISPATCHER ──
+  function drawFrame(type) {
+    const c = getCanvas();
+    if (!c || !c.parentElement) return;
+    const parent = document.getElementById('av-preview');
+    if (!parent) return;
+    const rect = parent.getBoundingClientRect();
+    const pRect = c.parentElement.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    c.width = size + 40;
+    c.height = size + 40;
+    const ctx = c.getContext('2d');
+    const cx = c.width / 2;
+    const cy = c.height / 2;
+    const R = size / 2;
+    t.v += 0.016;
+    const drawFn = {
+      forest: drawForest, lava: drawLava, storm: drawStorm,
+      ocean: drawOcean, gold: drawGold, shadow: drawShadow,
+      aurora: drawAurora, crystal: drawCrystal,
+    }[type];
+    if (drawFn) drawFn(ctx, c.width, c.height, cx, cy, R, t.v);
+    else ctx.clearRect(0, 0, c.width, c.height);
+    frameAnimId = requestAnimationFrame(() => drawFrame(type));
+  }
+
+  // Public API
+  window.setAvatarFrame = function(type) {
+    stopFrame();
+    currentFrameType = type;
+    if (type && type !== 'default' && type !== 'none') {
+      drawFrame(type);
+    }
+  };
+
+  window.stopAvatarFrame = stopFrame;
+})();
+
+// ── NAV RIPPLE ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.bnav-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
       const ripple = document.createElement('span');
-      ripple.style.cssText = `
-        position:absolute;border-radius:50%;
-        background:rgba(79,142,247,0.25);
-        width:40px;height:40px;
-        top:50%;left:50%;
-        transform:translate(-50%,-50%) scale(0);
-        animation:pop 0.35s ease forwards;
-        pointer-events:none;
-      `;
+      ripple.style.cssText = 'position:absolute;border-radius:50%;background:rgba(79,142,247,0.22);width:40px;height:40px;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);animation:pop 0.35s ease forwards;pointer-events:none;';
       this.appendChild(ripple);
-      setTimeout(()=>ripple.remove(), 400);
+      setTimeout(() => ripple.remove(), 400);
     });
   });
 });
-</script>
+E html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>StudySnap — AI Science & Maths Quizzes</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 </body>
 </html>
-
