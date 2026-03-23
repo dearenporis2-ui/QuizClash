@@ -1590,6 +1590,62 @@ function showAuthErr(m){
 function v(id){return document.getElementById(id).value.trim();}
 
 // ── STATS ──
+// ── ADMIN SYSTEM ──
+const ADMIN_EMAILS = ['admin', 'test', 'dev']; // emails containing these get admin
+let isAdmin = false;
+
+function checkAdmin() {
+  if (!currentUser) return false;
+  const email = (currentUser.email || '').toLowerCase();
+  const name = (currentUser.displayName || '').toLowerCase();
+  return ADMIN_EMAILS.some(k => email.includes(k) || name.includes(k));
+}
+
+// Call this in console: giveCoins(9999999) to set coins manually
+window.giveCoins = async function(amount = 9999999) {
+  if (!currentUser) { alert('Not logged in'); return; }
+  await db.collection('users').doc(currentUser.uid).update({ credits: amount });
+  userStats.credits = amount;
+  renderDash();
+  showToast('💰 ' + amount.toLocaleString() + ' coins added!');
+  console.log('%c✅ Coins set to ' + amount, 'color:#f0c060;font-size:16px;font-weight:bold;');
+};
+
+// Console shortcut
+window.adminPanel = function() {
+  console.log('%c🛡️ QuizClash Admin Panel', 'color:#a78bfa;font-size:20px;font-weight:bold;');
+  console.log('%cCommands:', 'color:#4f8ef7;font-weight:bold;');
+  console.log('  giveCoins(amount)   — set your coins');
+  console.log('  giveXP(amount)      — set your XP');
+  console.log('  unlockAll()         — unlock all achievements');
+  console.log('  resetStats()        — reset your stats');
+};
+
+window.giveXP = async function(amount = 99999) {
+  if (!currentUser) return;
+  await db.collection('users').doc(currentUser.uid).update({ xp: amount });
+  userStats.xp = amount;
+  renderDash();
+  showToast('⚡ XP set to ' + amount.toLocaleString() + '!');
+};
+
+window.unlockAll = async function() {
+  if (!currentUser) return;
+  const ids = (window.ACHIEVEMENTS||[]).map(a=>a.id);
+  await db.collection('users').doc(currentUser.uid).update({ achievements: ids });
+  userStats.achievements = ids;
+  renderDash();
+  showToast('🏅 All achievements unlocked!');
+};
+
+window.resetStats = async function() {
+  if (!currentUser || !confirm('Reset ALL your stats?')) return;
+  await db.collection('users').doc(currentUser.uid).update({
+    credits:0, xp:0, totalQuizzes:0, streak:0, topicScores:{}, recentQuizzes:[], achievements:[]
+  });
+  location.reload();
+};
+
 async function loadStats(){
   const doc=await db.collection('users').doc(currentUser.uid).get();
   if(doc.exists){
@@ -1599,11 +1655,20 @@ async function loadStats(){
     if(!userStats.friendRequests)userStats.friendRequests=[];
     if(!userStats.credits)userStats.credits=0;
     if(userStats.avatar) avatarState={...avatarState,...userStats.avatar};
+
+    // ── ADMIN OVERRIDE ──
+    isAdmin = checkAdmin();
+    if (isAdmin) {
+      userStats.credits = 999999999;
+      console.log('%c🛡️ Admin mode active — unlimited coins enabled!', 'color:#f0c060;font-size:14px;font-weight:bold;');
+      console.log('%cType adminPanel() to see all admin commands.', 'color:#a78bfa;');
+    }
+
     renderDash();
     updateWelcomeAvatar();
-    renderFriendRequests(); // update badge on load
+    renderFriendRequests();
     const chip=document.getElementById('user-chip');
-    if(chip) chip.textContent=(userStats.avatar?.base||'🧑')+' '+(currentUser.displayName||currentUser.email.split('@')[0]);
+    if(chip) chip.textContent=(isAdmin?'🛡️ ':'')+(userStats.avatar?.base||'🧑')+' '+(currentUser.displayName||currentUser.email.split('@')[0]);
   }
 }
 
@@ -1640,7 +1705,7 @@ function renderDash(){
   const displayName=currentUser?(currentUser.displayName||currentUser.email.split('@')[0]):'Student';
   const el=document.getElementById('welcome-name');if(el)el.textContent=displayName;
   document.getElementById('stat-total').textContent=s.totalQuizzes||0;
-  const dc=document.getElementById('dash-credits');if(dc)dc.textContent=s.credits||0;
+  const dc=document.getElementById('dash-credits');if(dc)dc.textContent=isAdmin?'∞':((s.credits||0).toLocaleString());
   document.getElementById('stat-streak').textContent=s.streak||0;
 
   // XP & Level
@@ -3214,6 +3279,7 @@ function showShopTab(tab){
 function equipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'};avatarState.equipped={...(avatarState.equipped||{})};avatarState.equipped[catMap[tab]]=item.id;if(tab==='frames')avatarState.frame=item.frameColor||'var(--accent)';if(tab==='effects')avatarState.effect=item.effect||'none';renderAvatarPreview();showShopTab(tab);playTone(659,'sine',0,0.15,0.2);playTone(784,'sine',0.12,0.15,0.2);}
 function unequipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'},noneMap={hats:'h_none',glasses:'g_none',frames:'f_none',effects:'e_none'};avatarState.equipped[catMap[tab]]=noneMap[tab];if(tab==='frames')avatarState.frame='var(--accent)';if(tab==='effects')avatarState.effect='none';renderAvatarPreview();showShopTab(tab);}
 async function buyItem(tab,item){
+  if(isAdmin) item = {...item, price: 0}; // Admin free purchases
   const credits=userStats.credits||0;
   if(credits<item.price){showToast('Not enough credits!');playWrong();return;}
   const nc=credits-item.price;
@@ -5468,18 +5534,33 @@ document.addEventListener('DOMContentLoaded', initLang);
   window.addEventListener('touchstart', onTouchStart, { passive: true });
   window.addEventListener('touchend', onMouseUp);
 
-  // Hide default cursor when over the canvas area
-  document.body.style.cursor = 'none';
+  // Custom cursor — hide default ONLY when mouse is actually moving over background
+  // Keep pointer on interactive elements
+  const interactiveTags = new Set(['INPUT','BUTTON','TEXTAREA','A','SELECT','LABEL']);
+  let cursorHidden = false;
 
-  // Restore cursor on inputs/buttons
-  document.addEventListener('mouseover', (e) => {
-    const tag = e.target.tagName;
-    if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'TEXTAREA' || tag === 'A' || tag === 'SELECT') {
-      document.body.style.cursor = 'auto';
-    } else {
-      document.body.style.cursor = 'none';
+  function updateCursorStyle(target) {
+    let el = target;
+    // Walk up the DOM to check if we're on something interactive
+    while (el && el !== document.body) {
+      if (interactiveTags.has(el.tagName) || el.classList.contains('option-btn') ||
+          el.classList.contains('subject-btn') || el.classList.contains('topic-chip') ||
+          el.classList.contains('diff-btn') || el.classList.contains('start-btn') ||
+          el.classList.contains('bnav-btn') || el.classList.contains('auth-btn') ||
+          el.classList.contains('lesson-topic-item') || el.classList.contains('star-btn') ||
+          el.style.cursor === 'pointer' || window.getComputedStyle(el).cursor === 'pointer') {
+        document.body.style.cursor = 'pointer';
+        cursorHidden = false;
+        return;
+      }
+      el = el.parentElement;
     }
-  });
+    document.body.style.cursor = 'none';
+    cursorHidden = true;
+  }
+
+  document.addEventListener('mouseover', (e) => updateCursorStyle(e.target));
+  document.addEventListener('mouseleave', () => { document.body.style.cursor = 'auto'; });
 })();
 
 // ── NAV RIPPLE ──
