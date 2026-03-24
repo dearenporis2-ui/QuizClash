@@ -414,6 +414,47 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .star-btn{font-size:30px;background:none;border:none;cursor:pointer;color:var(--text-dim);transition:all 0.1s;padding:2px 4px;line-height:1;}
 .star-btn.active{color:#f0a050;}.star-btn:hover{transform:scale(1.2);}
 
+/* ── ONLINE PRESENCE DOT ── */
+.online-dot{width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--bg);position:absolute;bottom:1px;right:1px;box-shadow:0 0 6px rgba(62,207,142,0.8);flex-shrink:0;}
+.online-dot.offline{background:var(--text-dim);box-shadow:none;}
+.online-dot.away{background:var(--amber);box-shadow:0 0 6px rgba(240,160,80,0.7);}
+@keyframes onlinePulse{0%,100%{box-shadow:0 0 4px rgba(62,207,142,0.6);}50%{box-shadow:0 0 12px rgba(62,207,142,0.9),0 0 20px rgba(62,207,142,0.3);}}
+.online-dot{animation:onlinePulse 2s ease-in-out infinite;}
+.online-dot.offline,.online-dot.away{animation:none;}
+
+/* ── ONLINE USERS PANEL ── */
+#online-panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin-bottom:1.25rem;overflow:hidden;}
+#online-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+#online-panel-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
+#online-count-badge{background:var(--green-dim);border:1px solid rgba(62,207,142,0.4);border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--green);}
+#online-users-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.online-user-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:500;color:var(--text-muted);position:relative;transition:border-color 0.2s;}
+.online-user-chip.me{border-color:rgba(79,142,247,0.4);color:var(--accent);}
+
+/* ── MULTI-PAGE LESSON ── */
+.lesson-page{display:none;animation:fadeUp 0.3s ease both;}
+.lesson-page.active{display:block;}
+.lesson-progress-bar{display:flex;gap:6px;margin-bottom:1.5rem;}
+.lesson-progress-step{flex:1;height:4px;border-radius:2px;background:var(--surface2);transition:background 0.3s;}
+.lesson-progress-step.done{background:var(--accent);}
+.lesson-progress-step.active{background:linear-gradient(90deg,var(--accent),#a78bfa);box-shadow:0 0 8px rgba(79,142,247,0.4);}
+.lesson-nav-row{display:flex;gap:10px;margin-top:1.25rem;}
+.lesson-nav-btn{flex:1;padding:13px;border-radius:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;border:1.5px solid var(--border);}
+.lesson-nav-btn.prev{background:var(--surface2);color:var(--text-muted);}
+.lesson-nav-btn.prev:hover{border-color:var(--border-hover);color:var(--text);}
+.lesson-nav-btn.next{background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;box-shadow:0 4px 16px rgba(79,142,247,0.25);}
+.lesson-nav-btn.next:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,142,247,0.4);}
+.lesson-page-label{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;}
+/* Practice quiz inside lesson */
+.lesson-practice-opt{padding:12px 15px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);text-align:left;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);transition:all 0.15s;display:flex;align-items:center;gap:10px;margin-bottom:7px;width:100%;}
+.lesson-practice-opt:hover:not(:disabled){border-color:rgba(79,142,247,0.3);background:rgba(79,142,247,0.05);}
+.lesson-practice-opt.lp-correct{border-color:var(--green);background:var(--green-dim);}
+.lesson-practice-opt.lp-wrong{border-color:var(--red);background:var(--red-dim);}
+.lesson-practice-result{background:var(--surface2);border-left:3px solid var(--accent);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-muted);line-height:1.6;margin-top:10px;display:none;animation:fadeUp 0.25s ease both;}
+.lesson-score-ring{width:80px;height:80px;margin:0 auto 1rem;position:relative;display:flex;align-items:center;justify-content:center;}
+.lesson-score-ring svg{position:absolute;inset:0;transform:rotate(-90deg);}
+.lesson-score-inner{font-family:'DM Serif Display',serif;font-size:22px;}
+
 /* ── AVATAR ── */
 .avatar-display{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;flex-shrink:0;transition:all 0.3s;}
 .avatar-credit-badge{display:inline-flex;align-items:center;gap:5px;background:var(--amber-dim);border:1px solid rgba(240,160,80,0.3);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;color:var(--amber);}
@@ -1078,6 +1119,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
   <!-- LEADERBOARD -->
   <div id="board-view" class="view" style="display:none;">
+    <!-- Online Users Panel -->
+    <div id="online-panel">
+      <div id="online-panel-header">
+        <div id="online-panel-title">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:onlinePulse 2s infinite;"></span>
+          Online Now
+        </div>
+        <span id="online-count-badge">0 online</span>
+      </div>
+      <div id="online-users-row"><div style="font-size:12px;color:var(--text-dim);">Loading...</div></div>
+    </div>
     <div id="board-loading" style="text-align:center;padding:2.5rem;color:var(--text-muted);font-size:14px;">Loading leaderboard...</div>
     <div id="board-list"></div>
   </div>
@@ -1569,6 +1621,7 @@ auth.onAuthStateChanged(user=>{
     }
     loadStats();
     startUserListener();
+    startPresence();
     restoreUserPreferences();
     setTimeout(()=>{ if(typeof applyLang==='function') applyLang(); }, 0);
   } else {
@@ -1984,8 +2037,14 @@ function playAchievementSound(type){
 async function loadLeaderboard(){
   document.getElementById('board-loading').style.display='block';
   document.getElementById('board-list').innerHTML='';
+  // Load online users panel in parallel
+  loadOnlineUsers();
   try{
+    const now=Date.now();
     const snap=await db.collection('users').orderBy('totalQuizzes','desc').limit(20).get();
+    // Build a quick online-status map
+    const onlineMap={};
+    snap.forEach(doc=>{const d=doc.data();const diff=now-(d.lastSeen||0);onlineMap[doc.id]=diff<120000?'online':diff<600000?'away':'offline';});
     const users=[];
     snap.forEach(doc=>{
       const d=doc.data();
@@ -1998,7 +2057,7 @@ async function loadLeaderboard(){
       const hatE=(hatId&&hatId!=='h_none')?(hatMap[hatId]||''):'';
       const glassE=(glassId&&glassId!=='g_none')?(glassMap[glassId]||''):'';
       const userLevel=calcLevel(d.xp||0);
-      users.push({uid:doc.id,name:d.name||'Student',totalQuizzes:d.totalQuizzes||0,streak:d.streak||0,avg,xp:d.xp||0,level:userLevel,avBase,avColor,avFrame,hatE,glassE});
+      users.push({uid:doc.id,name:d.name||'Student',totalQuizzes:d.totalQuizzes||0,streak:d.streak||0,avg,xp:d.xp||0,level:userLevel,avBase,avColor,avFrame,hatE,glassE,presence:onlineMap[doc.id]||'offline'});
     });
     users.sort((a,b)=>b.avg-a.avg||b.totalQuizzes-a.totalQuizzes);
     document.getElementById('board-loading').style.display='none';
@@ -2013,8 +2072,9 @@ async function loadLeaderboard(){
       const fbColor=isCanvasFrame?canvasFrameColors[u.avFrame]:(u.avFrame==='rainbow'?'#4f8ef7':u.avFrame);
       const frameBorder=`border-color:${fbColor};box-shadow:0 0 10px ${fbColor}55;`;
       const frameClass=u.avFrame==='gold'?'frame-legendary':u.avFrame==='aurora'||u.avFrame==='shadow'?'frame-legendary':u.avFrame==='storm'||u.avFrame==='forest'||u.avFrame==='lava'||u.avFrame==='ocean'?'frame-rare':'frame-common';
-      // Level badge colour by tier
       const lvlColor=u.level>=15?'#f0a050':u.level>=10?'#a78bfa':u.level>=5?'#3ecf8e':'#7a80a0';
+      // Online dot
+      const dotClass=u.presence==='online'?'online-dot':u.presence==='away'?'online-dot away':'online-dot offline';
       const d=document.createElement('div');d.className='board-item'+(isMe?' me':'');
       d.innerHTML=`
         <div class="board-rank ${rankClass}">${rankIcon}</div>
@@ -2022,6 +2082,7 @@ async function loadLeaderboard(){
           ${u.hatE?`<span style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:15px;">${u.hatE}</span>`:''}
           ${u.avBase}
           ${u.glassE?`<span style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:10px;">${u.glassE}</span>`:''}
+          <div class="${dotClass}"></div>
         </div>
         <div class="board-info">
           <div class="board-name">${u.name}${isMe?` <span style="font-size:10px;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;">${t('you_label')||'You'}</span>`:''}</div>
@@ -3190,26 +3251,211 @@ function selectLessonSubject(btn){
   });
 }
 
+// ── MULTI-PAGE LESSON ENGINE ──
+let _lessonSubj='', _lessonTop='', _lessonPage=0, _lessonPracticeAnswered=false;
+const LESSON_PAGE_LABELS=['📖 Introduction','💡 Key Concepts','📐 Formulas','🔬 Examples','✏️ Practice'];
+
 function openLesson(subj,top){
   const lesson=getLessonData(subj,top);if(!lesson)return;
+  _lessonSubj=subj;_lessonTop=top;_lessonPage=0;
   document.getElementById('lessons-browser').style.display='none';
   const el=document.getElementById('lesson-content');el.style.display='block';
-  const fHtml=lesson.formulas.map(f=>`<div class="lesson-formula">${f}</div>`).join('');
-  const pHtml=lesson.keyPoints.map(p=>`<div class="lesson-point"><div class="lesson-bullet"></div><div class="lesson-point-text">${p}</div></div>`).join('');
-  const eHtml=lesson.examples.map(e=>`<div class="lesson-example"><div class="lesson-example-title">${e.title}</div>${e.steps.map((s,i)=>`<div class="lesson-step"><strong>Step ${i+1}:</strong> ${s}</div>`).join('')}</div>`).join('');
-  el.innerHTML=`
-    <button class="lesson-back" onclick="closeLesson()">← ${t('back_lessons')}</button>
-    <div class="lesson-title">${top}</div>
-    <span class="lesson-subject-tag">${subj}</span>
-    <div class="lesson-section"><div class="lesson-section-title">${t('introduction')}</div><div class="lesson-point-text" style="font-size:14px;color:var(--text-muted);line-height:1.7;">${lesson.intro}</div></div>
-    <div class="lesson-section"><div class="lesson-section-title">${t('key_points')}</div>${pHtml}</div>
-    <div class="lesson-section"><div class="lesson-section-title">${t('key_formulas')}</div>${fHtml}</div>
-    <div class="lesson-section"><div class="lesson-section-title">${t('worked_examples')}</div>${eHtml}</div>
-    <div style="display:flex;gap:10px;margin-top:0.5rem;">
-      <button class="lesson-quiz-btn" onclick="goQuizFromLesson('${subj}','${top}')" style="flex:1;">${t('test_yourself')} ${top} →</button>
-      <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(subj+' '+top+' explained')}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:15px 16px;border-radius:14px;background:#ff0000;color:#fff;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;flex-shrink:0;white-space:nowrap;" onclick="playClick()">${t('watch_btn')||'▶ Watch'}</a>
-    </div>`;
+  _renderLessonPage(el,lesson,0);
   el.scrollIntoView({behavior:'smooth'});
+}
+
+function _lessonNav(dir){
+  const lesson=getLessonData(_lessonSubj,_lessonTop);if(!lesson)return;
+  _lessonPage=Math.max(0,Math.min(4,_lessonPage+dir));
+  const el=document.getElementById('lesson-content');
+  _renderLessonPage(el,lesson,_lessonPage);
+  el.scrollIntoView({behavior:'smooth'});
+  playClick();
+}
+
+function _renderLessonPage(el,lesson,page){
+  const subj=_lessonSubj,top=_lessonTop;
+  const totalPages=5;
+  // Progress bar
+  const progHtml=Array.from({length:totalPages},(_,i)=>`<div class="lesson-progress-step ${i<page?'done':i===page?'active':''}"></div>`).join('');
+  // Nav buttons
+  const prevHtml=page>0?`<button class="lesson-nav-btn prev" onclick="_lessonNav(-1)">← Back</button>`:'';
+  const nextHtml=page<totalPages-1?`<button class="lesson-nav-btn next" onclick="_lessonNav(1)">Next →</button>`:`<button class="lesson-nav-btn next" onclick="goQuizFromLesson('${subj}','${top}')">🎯 Take Full Quiz →</button>`;
+
+  let contentHtml='';
+
+  if(page===0){
+    // ── PAGE 1: INTRODUCTION ──
+    const subjectEmojis={Physics:'⚡',Chemistry:'🧪',Maths:'📐',Finance:'💰',Coding:'💻',Tax:'🧾',Biology:'🧬'};
+    const emoji=subjectEmojis[subj]||'📚';
+    contentHtml=`
+      <div style="background:linear-gradient(135deg,rgba(79,142,247,0.12),rgba(167,139,250,0.08));border:1px solid rgba(79,142,247,0.2);border-radius:20px;padding:22px;margin-bottom:1.25rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-20px;font-size:90px;opacity:0.08;pointer-events:none;">${emoji}</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">${subj}</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:12px;line-height:1.2;">${top}</div>
+        <div style="font-size:15px;color:var(--text-muted);line-height:1.8;">${lesson.intro}</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:1rem;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;">📋 What you'll learn</div>
+        ${lesson.keyPoints.slice(0,3).map(p=>`
+          <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">
+            <div style="width:20px;height:20px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);"></div>
+            </div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">${p}</div>
+          </div>`).join('')}
+        ${lesson.keyPoints.length>3?`<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">+ ${lesson.keyPoints.length-3} more concepts on next page →</div>`:''}
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:0.5rem;">
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">💡</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">${lesson.keyPoints.length} Concepts</div>
+        </div>
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">📐</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">${lesson.formulas.length} Formulas</div>
+        </div>
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">🔬</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">${lesson.examples.length} Examples</div>
+        </div>
+      </div>`;
+  } else if(page===1){
+    // ── PAGE 2: KEY CONCEPTS ──
+    contentHtml=`
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;">All Key Concepts</div>
+      ${lesson.keyPoints.map((p,i)=>`
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(79,142,247,0.3)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="min-width:28px;height:28px;border-radius:8px;background:var(--accent-dim);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;">${i+1}</div>
+          <div style="font-size:14px;color:var(--text-muted);line-height:1.65;">${p}</div>
+        </div>`).join('')}`;
+  } else if(page===2){
+    // ── PAGE 3: FORMULAS ──
+    contentHtml=`
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;">Key Formulas & Rules</div>
+      ${lesson.formulas.map((f,i)=>`
+        <div style="position:relative;margin-bottom:12px;">
+          <div style="position:absolute;top:-8px;left:12px;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);background:var(--bg);padding:0 6px;">Formula ${i+1}</div>
+          <div class="lesson-formula" style="font-size:16px;padding:18px 16px;letter-spacing:0.5px;border-radius:14px;">${f}</div>
+        </div>`).join('')}
+      <div style="background:linear-gradient(135deg,rgba(240,192,96,0.08),rgba(240,160,80,0.05));border:1px solid rgba(240,192,96,0.25);border-radius:16px;padding:16px;margin-top:1rem;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">💡 Pro Tip</div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.65;">Write each formula on a flashcard and test yourself. Cover the right side and try to recall it from the label alone. Space repetition is the fastest way to memorise formulas.</div>
+      </div>`;
+  } else if(page===3){
+    // ── PAGE 4: WORKED EXAMPLES ──
+    contentHtml=`
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px;">Step-by-Step Worked Examples</div>
+      ${lesson.examples.map((ex,ei)=>`
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),#a78bfa,transparent);"></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6366f1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${ei+1}</div>
+            <div style="font-size:13px;font-weight:700;color:var(--amber);letter-spacing:0.3px;text-transform:uppercase;">${ex.title}</div>
+          </div>
+          ${ex.steps.map((s,si)=>`
+            <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:${si<ex.steps.length-1?'10':'0'}px;">
+              <div style="width:22px;height:22px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text-dim);flex-shrink:0;margin-top:2px;">${si+1}</div>
+              <div style="font-size:14px;color:var(--text-muted);line-height:1.65;">${s}</div>
+            </div>`).join('')}
+        </div>`).join('')}
+      <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(subj+' '+top+' explained')}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;background:#ff0000;color:#fff;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;margin-top:0.5rem;" onclick="playClick()">▶ Watch ${top} on YouTube</a>`;
+  } else if(page===4){
+    // ── PAGE 5: PRACTICE QUIZ ──
+    const bankKey=`${subj}::${top}::easy`;
+    const medKey=`${subj}::${top}::medium`;
+    let pool=(QUESTION_BANK[bankKey]||[]).concat(QUESTION_BANK[medKey]||[]);
+    // Shuffle and pick 4 questions
+    pool=[...pool].sort(()=>Math.random()-0.5).slice(0,4);
+    _lessonPracticeAnswered=false;
+    if(!pool.length){
+      contentHtml=`
+        <div style="text-align:center;padding:2.5rem 1rem;">
+          <div style="font-size:48px;margin-bottom:12px;">📝</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:8px;">No practice questions yet</div>
+          <div style="font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;">Head to the Quiz tab to test this topic.</div>
+          <button class="lesson-quiz-btn" onclick="goQuizFromLesson('${subj}','${top}')">Go to Full Quiz →</button>
+        </div>`;
+    } else {
+      contentHtml=`
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;">Practice Questions</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Test your understanding before taking the full quiz.</div>
+        <div id="lesson-practice-container">
+          ${pool.map((q,qi)=>`
+            <div class="lesson-practice-q" id="lpq-${qi}" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:600;color:var(--accent);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;">Question ${qi+1}</div>
+              <div style="font-size:15px;font-weight:500;line-height:1.6;margin-bottom:12px;">${q.question}</div>
+              <div id="lp-opts-${qi}">
+                ${q.options.map((opt,oi)=>`<button class="lesson-practice-opt" id="lp-opt-${qi}-${oi}" onclick="_lessonAnswerQ(${qi},${oi},${q.answer},'${q.explanation.replace(/'/g,"\\'")}',${pool.length})" data-qi="${qi}">
+                  <span style="width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-dim);flex-shrink:0;">${['A','B','C','D'][oi]}</span>
+                  <span>${opt}</span>
+                </button>`).join('')}
+              </div>
+              <div class="lesson-practice-result" id="lp-res-${qi}"></div>
+            </div>`).join('')}
+        </div>
+        <div id="lesson-practice-score" style="display:none;text-align:center;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:18px;margin-top:0.5rem;animation:fadeUp 0.35s ease both;">
+          <div class="lesson-score-ring">
+            <svg viewBox="0 0 80 80"><circle fill="none" stroke="var(--surface2)" stroke-width="6" cx="40" cy="40" r="32"/><circle fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" id="lp-ring-fill" cx="40" cy="40" r="32" stroke-dasharray="201.1" stroke-dashoffset="201.1" style="transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1)"/></svg>
+            <div class="lesson-score-inner" id="lp-score-val">0/${pool.length}</div>
+          </div>
+          <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;" id="lp-score-title"></div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.25rem;" id="lp-score-sub"></div>
+          <div style="display:flex;gap:8px;justify-content:center;">
+            <button onclick="_lessonNav(0)" style="padding:11px 20px;border-radius:12px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Retry</button>
+            <button onclick="goQuizFromLesson('${subj}','${top}')" style="padding:11px 20px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Full Quiz →</button>
+          </div>
+        </div>`;
+    }
+  }
+
+  el.innerHTML=`
+    <button class="lesson-back" onclick="closeLesson()" style="display:flex;align-items:center;gap:6px;margin-bottom:1rem;">← Back to Lessons</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);letter-spacing:0.5px;">${LESSON_PAGE_LABELS[page]}</div>
+      <div style="font-size:11px;color:var(--text-dim);font-weight:500;">${page+1} / ${totalPages}</div>
+    </div>
+    <div class="lesson-progress-bar">${progHtml}</div>
+    <div id="lesson-page-content">${contentHtml}</div>
+    <div class="lesson-nav-row">${prevHtml}${nextHtml}</div>`;
+}
+
+// Track how many practice questions answered and score
+window._lessonPracticeScore=0;
+window._lessonPracticeTotal=0;
+window._lessonPracticeAnsweredCount=0;
+
+function _lessonAnswerQ(qi,chosen,correct,explanation,total){
+  // Disable all options for this question
+  document.querySelectorAll(`#lp-opts-${qi} .lesson-practice-opt`).forEach(b=>{b.disabled=true;b.style.cursor='default';});
+  const chosenBtn=document.getElementById(`lp-opt-${qi}-${chosen}`);
+  const correctBtn=document.getElementById(`lp-opt-${qi}-${correct}`);
+  correctBtn.classList.add('lp-correct');
+  if(chosen!==correct){chosenBtn.classList.add('lp-wrong');playWrong();}else{playCorrect();window._lessonPracticeScore=(window._lessonPracticeScore||0)+1;}
+  // Show explanation
+  const res=document.getElementById(`lp-res-${qi}`);
+  res.textContent=explanation;res.style.display='block';
+  // Check if all answered
+  window._lessonPracticeAnsweredCount=(window._lessonPracticeAnsweredCount||0)+1;
+  if(window._lessonPracticeAnsweredCount>=total){
+    setTimeout(()=>_showLessonScore(window._lessonPracticeScore,total),600);
+  }
+}
+
+function _showLessonScore(score,total){
+  window._lessonPracticeScore=0;window._lessonPracticeAnsweredCount=0;
+  const pct=score/total;
+  const scoreEl=document.getElementById('lesson-practice-score');
+  if(!scoreEl)return;
+  scoreEl.style.display='block';scoreEl.scrollIntoView({behavior:'smooth'});
+  document.getElementById('lp-score-val').textContent=`${score}/${total}`;
+  const ring=document.getElementById('lp-ring-fill');
+  if(ring)setTimeout(()=>{ring.style.strokeDashoffset=201.1-(pct*201.1);},100);
+  const msgs=[[1,'Perfect! 🌟','Flawless — you nailed it!'],[0.75,'Great work! ✨','Strong understanding.'],[0.5,'Good effort 👍','Review a few concepts.'],[0,'Keep practising 💪','Revisit the key points.']];
+  const[,title,sub]=msgs.find(([t])=>pct>=t);
+  document.getElementById('lp-score-title').textContent=title;
+  document.getElementById('lp-score-sub').textContent=sub;
+  playComplete();
 }
 
 function closeLesson(){document.getElementById('lesson-content').style.display='none';document.getElementById('lessons-browser').style.display='block';}
@@ -3871,8 +4117,9 @@ async function renderFriendsList(){
   list.innerHTML=`<div class="empty-state" style="padding:1rem;font-size:12px;color:var(--text-dim);">${t('loading_friends')||'Loading friends...'}</div>`;
 
   const rows=[];
+  const now=Date.now();
   for(const f of friends){
-    let avg='—',streak=0,av={};
+    let avg='—',streak=0,av={},isOnline=false,isAway=false;
     try{
       const doc=await db.collection('users').doc(f.uid).get();
       if(doc.exists){
@@ -3880,19 +4127,31 @@ async function renderFriendsList(){
         const scores=Object.values(d.topicScores||{});
         avg=scores.length?Math.round(scores.reduce((a,b)=>a+b.avg,0)/scores.length)+'%':'—';
         streak=d.streak||0;av=d.avatar||{};
+        const lastSeen=d.lastSeen||0;
+        const diff=now-lastSeen;
+        isOnline=diff<120000; // 2 min = online
+        isAway=!isOnline&&diff<600000; // 10 min = away
       }
     }catch(e){}
-    rows.push({f,avg,streak,av});
+    rows.push({f,avg,streak,av,isOnline,isAway});
   }
 
+  // Sort: online first, then away, then offline
+  rows.sort((a,b)=>(b.isOnline-a.isOnline)||(b.isAway-a.isAway));
+
   list.innerHTML='';
-  rows.forEach(({f,avg,streak,av})=>{
+  rows.forEach(({f,avg,streak,av,isOnline,isAway})=>{
     const div=document.createElement('div');div.className='friend-row';
     const fc=av.frame||'var(--accent)';
+    const dotClass=isOnline?'online-dot':isAway?'online-dot away':'online-dot offline';
+    const statusText=isOnline?'<span style="font-size:10px;color:var(--green);font-weight:600;">● Online</span>':isAway?'<span style="font-size:10px;color:var(--amber);font-weight:600;">● Away</span>':'';
     div.innerHTML=`
-      <div class="friend-avatar" style="background:${av.color||'#1c202c'};border-color:${fc==='rainbow'?'#4f8ef7':fc};font-size:20px;">${av.base||'🧑'}</div>
+      <div class="friend-avatar" style="background:${av.color||'#1c202c'};border-color:${fc==='rainbow'?'#4f8ef7':fc};font-size:20px;position:relative;">
+        ${av.base||'🧑'}
+        <div class="${dotClass}"></div>
+      </div>
       <div class="friend-info">
-        <div class="friend-name">${f.name}</div>
+        <div class="friend-name" style="display:flex;align-items:center;gap:7px;">${f.name}${statusText}</div>
         <div class="friend-stats">${avg} avg · ${streak}🔥 streak</div>
       </div>
       <div class="friend-actions">
@@ -3998,6 +4257,86 @@ function startUserListener(){
 }
 
 // ── PVP SETUP ──
+
+// ══════════════════════════════════════════════
+// ONLINE PRESENCE SYSTEM
+// ══════════════════════════════════════════════
+let _presenceInterval=null;
+
+function startPresence(){
+  if(!currentUser)return;
+  const writePresence=()=>{
+    const av=userStats.avatar||{};
+    db.collection('users').doc(currentUser.uid).update({
+      lastSeen:Date.now(),
+      presenceName:currentUser.displayName||currentUser.email.split('@')[0],
+      presenceAvatar:{base:av.base||'🧑',color:av.color||'#1c202c',frame:av.frame||'var(--accent)'}
+    }).catch(()=>{});
+  };
+  writePresence();
+  clearInterval(_presenceInterval);
+  _presenceInterval=setInterval(writePresence,60000); // ping every 60s
+  // Also write on visibility change
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)writePresence();});
+}
+
+async function loadOnlineUsers(){
+  const panel=document.getElementById('online-panel');
+  const row=document.getElementById('online-users-row');
+  const badge=document.getElementById('online-count-badge');
+  if(!panel||!row)return;
+
+  try{
+    const now=Date.now();
+    const snap=await db.collection('users').get();
+    const online=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const lastSeen=d.lastSeen||0;
+      const diff=now-lastSeen;
+      if(diff<300000){ // online within 5 min
+        online.push({
+          uid:doc.id,
+          name:d.presenceName||d.name||'User',
+          av:d.presenceAvatar||{base:'🧑',color:'#1c202c'},
+          isMe:doc.id===currentUser?.uid,
+          diff
+        });
+      }
+    });
+    // Sort: me first, then by recency
+    online.sort((a,b)=>(b.isMe-a.isMe)||(a.diff-b.diff));
+
+    badge.textContent=`${online.length} online`;
+    if(!online.length){
+      row.innerHTML=`<div style="font-size:12px;color:var(--text-dim);">No one online right now</div>`;
+      return;
+    }
+    row.innerHTML='';
+    online.slice(0,12).forEach(u=>{
+      const chip=document.createElement('div');
+      chip.className='online-user-chip'+(u.isMe?' me':'');
+      const fc=u.av.frame&&u.av.frame!=='var(--accent)'?u.av.frame:'var(--accent)';
+      chip.innerHTML=`
+        <div style="width:26px;height:26px;border-radius:50%;background:${u.av.color||'#1c202c'};border:2px solid ${fc==='rainbow'?'#4f8ef7':fc};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;position:relative;">
+          ${u.av.base||'🧑'}
+          <div class="online-dot" style="width:8px;height:8px;bottom:0;right:0;"></div>
+        </div>
+        <span style="font-size:12px;white-space:nowrap;">${u.isMe?'You':u.name}</span>`;
+      row.appendChild(chip);
+    });
+    if(online.length>12){
+      const more=document.createElement('div');
+      more.className='online-user-chip';
+      more.style.background='var(--surface2)';
+      more.textContent=`+${online.length-12} more`;
+      row.appendChild(more);
+    }
+  }catch(e){
+    if(row)row.innerHTML=`<div style="font-size:12px;color:var(--text-dim);">Could not load presence</div>`;
+  }
+}
+
 function openPvpSetup(uid,name){
   pvpChallengeTarget={uid,name};
   pvpSubject=null;pvpTopic=null;pvpDiff='easy';
