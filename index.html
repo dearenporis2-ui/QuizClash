@@ -11,7 +11,7 @@
 <style>
 :root{
   --bg:#07080f;--surface:#0e1018;--surface2:#141720;--surface3:#1a1e2a;
-  --border:rgba(255,255,255,0.07);--border-hover:rgba(255,255,255,0.18);
+  --border:rgba(255,255,255,0.14);--border-hover:rgba(255,255,255,0.28);
   --text:#e8ecff;--text-muted:#6b728f;--text-dim:#3d4260;
   --accent:#4f8ef7;--accent-glow:rgba(79,142,247,0.25);--accent-dim:rgba(79,142,247,0.12);
   --gold:#f0c060;--gold-glow:rgba(240,192,96,0.3);--gold-dim:rgba(240,192,96,0.1);
@@ -122,7 +122,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   animation:logoShimmer 4s ease infinite;
 }
 .auth-card{
-  background:rgba(14,16,24,0.85);
+  background:rgba(14,16,24,0.97);
   border:1px solid rgba(255,255,255,0.1);
   border-radius:28px;padding:2rem;max-width:420px;margin:0 auto;
   box-shadow:0 0 0 1px rgba(79,142,247,0.08), 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
@@ -714,7 +714,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* Cards (weak items, recent items) */
 .weak-item,.recent-item{
-  background:rgba(14,16,24,0.7);
+  background:rgba(14,16,24,0.92);
   border:1px solid rgba(255,255,255,0.07);
   border-radius:14px;padding:13px 16px;
   display:flex;align-items:center;justify-content:space-between;
@@ -729,7 +729,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* Achievement cards */
 .achievement{
-  background:rgba(14,16,24,0.7);
+  background:rgba(14,16,24,0.92);
   border:1px solid rgba(255,255,255,0.07);
   border-radius:14px;padding:14px;text-align:center;transition:all 0.2s;
 }
@@ -745,7 +745,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* Subject buttons */
 .subject-btn,.lesson-subject-btn{
-  background:rgba(14,16,24,0.7);
+  background:rgba(14,16,24,0.92);
   border:1.5px solid rgba(255,255,255,0.07);
   border-radius:18px;
   box-shadow:0 2px 8px rgba(0,0,0,0.2);
@@ -761,7 +761,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* Topic chips */
 .topic-chip{
-  background:rgba(14,16,24,0.8);
+  background:rgba(14,16,24,0.95);
   border:1.5px solid rgba(255,255,255,0.07);
   border-radius:999px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
@@ -774,7 +774,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* Question card */
 .question-card{
-  background:rgba(14,16,24,0.75);
+  background:rgba(14,16,24,0.95);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:22px;padding:24px;margin-bottom:1rem;
   box-shadow:0 0 0 1px rgba(255,255,255,0.03), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -787,7 +787,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* Option buttons */
 .option-btn{
-  background:rgba(14,16,24,0.7);
+  background:rgba(14,16,24,0.92);
   border:1.5px solid rgba(255,255,255,0.07);
   border-radius:14px;
   box-shadow:0 2px 8px rgba(0,0,0,0.2);
@@ -892,6 +892,23 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:linear-gradient(135deg,rgba(240,160,80,0.15),rgba(240,192,96,0.08));
   border:1px solid rgba(240,160,80,0.35);
   box-shadow:0 0 12px rgba(240,160,80,0.1);
+}
+
+/* ── LEGENDARY SHOP CARD ANIMATIONS ── */
+@keyframes legendaryCardPulse{
+  0%,100%{box-shadow:0 0 12px rgba(240,192,96,0.4),0 0 0 1.5px rgba(240,192,96,0.5);}
+  50%{box-shadow:0 0 28px rgba(240,192,96,0.75),0 0 0 2px rgba(240,192,96,0.8),0 0 56px rgba(240,192,96,0.2);}
+}
+@keyframes musicBar{
+  from{transform:scaleY(0.3);}
+  to{transform:scaleY(1);}
+}
+/* Shop card base */
+.shop-item-card{
+  border-radius:16px;padding:16px 14px 14px;
+  background:linear-gradient(160deg,rgba(14,16,24,0.95),rgba(20,23,32,0.9));
+  border:1.5px solid rgba(255,255,255,0.07);
+  cursor:pointer;transition:all 0.2s;text-align:center;
 }
 </style>
 </head>
@@ -1157,11 +1174,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="color-row" id="color-row"></div>
       <button onclick="saveAvatar()" id="av-save-btn" style="margin-top:16px;width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(79,142,247,0.25);">Save avatar</button>
     </div>
-    <div style="display:flex;gap:4px;margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:3px;">
-      <button class="shop-tab-btn active" onclick="showShopTab('hats')" style="flex:1;padding:8px;border-radius:9px;border:none;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">🎩 Hats</button>
-      <button class="shop-tab-btn" onclick="showShopTab('glasses')" style="flex:1;padding:8px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">👓 Glasses</button>
-      <button class="shop-tab-btn" onclick="showShopTab('frames')" style="flex:1;padding:8px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">🖼️ Frames</button>
-      <button class="shop-tab-btn" onclick="showShopTab('effects')" style="flex:1;padding:8px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">✨ Effects</button>
+    <div style="display:flex;gap:4px;margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:3px;overflow-x:auto;">
+      <button class="shop-tab-btn active" onclick="showShopTab('hats')" data-tab="hats" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🎩<br>Hats</button>
+      <button class="shop-tab-btn" onclick="showShopTab('glasses')" data-tab="glasses" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">👓<br>Glasses</button>
+      <button class="shop-tab-btn" onclick="showShopTab('frames')" data-tab="frames" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🖼️<br>Frames</button>
+      <button class="shop-tab-btn" onclick="showShopTab('themes')" data-tab="themes" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🎨<br>Themes</button>
+      <button class="shop-tab-btn" onclick="showShopTab('music')" data-tab="music" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🎵<br>Music</button>
     </div>
     <div id="shop-grid-wrap"></div>
     <div style="background:var(--surface2);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--text-muted);text-align:center;margin-top:8px;" id="av-earn-credits">
@@ -3208,9 +3226,39 @@ const AVATAR_COLORS=['#1c202c','#2d1b4e','#1a3a2a','#3a1a1a','#1a2a3a','#2a2a1a'
 const SHOP_ITEMS={
   hats:[{id:'h_grad',icon:'🎓',name:'Grad Cap',price:5},{id:'h_crown',icon:'👑',name:'Crown',price:15},{id:'h_tophat',icon:'🎩',name:'Top Hat',price:10},{id:'h_party',icon:'🎉',name:'Party Hat',price:8},{id:'h_cowboy',icon:'🤠',name:'Cowboy',price:12},{id:'h_santa',icon:'🎅',name:'Santa Hat',price:10},{id:'h_wizard',icon:'🧙',name:'Wizard',price:20},{id:'h_viking',icon:'⛑️',name:'Helmet',price:15},{id:'h_none',icon:'❌',name:'No Hat',price:0}],
   glasses:[{id:'g_glasses',icon:'👓',name:'Glasses',price:5},{id:'g_sungl',icon:'🕶️',name:'Sunglasses',price:8},{id:'g_monocle',icon:'🧐',name:'Monocle',price:12},{id:'g_none',icon:'❌',name:'None',price:0}],
-  frames:[{id:'f_none',icon:'⬜',name:'Default',price:0,frameColor:'default'},{id:'f_blue',icon:'🔵',name:'Crystal Frame',price:5,frameColor:'crystal'},{id:'f_forest',icon:'🍃',name:'Forest Frame',price:15,frameColor:'forest'},{id:'f_lava',icon:'🌋',name:'Lava Frame',price:20,frameColor:'lava'},{id:'f_storm',icon:'⚡',name:'Storm Frame',price:25,frameColor:'storm'},{id:'f_ocean',icon:'🌊',name:'Ocean Frame',price:18,frameColor:'ocean'},{id:'f_gold',icon:'✨',name:'Gold Frame',price:30,frameColor:'gold'},{id:'f_shadow',icon:'💀',name:'Shadow Frame',price:40,frameColor:'shadow'},{id:'f_aurora',icon:'🌈',name:'Aurora Frame',price:60,frameColor:'aurora'}],
-  effects:[{id:'e_pulse',icon:'💓',name:'Pulse',price:15,effect:'pulse'},{id:'e_glow',icon:'✨',name:'Glow',price:20,effect:'glow'},{id:'e_rainbow',icon:'🌈',name:'Rainbow Glow',price:30,effect:'rainbow'},{id:'e_none',icon:'❌',name:'No Effect',price:0,effect:'none'}]
-};
+  frames:[
+    {id:'f_none',    icon:'⬜',name:'Default',          rarity:'common',    price:0,  frameColor:'default',desc:'Clean and simple'},
+    {id:'f_crystal', icon:'💎',name:'Crystal',          rarity:'rare',      price:10, frameColor:'crystal',desc:'Icy blue facets shimmer'},
+    {id:'f_forest',  icon:'🍃',name:'Forest Spirit',    rarity:'rare',      price:15, frameColor:'forest', desc:'Living vines pulse with life'},
+    {id:'f_ocean',   icon:'🌊',name:'Deep Ocean',       rarity:'rare',      price:18, frameColor:'ocean',  desc:'Crashing waves orbit you'},
+    {id:'f_lava',    icon:'🌋',name:'Magma Core',       rarity:'epic',      price:25, frameColor:'lava',   desc:'Molten rock cracks and glows'},
+    {id:'f_storm',   icon:'⚡',name:'Storm Surge',      rarity:'epic',      price:28, frameColor:'storm',  desc:'Lightning arcs strike outward'},
+    {id:'f_shadow',  icon:'💀',name:'Void Walker',      rarity:'epic',      price:40, frameColor:'shadow', desc:'Dark matter spirals endlessly'},
+    {id:'f_gold',    icon:'✨',name:'Gilded Legend',    rarity:'legendary', price:50, frameColor:'gold',   desc:'Pure gold pulses with power'},
+    {id:'f_aurora',  icon:'🌈',name:'Aurora Infinitus', rarity:'legendary', price:75, frameColor:'aurora', desc:'Northern lights dance forever'},
+    {id:'f_cosmos',  icon:'🌌',name:'Cosmic Rift',      rarity:'legendary', price:100,frameColor:'cosmos', desc:'A tear in spacetime itself'},
+  ],
+  effects:[{id:'e_pulse',icon:'💓',name:'Pulse',price:15,effect:'pulse'},{id:'e_glow',icon:'✨',name:'Glow',price:20,effect:'glow'},{id:'e_rainbow',icon:'🌈',name:'Rainbow Glow',price:30,effect:'rainbow'},{id:'e_none',icon:'❌',name:'No Effect',price:0,effect:'none'}],
+  themes:[
+    {id:'t_dark',    icon:'🌑',name:'Void',          rarity:'common',    price:0,  desc:'The default darkness',   accent:'#4f8ef7',bg:'#07080f',surface:'#0e1018'},
+    {id:'t_midnight',icon:'🌌',name:'Midnight',      rarity:'rare',      price:25, desc:'Deep space blue',        accent:'#5b7fff',bg:'#080c18',surface:'#101525'},
+    {id:'t_forest',  icon:'🌲',name:'Emerald',       rarity:'rare',      price:25, desc:'Lush green energy',      accent:'#3ecf8e',bg:'#040f08',surface:'#0a1a0d'},
+    {id:'t_sunset',  icon:'🌅',name:'Inferno',       rarity:'rare',      price:25, desc:'Blazing orange fire',    accent:'#f0a050',bg:'#110800',surface:'#1a0e05'},
+    {id:'t_rose',    icon:'🌸',name:'Rose Cipher',   rarity:'epic',      price:40, desc:'Elegant pink power',     accent:'#f472b6',bg:'#12040d',surface:'#1a0810'},
+    {id:'t_toxic',   icon:'☢️',name:'Toxic',         rarity:'epic',      price:45, desc:'Radioactive green',      accent:'#39ff14',bg:'#030a03',surface:'#081208'},
+    {id:'t_ice',     icon:'🧊',name:'Arctic',        rarity:'epic',      price:45, desc:'Frozen crystal blue',    accent:'#7ee8fa',bg:'#030d14',surface:'#06141e'},
+    {id:'t_blood',   icon:'🩸',name:'Blood Moon',    rarity:'legendary', price:80, desc:'Crimson dominance',      accent:'#ff2244',bg:'#0f0205',surface:'#180508'},
+    {id:'t_galaxy',  icon:'🌠',name:'Galaxy Brain',  rarity:'legendary', price:100,desc:'Cosmic purple swirl',    accent:'#c084fc',bg:'#05020f',surface:'#0d0518'},
+    {id:'t_gold',    icon:'👑',name:'Gold Prestige', rarity:'legendary', price:120,desc:'Pure championship gold', accent:'#f0c060',bg:'#0f0a00',surface:'#1a1200'},
+  ],
+  music:[
+    {id:'lofi_default',icon:'🎹',name:'Lo-Fi Chill',   rarity:'common',   price:0, desc:'Warm piano & soft bass'},
+    {id:'lofi_jazz',   icon:'🎷',name:'Late Night Jazz',rarity:'rare',     price:30,desc:'Smooth jazz with swing feel'},
+    {id:'lofi_nature', icon:'🌿',name:'Nature Study',   rarity:'rare',     price:30,desc:'Ambient with sparkle rain'},
+    {id:'lofi_focus',  icon:'🧠',name:'Deep Focus',     rarity:'epic',     price:40,desc:'Heavy beats, minimal melody'},
+    {id:'lofi_epic',   icon:'⚡',name:'Epic Mode',      rarity:'legendary',price:50,desc:'Fast & intense energy track'},
+  ],
+}
 
 let avatarState={base:'🧑',color:'#1c202c',hat:null,glasses:null,frame:'var(--accent)',effect:'none',owned:{hats:['h_none'],glasses:['g_none'],frames:['f_none'],effects:['e_none']},equipped:{hat:'h_none',glasses:'g_none',frame:'f_none',effect:'e_none'}};
 let currentShopTab='hats';
@@ -3239,7 +3287,7 @@ function renderAvatarPreview(){
   const fc=avatarState.frame||'default';
   el.classList.remove('effect-rainbow','effect-pulse','effect-glow','frame-common','frame-rare','frame-legendary','frame-rainbow-outer');
   el.style.boxShadow='';
-  const canvasFrames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal'];
+  const canvasFrames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal','cosmos'];
   if(canvasFrames.includes(fc)){
     el.style.border='3px solid transparent';
     if(window.setAvatarFrame) window.setAvatarFrame(fc);
@@ -3259,20 +3307,313 @@ function renderAvatarPreview(){
 
 
 function showShopTab(tab){
-  currentShopTab=tab;playClick();
-  document.querySelectorAll('.shop-tab-btn').forEach((b,i)=>{const tabs=['hats','glasses','frames','effects'];const isA=tabs[i]===tab;b.style.background=isA?'var(--surface2)':'transparent';b.style.color=isA?'var(--text)':'var(--text-muted)';});
-  const credits=userStats.credits||0,owned=avatarState.owned[tab]||[],equipped=avatarState.equipped,items=SHOP_ITEMS[tab]||[];
-  const wrap=document.getElementById('shop-grid-wrap');wrap.innerHTML='<div class="shop-grid" id="shop-grid"></div>';
-  const grid=document.getElementById('shop-grid');
-  items.forEach(item=>{
-    const isOwned=owned.includes(item.id)||item.price===0,isEquipped=Object.values(equipped||{}).includes(item.id),canAfford=credits>=item.price;
-    const div=document.createElement('div');div.className='shop-item'+(isEquipped?' equipped':isOwned?' owned':(!canAfford?' locked':''));
-    div.innerHTML=`<div class="item-icon">${item.icon}</div><div class="item-name">${item.name}</div><div class="item-price">${isOwned?'':item.price===0?'Free':`⚡ ${item.price}`}</div>${isEquipped?'<span class="item-badge">On</span>':isOwned?'<span class="item-badge">Owned</span>':''}`;
-    if(item.id) div.setAttribute('data-frame-id', item.id);
-    div.onclick=()=>{if(isEquipped){unequipItem(tab,item);return;}if(isOwned){equipItem(tab,item);return;}if(canAfford)buyItem(tab,item);};
-    grid.appendChild(div);
+  currentShopTab=tab; playClick();
+  // Update tab buttons
+  document.querySelectorAll('.shop-tab-btn').forEach(b=>{
+    const isA=b.dataset.tab===tab;
+    b.style.background=isA?'var(--surface2)':'transparent';
+    b.style.color=isA?'var(--text)':'var(--text-muted)';
   });
+
+  const RARITY_CFG={
+    common:  {label:'COMMON',    color:'#7a80a0', glow:'rgba(122,128,160,0.3)',  border:'rgba(122,128,160,0.4)'},
+    rare:    {label:'RARE',      color:'#4f8ef7', glow:'rgba(79,142,247,0.4)',   border:'rgba(79,142,247,0.5)'},
+    epic:    {label:'EPIC',      color:'#a78bfa', glow:'rgba(167,139,250,0.5)',  border:'rgba(167,139,250,0.6)'},
+    legendary:{label:'LEGENDARY',color:'#f0c060', glow:'rgba(240,192,96,0.6)',   border:'rgba(240,192,96,0.7)'},
+  };
+
+  const credits=userStats.credits||0;
+  const owned=avatarState.owned||{};
+  const equipped=avatarState.equipped||{};
+  const items=SHOP_ITEMS[tab]||[];
+  const wrap=document.getElementById('shop-grid-wrap');
+
+  // ── FRAMES & HATS/GLASSES: card grid ──
+  if(tab==='hats'||tab==='glasses'||tab==='frames'||tab==='effects'){
+    const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'};
+    const ownedList=owned[tab]||[];
+    wrap.innerHTML='';
+    const grid=document.createElement('div');
+    grid.style.cssText='display:grid;grid-template-columns:repeat(2,1fr);gap:12px;';
+    items.forEach(item=>{
+      const isOwned=ownedList.includes(item.id)||item.price===0;
+      const isEquipped=Object.values(equipped).includes(item.id);
+      const canAfford=credits>=item.price;
+      const rar=RARITY_CFG[item.rarity||'common'];
+      const card=document.createElement('div');
+      card.style.cssText=`
+        position:relative;border-radius:16px;padding:16px 14px 14px;
+        background:linear-gradient(160deg,rgba(14,16,24,0.95),rgba(20,23,32,0.9));
+        border:1.5px solid ${isEquipped?rar.color:isOwned?rar.border:'rgba(255,255,255,0.07)'};
+        box-shadow:${isEquipped?'0 0 20px '+rar.glow+',0 0 40px '+rar.glow:'0 2px 8px rgba(0,0,0,0.3)'};
+        cursor:pointer;transition:all 0.2s;text-align:center;
+        ${item.rarity==='legendary'&&isOwned?'animation:legendaryCardPulse 2.5s ease-in-out infinite;':''}
+      `;
+      // Rarity badge
+      const badge=`<div style="position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:1px;color:${rar.color};text-transform:uppercase;background:${rar.glow};padding:2px 6px;border-radius:4px;">${rar.label}</div>`;
+      // Equipped badge
+      const eqBadge=isEquipped?`<div style="position:absolute;top:8px;right:8px;font-size:9px;font-weight:800;color:#fff;background:${rar.color};padding:2px 7px;border-radius:4px;">ON</div>`:'';
+      // Frame preview canvas for animated frames
+      let framePreview='';
+      if(tab==='frames'&&item.frameColor&&item.frameColor!=='default'){
+        framePreview=`<canvas data-frame="${item.frameColor}" style="position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px);pointer-events:none;border-radius:20px;opacity:${isOwned?1:0.35};"></canvas>`;
+      }
+      const lockOverlay=!isOwned&&!canAfford?`<div style="position:absolute;inset:0;border-radius:16px;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:20px;">🔒</div>`:'';
+      card.innerHTML=`
+        ${framePreview}${badge}${eqBadge}
+        <div style="font-size:32px;margin:18px 0 8px;position:relative;">${item.icon}</div>
+        <div style="font-size:13px;font-weight:700;color:${isOwned?rar.color:'var(--text)'};margin-bottom:4px;">${item.name}</div>
+        ${item.desc?`<div style="font-size:10px;color:var(--text-dim);margin-bottom:8px;line-height:1.4;">${item.desc}</div>`:''}
+        <div style="font-size:12px;font-weight:700;color:${isEquipped?rar.color:isOwned?'var(--green)':canAfford?'var(--gold)':'var(--red)'};">
+          ${isEquipped?'✓ Equipped':isOwned?'✓ Owned':item.price===0?'Free':'⚡ '+item.price}
+        </div>
+        ${lockOverlay}
+      `;
+      card.onmouseenter=()=>{if(!isEquipped)card.style.transform='translateY(-3px)';card.style.boxShadow=`0 8px 32px ${rar.glow}`;};
+      card.onmouseleave=()=>{card.style.transform='';card.style.boxShadow=isEquipped?`0 0 20px ${rar.glow},0 0 40px ${rar.glow}`:'0 2px 8px rgba(0,0,0,0.3)';};
+      card.onclick=()=>{
+        if(isEquipped){unequipItem(tab,item);return;}
+        if(isOwned){equipItem(tab,item);return;}
+        if(canAfford)buyItem(tab,item);
+        else showToast('Not enough credits! Complete quizzes to earn more ⚡');
+      };
+      grid.appendChild(card);
+    });
+    wrap.appendChild(grid);
+    // Start mini frame animations on preview canvases
+    setTimeout(()=>{
+      grid.querySelectorAll('canvas[data-frame]').forEach(c=>{
+        startMiniFrame(c, c.dataset.frame);
+      });
+    },50);
+    return;
+  }
+
+  // ── THEMES: full-width cards with live preview ──
+  if(tab==='themes'){
+    const ownedList=owned.themes||[];
+    const activeTheme=localStorage.getItem('qc_theme')||'t_dark';
+    wrap.innerHTML='';
+    items.forEach(item=>{
+      const isOwned=ownedList.includes(item.id)||item.price===0;
+      const isActive=activeTheme===item.id;
+      const canAfford=credits>=item.price;
+      const rar=RARITY_CFG[item.rarity||'common'];
+      const card=document.createElement('div');
+      card.style.cssText=`
+        position:relative;border-radius:18px;padding:16px 18px;margin-bottom:10px;
+        background:linear-gradient(135deg,${item.bg||'#07080f'},${item.bg||'#07080f'}dd);
+        border:2px solid ${isActive?rar.color:isOwned?rar.border:'rgba(255,255,255,0.07)'};
+        box-shadow:${isActive?'0 0 24px '+rar.glow:'0 2px 8px rgba(0,0,0,0.3)'};
+        cursor:pointer;transition:all 0.25s;overflow:hidden;
+      `;
+      // Animated shimmer for legendary
+      const shimmer=item.rarity==='legendary'?`<div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,${rar.glow},transparent);background-size:200% 100%;animation:shimmer 2s ease infinite;pointer-events:none;"></div>`:'';
+      // Mini UI mockup preview
+      const preview=`
+        <div style="display:flex;gap:6px;margin:10px 0 12px;pointer-events:none;">
+          <div style="flex:1;height:28px;border-radius:8px;background:${item.accent}22;border:1px solid ${item.accent}44;display:flex;align-items:center;padding:0 8px;gap:6px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${item.accent};box-shadow:0 0 6px ${item.accent};"></div>
+            <div style="height:4px;flex:1;background:${item.accent}66;border-radius:2px;"></div>
+          </div>
+          <div style="width:28px;height:28px;border-radius:8px;background:${item.accent};box-shadow:0 0 10px ${item.accent}88;display:flex;align-items:center;justify-content:center;font-size:14px;">${item.icon}</div>
+        </div>
+        <div style="display:flex;gap:6px;pointer-events:none;">
+          ${[0.7,0.5,0.3].map(o=>`<div style="flex:1;height:8px;border-radius:4px;background:${item.accent};opacity:${o};"></div>`).join('')}
+        </div>
+      `;
+      card.innerHTML=`
+        ${shimmer}
+        <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+              <span style="font-size:18px;">${item.icon}</span>
+              <span style="font-size:15px;font-weight:700;color:${rar.color};">${item.name}</span>
+              <span style="font-size:9px;font-weight:800;color:${rar.color};background:${rar.glow};padding:2px 6px;border-radius:4px;letter-spacing:1px;">${rar.label}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);">${item.desc}</div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:${isActive?rar.color:isOwned?'var(--green)':canAfford?'var(--gold)':'var(--red)'};text-align:right;flex-shrink:0;margin-left:12px;">
+            ${isActive?'✓ Active':isOwned?'Tap to apply':item.price===0?'Free':'⚡ '+item.price}
+          </div>
+        </div>
+        ${preview}
+        ${!isOwned&&!canAfford?'<div style="position:absolute;inset:0;border-radius:18px;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>':''}
+      `;
+      card.onclick=()=>{
+        if(isOwned||item.price===0){applyTheme(item);return;}
+        if(canAfford)buyTheme(item);
+        else showToast('Not enough credits! ⚡');
+      };
+      card.onmouseenter=()=>{card.style.transform='translateY(-2px)';card.style.boxShadow=`0 12px 40px ${rar.glow}`;};
+      card.onmouseleave=()=>{card.style.transform='';card.style.boxShadow=isActive?`0 0 24px ${rar.glow}`:'0 2px 8px rgba(0,0,0,0.3)';};
+      wrap.appendChild(card);
+    });
+    return;
+  }
+
+  // ── MUSIC: full-width cards ──
+  if(tab==='music'){
+    const ownedList=owned.music||[];
+    const activeTrack=_currentTrack||localStorage.getItem('qc_track')||'lofi_default';
+    wrap.innerHTML='';
+    items.forEach(item=>{
+      const isOwned=ownedList.includes(item.id)||item.price===0;
+      const isActive=activeTrack===item.id;
+      const canAfford=credits>=item.price;
+      const rar=RARITY_CFG[item.rarity||'common'];
+      const card=document.createElement('div');
+      card.style.cssText=`
+        position:relative;border-radius:16px;padding:16px 18px;margin-bottom:10px;
+        background:linear-gradient(135deg,rgba(14,16,24,0.95),rgba(20,23,32,0.9));
+        border:2px solid ${isActive?rar.color:isOwned?rar.border:'rgba(255,255,255,0.07)'};
+        box-shadow:${isActive?'0 0 20px '+rar.glow:'0 2px 8px rgba(0,0,0,0.3)'};
+        cursor:pointer;transition:all 0.25s;overflow:hidden;
+      `;
+      // Animated sound-wave bars for active track
+      const waveBars=isActive?`
+        <div style="display:flex;align-items:flex-end;gap:3px;height:24px;margin-left:auto;padding-right:4px;">
+          ${[0.4,0.8,0.5,1.0,0.6,0.9,0.4,0.7,0.5,0.85].map((h,i)=>`
+            <div style="width:4px;border-radius:2px;background:${rar.color};animation:musicBar 0.8s ease-in-out ${i*0.08}s infinite alternate;height:${Math.round(h*22)+2}px;opacity:0.9;"></div>
+          `).join('')}
+        </div>
+      `:'<div style="font-size:20px;margin-left:auto;">'+(isOwned?'▶':'🔒')+'</div>';
+      card.innerHTML=`
+        <div style="display:flex;align-items:center;gap:12px;position:relative;">
+          <div style="font-size:28px;width:44px;height:44px;border-radius:12px;background:${rar.glow};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid ${rar.border};">${item.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+              <span style="font-size:14px;font-weight:700;color:${rar.color};">${item.name}</span>
+              <span style="font-size:9px;font-weight:800;color:${rar.color};background:${rar.glow};padding:2px 6px;border-radius:4px;letter-spacing:1px;">${rar.label}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);">${item.desc}</div>
+            <div style="font-size:11px;font-weight:600;margin-top:4px;color:${isActive?rar.color:isOwned?'var(--green)':canAfford?'var(--gold)':'var(--red)'};">
+              ${isActive?'♪ Now Playing':isOwned?'Owned — tap to play':item.price===0?'Free':'⚡ '+item.price}
+            </div>
+          </div>
+          ${waveBars}
+        </div>
+        ${!isOwned&&!canAfford?'<div style="position:absolute;inset:0;border-radius:16px;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;font-size:24px;">🔒</div>':''}
+      `;
+      card.onclick=()=>{
+        if(isOwned||item.price===0){switchMusicTrack(item.id);showShopTab('music');return;}
+        if(canAfford)buyMusic(item);
+        else showToast('Not enough credits! ⚡');
+      };
+      card.onmouseenter=()=>{card.style.transform='translateY(-2px)';};
+      card.onmouseleave=()=>{card.style.transform='';};
+      wrap.appendChild(card);
+    });
+    return;
+  }
 }
+
+// ── Buy helpers for new tabs ──
+async function buyTheme(item){
+  if(isAdmin) item={...item,price:0};
+  const credits=userStats.credits||0;
+  if(credits<item.price){showToast('Not enough credits! ⚡');return;}
+  const nc=credits-item.price;
+  if(!avatarState.owned)avatarState.owned={};
+  if(!avatarState.owned.themes)avatarState.owned.themes=[];
+  avatarState.owned.themes.push(item.id);
+  userStats.credits=nc;
+  document.getElementById('credit-count').textContent=isAdmin?'∞':nc;
+  await db.collection('users').doc(currentUser.uid).update({credits:nc,avatar:avatarState});
+  applyTheme(item);
+  playAchievementSound('sparkle');
+}
+async function buyMusic(item){
+  if(isAdmin) item={...item,price:0};
+  const credits=userStats.credits||0;
+  if(credits<item.price){showToast('Not enough credits! ⚡');return;}
+  const nc=credits-item.price;
+  if(!avatarState.owned)avatarState.owned={};
+  if(!avatarState.owned.music)avatarState.owned.music=[];
+  avatarState.owned.music.push(item.id);
+  userStats.credits=nc;
+  document.getElementById('credit-count').textContent=isAdmin?'∞':nc;
+  await db.collection('users').doc(currentUser.uid).update({credits:nc,avatar:avatarState});
+  switchMusicTrack(item.id);
+  showShopTab('music');
+  playAchievementSound('sparkle');
+}
+function applyTheme(item){
+  const theme=typeof item==='string'?SHOP_ITEMS.themes.find(t=>t.id===item):item;
+  if(!theme)return;
+  if(theme.accent){
+    document.documentElement.style.setProperty('--accent',theme.accent);
+    document.documentElement.style.setProperty('--accent-dim',theme.accent+'1a');
+    document.documentElement.style.setProperty('--accent-glow',theme.accent+'2e');
+  } else {
+    document.documentElement.style.setProperty('--accent','#4f8ef7');
+    document.documentElement.style.setProperty('--accent-dim','rgba(79,142,247,0.12)');
+    document.documentElement.style.setProperty('--accent-glow','rgba(79,142,247,0.25)');
+  }
+  if(theme.surface){
+    document.documentElement.style.setProperty('--surface',theme.surface);
+    document.documentElement.style.setProperty('--surface2',theme.surface+'bb');
+    document.documentElement.style.setProperty('--surface3',theme.surface+'88');
+  }
+  if(theme.bg){
+    document.documentElement.style.setProperty('--bg',theme.bg);
+    document.body.style.background=theme.bg;
+  }
+  localStorage.setItem('qc_theme',theme.id);
+  showToast('Theme applied: '+theme.name+' '+theme.icon);
+  showShopTab('themes');
+}
+
+// ── Mini animated frame on shop cards ──
+const _miniFrameAnimIds={};
+function startMiniFrame(canvas, frameType){
+  const id=frameType+Math.random();
+  let t=0;
+  function loop(){
+    const W=canvas.offsetWidth||80, H=canvas.offsetHeight||80;
+    canvas.width=W; canvas.height=H;
+    const ctx=canvas.getContext('2d');
+    const cx=W/2, cy=H/2, R=Math.min(W,H)/2-8;
+    ctx.clearRect(0,0,W,H);
+    const fns={
+      forest:miniForest,lava:miniLava,storm:miniStorm,ocean:miniOcean,
+      gold:miniGold,shadow:miniShadow,aurora:miniAurora,crystal:miniCrystal,cosmos:miniCosmos
+    };
+    if(fns[frameType])fns[frameType](ctx,W,H,cx,cy,R,t);
+    t+=0.025;
+    _miniFrameAnimIds[canvas]=requestAnimationFrame(loop);
+  }
+  loop();
+}
+function miniForest(ctx,W,H,cx,cy,R,t){
+  for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2+t;const r=R+4+Math.sin(t*2+i)*3;ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r*0.9,2.5,0,Math.PI*2);ctx.fillStyle=`rgba(62,207,142,${0.5+Math.sin(t+i)*0.3})`;ctx.fill();}
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle=`rgba(62,207,142,${0.5+Math.sin(t)*0.2})`;ctx.lineWidth=2;ctx.stroke();}
+function miniLava(ctx,W,H,cx,cy,R,t){
+  const g=ctx.createLinearGradient(cx-R,cy,cx+R,cy);
+  g.addColorStop(0,`hsla(${10+Math.sin(t)*10},100%,45%,0.9)`);
+  g.addColorStop(1,`hsla(${30+Math.cos(t)*10},100%,55%,0.9)`);
+  ctx.beginPath();ctx.arc(cx,cy,R+3+Math.sin(t*2)*2,0,Math.PI*2);ctx.strokeStyle=g;ctx.lineWidth=3;ctx.stroke();
+  for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2+t*0.8;ctx.beginPath();ctx.arc(cx+Math.cos(a)*(R+2),cy+Math.sin(a)*(R+2),2,0,Math.PI*2);ctx.fillStyle='rgba(255,100,0,0.8)';ctx.fill();}}
+function miniStorm(ctx,W,H,cx,cy,R,t){
+  for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2+t*2;const x1=cx+Math.cos(a)*R;const y1=cy+Math.sin(a)*R;const x2=cx+Math.cos(a+0.5)*(R-10);const y2=cy+Math.sin(a+0.5)*(R-10);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=`rgba(136,204,255,${0.6+Math.sin(t*3+i)*0.3})`;ctx.lineWidth=1.5;ctx.stroke();}}
+function miniOcean(ctx,W,H,cx,cy,R,t){
+  for(let i=0;i<2;i++){const r=R+i*5;ctx.beginPath();for(let a=0;a<=Math.PI*2;a+=0.1){const wr=r+Math.sin(a*5+t*(i+1))*3;ctx.lineTo(cx+Math.cos(a)*wr,cy+Math.sin(a)*wr*0.88);}ctx.closePath();ctx.strokeStyle=`rgba(0,153,255,${0.5-i*0.15})`;ctx.lineWidth=1.5;ctx.stroke();}}
+function miniGold(ctx,W,H,cx,cy,R,t){
+  const g=ctx.createLinearGradient(cx-R,cy,cx+R,cy);
+  g.addColorStop(0,'rgba(240,192,96,0.8)');g.addColorStop(0.5,'rgba(255,230,140,1)');g.addColorStop(1,'rgba(240,192,96,0.8)');
+  ctx.beginPath();ctx.arc(cx,cy,R+2,0,Math.PI*2);ctx.strokeStyle=g;ctx.lineWidth=3;ctx.stroke();
+  for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2+t;const sp=Math.abs(Math.sin(t*2+i));ctx.beginPath();ctx.arc(cx+Math.cos(a)*(R+6),cy+Math.sin(a)*(R+6),sp*3,0,Math.PI*2);ctx.fillStyle=`rgba(255,220,100,${sp})`;ctx.fill();}}
+function miniShadow(ctx,W,H,cx,cy,R,t){
+  for(let i=0;i<3;i++){const hue=270+i*30;ctx.beginPath();ctx.arc(cx,cy,R+i*4+Math.sin(t+i)*2,0,Math.PI*2);ctx.strokeStyle=`hsla(${hue},80%,50%,${0.5-i*0.1})`;ctx.lineWidth=1;ctx.stroke();}
+  for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2+t*0.7;ctx.beginPath();ctx.arc(cx+Math.cos(a)*(R+3),cy+Math.sin(a)*(R+3),1.5,0,Math.PI*2);ctx.fillStyle=`rgba(180,100,255,${0.5+Math.sin(t*2+i)*0.3})`;ctx.fill();}}
+function miniAurora(ctx,W,H,cx,cy,R,t){
+  for(let p=0;p<2;p++){ctx.beginPath();for(let a=0;a<=Math.PI*2;a+=0.08){const r2=R+4+Math.sin(a*4+t*1.5+p)*3;ctx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2*0.88);}ctx.closePath();const h=(t*40+p*120)%360;ctx.strokeStyle=`hsla(${h},100%,65%,0.7)`;ctx.lineWidth=1.5;ctx.stroke();}}
+function miniCrystal(ctx,W,H,cx,cy,R,t){
+  const f=12;for(let i=0;i<f;i++){const a1=(i/f)*Math.PI*2;const a2=((i+1)/f)*Math.PI*2;const br=Math.sin(a1+t)*0.5+0.5;ctx.beginPath();ctx.moveTo(cx+Math.cos(a1)*R,cy+Math.sin(a1)*R);ctx.lineTo(cx+Math.cos(a1)*(R+6+br*3),cy+Math.sin(a1)*(R+6+br*3));ctx.lineTo(cx+Math.cos(a2)*(R+6+br*3),cy+Math.sin(a2)*(R+6+br*3));ctx.lineTo(cx+Math.cos(a2)*R,cy+Math.sin(a2)*R);ctx.closePath();ctx.fillStyle=`rgba(100,200,255,${0.3+br*0.4})`;ctx.fill();}}
+function miniCosmos(ctx,W,H,cx,cy,R,t){
+  for(let arm=0;arm<3;arm++){const base=(arm/3)*Math.PI*2+t*0.5;for(let s=0;s<12;s++){const t2=s/12;const a=base+t2*Math.PI*2;const r=R*0.2+t2*R*0.85;ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,t2*2+0.5,0,Math.PI*2);const hue=(t*30+arm*120+s*15)%360;ctx.fillStyle=`hsla(${hue},100%,75%,${t2*0.6+0.2})`;ctx.fill();}}
+  ctx.beginPath();ctx.arc(cx,cy,R+7,0,Math.PI*2);const haloH=(t*30)%360;ctx.strokeStyle=`hsla(${haloH},100%,70%,0.7)`;ctx.lineWidth=2;ctx.stroke();}
+
 
 function equipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'};avatarState.equipped={...(avatarState.equipped||{})};avatarState.equipped[catMap[tab]]=item.id;if(tab==='frames')avatarState.frame=item.frameColor||'var(--accent)';if(tab==='effects')avatarState.effect=item.effect||'none';renderAvatarPreview();showShopTab(tab);playTone(659,'sine',0,0.15,0.2);playTone(784,'sine',0.12,0.15,0.2);}
 function unequipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'},noneMap={hats:'h_none',glasses:'g_none',frames:'f_none',effects:'e_none'};avatarState.equipped[catMap[tab]]=noneMap[tab];if(tab==='frames')avatarState.frame='var(--accent)';if(tab==='effects')avatarState.effect='none';renderAvatarPreview();showShopTab(tab);}
@@ -4070,63 +4411,82 @@ let _lofiBar=0;
 
 function scheduleMusic(){
   const ctx=getMusicCtx();
-  // Pick a progression and stick with it for 8 bars before potentially changing
+  const track=_currentTrack||'lofi_default';
   if(_lofiBar===0)_lofiProgIdx=Math.floor(Math.random()*LOFI_CHORDS.length);
   const prog=LOFI_CHORDS[_lofiProgIdx];
+
+  const CFG={
+    lofi_default:{bpm:75,padVol:0.04,bassVol:0.09,melodyVol:0.06,hatVol:0.018,hatPattern:[0.5],extraHat:0.3,mChance:[0.5,0.4],sparkle:0.08,melody:'rhodes',desc:'warm'},
+    lofi_jazz:{bpm:92,padVol:0.03,bassVol:0.07,melodyVol:0.08,hatVol:0.025,hatPattern:[0.25,0.5,0.75],extraHat:0.55,mChance:[0.65,0.55],sparkle:0.15,melody:'rhodes',desc:'jazz',swing:0.1},
+    lofi_nature:{bpm:62,padVol:0.055,bassVol:0.05,melodyVol:0.035,hatVol:0.008,hatPattern:[0.5],extraHat:0.12,mChance:[0.25,0.2],sparkle:0.22,melody:'sparkle',desc:'ambient'},
+    lofi_focus:{bpm:82,padVol:0.022,bassVol:0.12,melodyVol:0.02,hatVol:0.032,hatPattern:[0,0.5],extraHat:0.65,mChance:[0.15,0.12],sparkle:0.02,melody:'none',desc:'minimal'},
+    lofi_epic:{bpm:108,padVol:0.035,bassVol:0.14,melodyVol:0.09,hatVol:0.038,hatPattern:[0,0.25,0.5,0.75],extraHat:0.72,mChance:[0.72,0.62],sparkle:0.22,melody:'rhodes',desc:'energetic'},
+  };
+  const c=CFG[track]||CFG.lofi_default;
+  const BT=60/c.bpm, BAR_T=BT*4;
 
   function scheduleBeat(){
     if(!musicPlaying)return;
     const now=ctx.currentTime;
-
     while(musicNextTime<now+0.5){
-      const bar=Math.floor(musicNextTime/BAR);
-      const beatInBar=Math.floor((musicNextTime%BAR)/BEAT);
-      const chordIdx=bar%prog.length;
-      const chord=prog[chordIdx];
-      const root=chord[0];
+      const bar=Math.floor(musicNextTime/BAR_T);
+      const bib=Math.floor((musicNextTime%BAR_T)/BT);
+      const ci=bar%prog.length, chord=prog[ci], root=chord[0];
+      const sw=c.swing||0;
 
-      // ── PADS: on every bar start, slow attack ──
-      if(beatInBar===0){
-        // Stagger chord notes slightly for humanised feel
+      if(bib===0){
         chord.forEach((midi,i)=>{
-          const delay=i*0.06+Math.random()*0.02;
-          playPad(midiToFreq(midi),musicNextTime+delay,BAR*0.95,0.04+Math.random()*0.01,ctx);
+          playPad(midiToFreq(midi),musicNextTime+i*0.06+Math.random()*0.02,BAR_T*0.95,c.padVol+Math.random()*0.01,ctx);
         });
-        // Bass on beat 1
-        playBass(midiToFreq(root),musicNextTime,BEAT*2,0.09,ctx);
-        _lofiBar++;
-        if(_lofiBar>=8)_lofiBar=0;
+        playBass(midiToFreq(root),musicNextTime,BT*2,c.bassVol,ctx);
+        _lofiBar++;if(_lofiBar>=8)_lofiBar=0;
+        // Focus: kick-style sub on every bar
+        if(c.desc==='minimal')playBass(midiToFreq(root-12),musicNextTime,BT*0.4,0.16,ctx);
+        // Epic: power stab on bar 1
+        if(c.desc==='energetic'&&Math.random()<0.55){
+          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
+          playRhodes(midiToFreq(n+12),musicNextTime,BT*0.8,c.melodyVol*1.2,ctx);
+        }
+      }
+      // Bass fills
+      if(bib===2){
+        const nr=LOFI_CHORDS[_lofiProgIdx][((ci+1)%prog.length)][0];
+        if(Math.random()<0.5)playBass(midiToFreq(nr),musicNextTime+BT*0.75,BT*1.2,c.bassVol*0.75,ctx);
+      }
+      // Jazz: extra bass walk on beat 2
+      if(c.desc==='jazz'&&bib===1)playBass(midiToFreq(root+7),musicNextTime+sw,BT*0.8,c.bassVol*0.6,ctx);
+      // Focus: heavy beat on 3
+      if(c.desc==='minimal'&&bib===2)playBass(midiToFreq(root-12),musicNextTime,BT*0.3,0.12,ctx);
+
+      if(c.melody!=='none'){
+        if(bib===1&&Math.random()<c.mChance[0]){
+          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
+          if(c.melody==='sparkle') playRhodes(midiToFreq(n+12),musicNextTime+sw,BT*0.35,c.melodyVol*0.7,ctx);
+          else playRhodes(midiToFreq(n),musicNextTime+Math.random()*0.1+sw,BT*(0.5+Math.random()*1.5),c.melodyVol,ctx);
+        }
+        if(bib===3&&Math.random()<c.mChance[1]){
+          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
+          playRhodes(midiToFreq(n),musicNextTime+Math.random()*0.15,BT*(0.3+Math.random()),c.melodyVol*0.85,ctx);
+        }
+        if(Math.random()<c.sparkle){
+          const n=PENTA[Math.floor(Math.random()*5)+5];
+          playRhodes(midiToFreq(n+12),musicNextTime+BT*0.5,BT*0.4,c.melodyVol*0.45,ctx);
+        }
+        // Jazz syncopation
+        if(c.desc==='jazz'&&bib===0&&Math.random()<0.4){
+          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
+          playRhodes(midiToFreq(n+7),musicNextTime+BT*0.33,BT*0.55,c.melodyVol*0.6,ctx);
+        }
+        // Nature: high rain drops
+        if(c.desc==='ambient'&&Math.random()<0.14){
+          [0,1,2].forEach(k=>{if(Math.random()<0.5){const n=PENTA[Math.floor(Math.random()*PENTA.length)];playRhodes(midiToFreq(n+24),musicNextTime+k*BT*0.14,BT*0.18,0.018,ctx);}});
+        }
       }
 
-      // ── BASS: anticipation on beat 3 (off-beat feel) ──
-      if(beatInBar===2){
-        const nextChordIdx=(chordIdx+1)%prog.length;
-        const nextRoot=LOFI_CHORDS[_lofiProgIdx][nextChordIdx][0];
-        if(Math.random()<0.5)playBass(midiToFreq(nextRoot),musicNextTime+BEAT*0.75,BEAT*1.2,0.07,ctx);
-      }
+      c.hatPattern.forEach(off=>{if(Math.random()<0.78)playHat(musicNextTime+BT*off,c.hatVol,ctx);});
+      if(Math.random()<c.extraHat)playHat(musicNextTime+BT*0.25,c.hatVol*0.55,ctx);
 
-      // ── MELODY: sparse Rhodes notes, off-beat, pentatonic ──
-      if(beatInBar===1&&Math.random()<0.5){
-        const note=PENTA[Math.floor(Math.random()*PENTA.length)];
-        playRhodes(midiToFreq(note),musicNextTime+Math.random()*0.1,BEAT*(0.5+Math.random()*1.5),0.06,ctx);
-      }
-      if(beatInBar===3&&Math.random()<0.4){
-        const note=PENTA[Math.floor(Math.random()*PENTA.length)];
-        const delay=Math.random()*0.15;
-        playRhodes(midiToFreq(note),musicNextTime+delay,BEAT*(0.3+Math.random()),0.05,ctx);
-      }
-      // Occasional high octave sparkle
-      if(Math.random()<0.08){
-        const note=PENTA[Math.floor(Math.random()*5)+5]; // upper half
-        playRhodes(midiToFreq(note+12),musicNextTime+BEAT*0.5,BEAT*0.4,0.03,ctx);
-      }
-
-      // ── HI-HATS: gentle 8th note pattern with variation ──
-      // Only on off-beats, very quiet
-      if(beatInBar%1===0&&Math.random()<0.6)playHat(musicNextTime+BEAT*0.5,0.018,ctx);
-      if(Math.random()<0.3)playHat(musicNextTime+BEAT*0.25,0.01,ctx);
-
-      musicNextTime+=BEAT;
+      musicNextTime+=BT;
     }
     musicScheduler=setTimeout(scheduleBeat,120);
   }
@@ -4338,7 +4698,7 @@ function switchMusicTrack(trackId){
   const wasPlaying=musicPlaying;
   if(wasPlaying)stopMusic();
   // Update music engine behaviour based on track
-  localStorage.setItem('ss_track',trackId);
+  localStorage.setItem('qc_track',trackId);localStorage.setItem('ss_track',trackId);
   if(wasPlaying)setTimeout(()=>startMusic(),200);
   renderMusicTracks();
   showToast('Track changed! 🎵');
@@ -4597,6 +4957,13 @@ const LESSONS_ES = {
 };
 
 // ── Helper: get lesson data in current language ──
+  // Restore theme
+  const savedTheme=localStorage.getItem('qc_theme');
+  if(savedTheme&&savedTheme!=='t_dark'){const th=SHOP_ITEMS.themes.find(t=>t.id===savedTheme);if(th)applyTheme(th);}
+  // Restore music track
+  const savedTrack=localStorage.getItem('qc_track')||localStorage.getItem('ss_track');
+  if(savedTrack)_currentTrack=savedTrack;
+
 function getLessonData(subj, top) {
   if (currentLang === 'fr' && LESSONS_FR[subj]?.[top]) return LESSONS_FR[subj][top];
   if (currentLang === 'es' && LESSONS_ES[subj]?.[top]) return LESSONS_ES[subj][top];
@@ -5365,59 +5732,39 @@ document.addEventListener('DOMContentLoaded', initLang);
   }
 
   function drawTrail() {
-    if (trail.length < 2) return;
-    const now = Date.now();
-
-    for (let i = 1; i < trail.length; i++) {
-      const p = trail[i - 1], c = trail[i];
-      const age = (now - c.t) / 600; // 0=new, 1=old
-      if (age > 1) continue;
-      const alpha = (1 - age) * 0.7;
-      const width = (1 - age) * 3 + 0.5;
-
-      // Rainbow trail based on position in array
-      const hue = (i / trail.length) * 260 + 200; // blue to purple range
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      ctx.lineTo(c.x, c.y);
-      ctx.strokeStyle = `hsla(${hue}, 100%, 70%, ${alpha})`;
-      ctx.lineWidth = width;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-    }
+    // Trail line removed — only keep the cursor glow dot
+    if (!mouse.active) return;
 
     // Glowing cursor dot
-    if (mouse.active) {
-      const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouse.down ? 28 : 18);
-      grd.addColorStop(0, `rgba(180,160,255,${mouse.down ? 0.9 : 0.7})`);
-      grd.addColorStop(0.4, `rgba(100,130,255,${mouse.down ? 0.5 : 0.3})`);
-      grd.addColorStop(1, `rgba(80,100,247,0)`);
-      ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, mouse.down ? 28 : 18, 0, Math.PI * 2);
-      ctx.fillStyle = grd;
-      ctx.fill();
+    const grd = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouse.down ? 28 : 18);
+    grd.addColorStop(0, `rgba(180,160,255,${mouse.down ? 0.9 : 0.7})`);
+    grd.addColorStop(0.4, `rgba(100,130,255,${mouse.down ? 0.5 : 0.3})`);
+    grd.addColorStop(1, `rgba(80,100,247,0)`);
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, mouse.down ? 28 : 18, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
 
-      // Hard centre dot
-      ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, mouse.down ? 5 : 3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(220,210,255,0.95)`;
-      ctx.fill();
+    // Hard centre dot
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, mouse.down ? 5 : 3, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(220,210,255,0.95)`;
+    ctx.fill();
 
-      // Rotating ring when holding down
-      if (mouse.down) {
-        ctx.save();
-        ctx.translate(mouse.x, mouse.y);
-        ctx.rotate(t * 3);
-        for (let k = 0; k < 6; k++) {
-          const angle = (k / 6) * Math.PI * 2;
-          const rx = Math.cos(angle) * 16, ry = Math.sin(angle) * 16;
-          ctx.beginPath();
-          ctx.arc(rx, ry, 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${k*60 + t*100},100%,75%,0.9)`;
-          ctx.fill();
-        }
-        ctx.restore();
+    // Rotating ring when holding down
+    if (mouse.down) {
+      ctx.save();
+      ctx.translate(mouse.x, mouse.y);
+      ctx.rotate(t * 3);
+      for (let k = 0; k < 6; k++) {
+        const angle = (k / 6) * Math.PI * 2;
+        const rx = Math.cos(angle) * 16, ry = Math.sin(angle) * 16;
+        ctx.beginPath();
+        ctx.arc(rx, ry, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${k*60 + t*100},100%,75%,0.9)`;
+        ctx.fill();
       }
+      ctx.restore();
     }
   }
 
