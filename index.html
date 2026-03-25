@@ -30,6 +30,9 @@
 html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
 
+/* Performance: promote canvas to its own layer */
+#app-bg-canvas{will-change:transform;}
+
 /* Deep space star-field nebula background */
 body::before{content:'';position:fixed;inset:0;
   background-image:
@@ -3498,11 +3501,11 @@ const SHOP_ITEMS={
     {id:'t_gold',    icon:'👑',name:'Gold Prestige', rarity:'legendary', price:120,desc:'Pure championship gold', accent:'#f0c060',bg:'#0f0a00',surface:'#1a1200'},
   ],
   music:[
-    {id:'lofi_default',icon:'🎹',name:'Lo-Fi Chill',   rarity:'common',   price:0, desc:'Warm piano & soft bass'},
-    {id:'lofi_jazz',   icon:'🎷',name:'Late Night Jazz',rarity:'rare',     price:30,desc:'Smooth jazz with swing feel'},
-    {id:'lofi_nature', icon:'🌿',name:'Nature Study',   rarity:'rare',     price:30,desc:'Ambient with sparkle rain'},
-    {id:'lofi_focus',  icon:'🧠',name:'Deep Focus',     rarity:'epic',     price:40,desc:'Heavy beats, minimal melody'},
-    {id:'lofi_epic',   icon:'⚡',name:'Epic Mode',      rarity:'legendary',price:50,desc:'Fast & intense energy track'},
+    {id:'lofi_default',icon:'🎹',name:'Lo-Fi Chill',   rarity:'common',   price:0, desc:'Rhodes piano & warm pad chords'},
+    {id:'lofi_jazz',   icon:'🎸',name:'Late Night Jazz',rarity:'rare',     price:30,desc:'Guitar chords, plucky melody, swing'},
+    {id:'lofi_nature', icon:'🎻',name:'Nature Study',   rarity:'rare',     price:30,desc:'Slow bowed strings, gentle & spacious'},
+    {id:'lofi_focus',  icon:'🔔',name:'Deep Focus',     rarity:'epic',     price:40,desc:'Vibraphone, heavy bass & kick drum'},
+    {id:'lofi_epic',   icon:'⚡',name:'Epic Study',     rarity:'legendary',price:50,desc:'Synth lead + full kick/snare drum kit'},
   ],
 }
 
@@ -3554,6 +3557,7 @@ function renderAvatarPreview(){
 
 function showShopTab(tab){
   currentShopTab=tab; playClick();
+  cancelAllMiniFrames(); // cancel any running canvas animations from previous tab
   // Update tab buttons
   document.querySelectorAll('.shop-tab-btn').forEach(b=>{
     const isA=b.dataset.tab===tab;
@@ -3812,9 +3816,17 @@ function applyTheme(item){
 
 // ── Mini animated frame on shop cards ──
 const _miniFrameAnimIds={};
+// Track active canvas animation IDs so we can cancel them when tab switches
+const _activeMiniAnims = new Set();
+
+function cancelAllMiniFrames(){
+  _activeMiniAnims.forEach(id => cancelAnimationFrame(id));
+  _activeMiniAnims.clear();
+}
+
 function startMiniFrame(canvas, frameType){
-  const id=frameType+Math.random();
   let t=0;
+  let rafId;
   function loop(){
     const W=canvas.offsetWidth||80, H=canvas.offsetHeight||80;
     canvas.width=W; canvas.height=H;
@@ -3827,7 +3839,8 @@ function startMiniFrame(canvas, frameType){
     };
     if(fns[frameType])fns[frameType](ctx,W,H,cx,cy,R,t);
     t+=0.025;
-    _miniFrameAnimIds[canvas]=requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
+    _activeMiniAnims.add(rafId);
   }
   loop();
 }
@@ -4649,28 +4662,18 @@ async function pvpRematch(){
 let musicCtx=null,musicPlaying=false,musicScheduler=null;
 let musicNextTime=0,musicNodes=[];
 
-// Lo-fi chord progressions: Am - F - C - G and variations
-// Each chord: [root, third, fifth, seventh] in MIDI
+// Lo-fi chord progressions
 const LOFI_CHORDS=[
-  // Am7 - Fmaj7 - Cmaj7 - G7  (classic lo-fi)
   [[57,60,64,67],[65,69,72,76],[60,64,67,71],[62,65,67,71]],
-  // Dm7 - G7 - Cmaj7 - Am7
   [[62,65,69,72],[62,65,67,71],[60,64,67,71],[57,60,64,67]],
-  // Fmaj7 - Em7 - Dm7 - Cmaj7
   [[65,69,72,76],[64,67,71,74],[62,65,69,72],[60,64,67,71]],
 ];
-
-// Pentatonic minor scale for melody (A minor pentatonic)
 const PENTA=[57,60,62,64,67,69,72,74,76,79];
-
-const BPM=72; // slightly faster for more life
-const BEAT=60/BPM;
-const BAR=BEAT*4;
 
 function midiToFreq(midi){return 440*Math.pow(2,(midi-69)/12);}
 function getMusicCtx(){if(!musicCtx)musicCtx=new(window.AudioContext||window.webkitAudioContext)();return musicCtx;}
 
-// Warm pad sound (slow attack, long release — like a Rhodes or soft synth)
+// ── INSTRUMENT 1: Warm Rhodes pad (lofi_default) ──
 function playPad(freq,startTime,duration,vol,ctx){
   const g=ctx.createGain();
   const attack=0.18,release=duration*0.5;
@@ -4678,12 +4681,11 @@ function playPad(freq,startTime,duration,vol,ctx){
   g.gain.linearRampToValueAtTime(vol,startTime+attack);
   g.gain.setValueAtTime(vol,startTime+duration-release);
   g.gain.exponentialRampToValueAtTime(0.001,startTime+duration);
-  // Slight low-pass for warmth
   const filt=ctx.createBiquadFilter();
   filt.type='lowpass';filt.frequency.value=800+freq*0.5;filt.Q.value=0.8;
   const o1=ctx.createOscillator(),o2=ctx.createOscillator();
   o1.type='sine';o2.type='triangle';
-  o1.frequency.value=freq;o2.frequency.value=freq*1.003; // slight detune
+  o1.frequency.value=freq;o2.frequency.value=freq*1.003;
   const mix=ctx.createGain();mix.gain.value=0.5;
   o1.connect(mix);o2.connect(mix);mix.connect(filt);filt.connect(g);g.connect(ctx.destination);
   o1.start(startTime);o2.start(startTime);
@@ -4691,7 +4693,7 @@ function playPad(freq,startTime,duration,vol,ctx){
   musicNodes.push(o1,o2);
 }
 
-// Plucky Rhodes-like melody note
+// ── INSTRUMENT 2: Plucky Rhodes melody (lofi_default) ──
 function playRhodes(freq,startTime,duration,vol,ctx){
   const g=ctx.createGain();
   g.gain.setValueAtTime(vol,startTime);
@@ -4702,7 +4704,7 @@ function playRhodes(freq,startTime,duration,vol,ctx){
   const o=ctx.createOscillator(),o2=ctx.createOscillator();
   o.type='sine';o2.type='sine';
   o.frequency.value=freq;
-  o2.frequency.value=freq*2.756; // bell partial
+  o2.frequency.value=freq*2.756;
   const g2=ctx.createGain();g2.gain.value=0.15;
   o.connect(filt);o2.connect(g2);g2.connect(filt);filt.connect(g);g.connect(ctx.destination);
   o.start(startTime);o2.start(startTime);
@@ -4710,7 +4712,121 @@ function playRhodes(freq,startTime,duration,vol,ctx){
   musicNodes.push(o,o2);
 }
 
-// Deep warm bass note
+// ── INSTRUMENT 3: Guitar pluck — attack noise + decaying sawtooth (lofi_jazz) ──
+function playGuitar(freq,startTime,duration,vol,ctx){
+  // Pluck noise burst
+  const bufSize=Math.floor(ctx.sampleRate*0.018);
+  const buf=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<bufSize;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/bufSize*6);
+  const ns=ctx.createBufferSource();ns.buffer=buf;
+  const ng=ctx.createGain();ng.gain.value=vol*1.4;
+  const nf=ctx.createBiquadFilter();nf.type='bandpass';nf.frequency.value=freq*2;nf.Q.value=3;
+  ns.connect(nf);nf.connect(ng);ng.connect(ctx.destination);
+  ns.start(startTime);
+  // Sustained tone — sawtooth with fast decay
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(vol*0.8,startTime+0.01);
+  g.gain.exponentialRampToValueAtTime(vol*0.2,startTime+0.08);
+  g.gain.exponentialRampToValueAtTime(0.001,startTime+Math.min(duration,1.8));
+  const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=1800;filt.Q.value=0.6;
+  const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=freq;
+  o.connect(filt);filt.connect(g);g.connect(ctx.destination);
+  o.start(startTime);o.stop(startTime+Math.min(duration,2)+0.05);
+  musicNodes.push(ns,o);
+}
+
+// ── INSTRUMENT 4: Strings — bowed sound (lofi_nature) ──
+function playStrings(freq,startTime,duration,vol,ctx){
+  const g=ctx.createGain();
+  const slowAttack=0.35;
+  g.gain.setValueAtTime(0,startTime);
+  g.gain.linearRampToValueAtTime(vol,startTime+slowAttack);
+  g.gain.setValueAtTime(vol,startTime+duration-0.3);
+  g.gain.exponentialRampToValueAtTime(0.001,startTime+duration+0.1);
+  // Subtle vibrato via LFO
+  const lfo=ctx.createOscillator();lfo.type='sine';lfo.frequency.value=5.2;
+  const lfoG=ctx.createGain();lfoG.gain.value=3;
+  lfo.connect(lfoG);
+  const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=freq;
+  lfoG.connect(o.frequency);
+  const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=1200;filt.Q.value=0.5;
+  // Add 5th partial for richness
+  const o2=ctx.createOscillator();o2.type='sawtooth';o2.frequency.value=freq*1.5;
+  const g2=ctx.createGain();g2.gain.value=0.12;
+  o.connect(filt);o2.connect(g2);g2.connect(filt);filt.connect(g);g.connect(ctx.destination);
+  lfo.start(startTime);lfo.stop(startTime+duration+0.2);
+  o.start(startTime);o.stop(startTime+duration+0.2);
+  o2.start(startTime);o2.stop(startTime+duration+0.2);
+  musicNodes.push(o,o2,lfo);
+}
+
+// ── INSTRUMENT 5: Vibraphone — metallic bell with tremolo (lofi_focus) ──
+function playVibe(freq,startTime,duration,vol,ctx){
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(vol,startTime);
+  g.gain.exponentialRampToValueAtTime(vol*0.6,startTime+0.04);
+  g.gain.exponentialRampToValueAtTime(0.001,startTime+Math.min(duration,2.5));
+  // Tremolo (motor effect)
+  const trem=ctx.createOscillator();trem.type='sine';trem.frequency.value=6.5;
+  const tremG=ctx.createGain();tremG.gain.value=0.3;
+  trem.connect(tremG);
+  // Metallic partials: fundamental + 4th + b7th (metallophone tuning)
+  const freqs=[freq, freq*2.756, freq*5.404];
+  const vols=[1, 0.35, 0.12];
+  freqs.forEach((f,i)=>{
+    const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;
+    const og=ctx.createGain();og.gain.value=vols[i];
+    tremG.connect(og);
+    o.connect(og);og.connect(g);g.connect(ctx.destination);
+    o.start(startTime);o.stop(startTime+Math.min(duration,2.8));
+    musicNodes.push(o);
+  });
+  trem.start(startTime);trem.stop(startTime+Math.min(duration,2.8));
+  musicNodes.push(trem);
+}
+
+// ── INSTRUMENT 6: Synth lead — saw with resonant filter sweep (lofi_epic) ──
+function playSynthLead(freq,startTime,duration,vol,ctx){
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0,startTime);
+  g.gain.linearRampToValueAtTime(vol,startTime+0.02);
+  g.gain.exponentialRampToValueAtTime(vol*0.7,startTime+0.1);
+  g.gain.exponentialRampToValueAtTime(0.001,startTime+duration);
+  const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.Q.value=4;
+  // Filter sweep from bright to warm
+  filt.frequency.setValueAtTime(3000,startTime);
+  filt.frequency.exponentialRampToValueAtTime(800,startTime+duration*0.4);
+  const o1=ctx.createOscillator();o1.type='sawtooth';o1.frequency.value=freq;
+  const o2=ctx.createOscillator();o2.type='sawtooth';o2.frequency.value=freq*1.006; // chorus detune
+  const o3=ctx.createOscillator();o3.type='square';o3.frequency.value=freq*0.5; // sub octave
+  const g3=ctx.createGain();g3.gain.value=0.3;
+  o1.connect(filt);o2.connect(filt);o3.connect(g3);g3.connect(filt);
+  filt.connect(g);g.connect(ctx.destination);
+  o1.start(startTime);o2.start(startTime);o3.start(startTime);
+  o1.stop(startTime+duration+0.05);o2.stop(startTime+duration+0.05);o3.stop(startTime+duration+0.05);
+  musicNodes.push(o1,o2,o3);
+}
+
+// ── INSTRUMENT 7: Pad chord (strings/jazz variant for lofi_jazz) ──
+function playJazzPad(freq,startTime,duration,vol,ctx){
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0,startTime);
+  g.gain.linearRampToValueAtTime(vol,startTime+0.08);
+  g.gain.setValueAtTime(vol,startTime+duration-0.2);
+  g.gain.exponentialRampToValueAtTime(0.001,startTime+duration);
+  const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=1400;filt.Q.value=0.7;
+  // Jazz voicing: triangle for warmth
+  const o=ctx.createOscillator();o.type='triangle';o.frequency.value=freq;
+  const o2=ctx.createOscillator();o2.type='sine';o2.frequency.value=freq*2.0;
+  const g2=ctx.createGain();g2.gain.value=0.18;
+  o.connect(filt);o2.connect(g2);g2.connect(filt);filt.connect(g);g.connect(ctx.destination);
+  o.start(startTime);o2.start(startTime);
+  o.stop(startTime+duration+0.1);o2.stop(startTime+duration+0.1);
+  musicNodes.push(o,o2);
+}
+
+// ── Deep warm bass (all tracks) ──
 function playBass(freq,startTime,duration,vol,ctx){
   const g=ctx.createGain();
   g.gain.setValueAtTime(0,startTime);
@@ -4720,13 +4836,13 @@ function playBass(freq,startTime,duration,vol,ctx){
   const filt=ctx.createBiquadFilter();
   filt.type='lowpass';filt.frequency.value=280;filt.Q.value=1.5;
   const o=ctx.createOscillator();
-  o.type='sine';o.frequency.value=freq/2; // one octave down
+  o.type='sine';o.frequency.value=freq/2;
   o.connect(filt);filt.connect(g);g.connect(ctx.destination);
   o.start(startTime);o.stop(startTime+duration+0.1);
   musicNodes.push(o);
 }
 
-// Soft hi-hat: very quiet filtered noise burst
+// ── Soft hi-hat ──
 function playHat(startTime,vol,ctx){
   try{
     const bufSize=ctx.sampleRate*0.04;
@@ -4745,6 +4861,43 @@ function playHat(startTime,vol,ctx){
   }catch(e){}
 }
 
+// ── Kick drum (lofi_epic + lofi_focus) ──
+function playKick(startTime,vol,ctx){
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(vol,startTime);
+  g.gain.exponentialRampToValueAtTime(0.001,startTime+0.35);
+  const o=ctx.createOscillator();
+  o.frequency.setValueAtTime(180,startTime);
+  o.frequency.exponentialRampToValueAtTime(40,startTime+0.08);
+  o.type='sine';
+  o.connect(g);g.connect(ctx.destination);
+  o.start(startTime);o.stop(startTime+0.4);
+  musicNodes.push(o);
+}
+
+// ── Snare (lofi_epic) ──
+function playSnare(startTime,vol,ctx){
+  try{
+    const bufSize=ctx.sampleRate*0.15;
+    const buf=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++)data[i]=(Math.random()*2-1)*Math.exp(-i/bufSize*18);
+    const src=ctx.createBufferSource();src.buffer=buf;
+    const filt=ctx.createBiquadFilter();filt.type='bandpass';filt.frequency.value=2200;filt.Q.value=0.8;
+    const g=ctx.createGain();g.gain.value=vol;
+    src.connect(filt);filt.connect(g);g.connect(ctx.destination);
+    // Tone component
+    const o=ctx.createOscillator();o.type='triangle';o.frequency.value=200;
+    const og=ctx.createGain();
+    og.gain.setValueAtTime(vol*0.4,startTime);
+    og.gain.exponentialRampToValueAtTime(0.001,startTime+0.08);
+    o.connect(og);og.connect(ctx.destination);
+    src.start(startTime);src.stop(startTime+0.18);
+    o.start(startTime);o.stop(startTime+0.1);
+    musicNodes.push(src,o);
+  }catch(e){}
+}
+
 let _lofiProgIdx=0;
 let _lofiBar=0;
 
@@ -4754,12 +4907,18 @@ function scheduleMusic(){
   if(_lofiBar===0)_lofiProgIdx=Math.floor(Math.random()*LOFI_CHORDS.length);
   const prog=LOFI_CHORDS[_lofiProgIdx];
 
+  // Each track now uses genuinely different instruments and patterns
   const CFG={
-    lofi_default:{bpm:75,padVol:0.04,bassVol:0.09,melodyVol:0.06,hatVol:0.018,hatPattern:[0.5],extraHat:0.3,mChance:[0.5,0.4],sparkle:0.08,melody:'rhodes',desc:'warm'},
-    lofi_jazz:{bpm:92,padVol:0.03,bassVol:0.07,melodyVol:0.08,hatVol:0.025,hatPattern:[0.25,0.5,0.75],extraHat:0.55,mChance:[0.65,0.55],sparkle:0.15,melody:'rhodes',desc:'jazz',swing:0.1},
-    lofi_nature:{bpm:62,padVol:0.055,bassVol:0.05,melodyVol:0.035,hatVol:0.008,hatPattern:[0.5],extraHat:0.12,mChance:[0.25,0.2],sparkle:0.22,melody:'sparkle',desc:'ambient'},
-    lofi_focus:{bpm:82,padVol:0.022,bassVol:0.12,melodyVol:0.02,hatVol:0.032,hatPattern:[0,0.5],extraHat:0.65,mChance:[0.15,0.12],sparkle:0.02,melody:'none',desc:'minimal'},
-    lofi_epic:{bpm:108,padVol:0.035,bassVol:0.14,melodyVol:0.09,hatVol:0.038,hatPattern:[0,0.25,0.5,0.75],extraHat:0.72,mChance:[0.72,0.62],sparkle:0.22,melody:'rhodes',desc:'energetic'},
+    // 🎹 Lo-Fi Chill — Rhodes pad + plucky Rhodes melody, gentle hats
+    lofi_default:{bpm:75,padFn:playPad,melFn:playRhodes,padVol:0.04,bassVol:0.09,melodyVol:0.06,hatVol:0.018,hatPattern:[0.5],extraHat:0.3,mChance:[0.5,0.4],sparkle:0.08,swing:0},
+    // 🎸 Late Night Jazz — guitar chords + guitar melody, walking bass, swing rhythm
+    lofi_jazz:{bpm:92,padFn:playJazzPad,melFn:playGuitar,padVol:0.035,bassVol:0.07,melodyVol:0.07,hatVol:0.022,hatPattern:[0.25,0.5,0.75],extraHat:0.55,mChance:[0.65,0.55],sparkle:0.1,swing:0.1},
+    // 🎻 Nature Study — slow strings pad, sparse high string melody, almost no drums
+    lofi_nature:{bpm:58,padFn:playStrings,melFn:playStrings,padVol:0.045,bassVol:0.04,melodyVol:0.025,hatVol:0.006,hatPattern:[0.5],extraHat:0.08,mChance:[0.22,0.16],sparkle:0.18,swing:0},
+    // 🎶 Deep Focus — vibraphone melody, heavy kick+bass, minimal
+    lofi_focus:{bpm:82,padFn:playPad,melFn:playVibe,padVol:0.018,bassVol:0.12,melodyVol:0.055,hatVol:0.028,hatPattern:[0,0.5],extraHat:0.6,mChance:[0.35,0.28],sparkle:0.04,swing:0,kick:true},
+    // ⚡ Epic Study — synth lead, driving kick+snare, energetic
+    lofi_epic:{bpm:108,padFn:playPad,melFn:playSynthLead,padVol:0.025,bassVol:0.14,melodyVol:0.07,hatVol:0.035,hatPattern:[0,0.25,0.5,0.75],extraHat:0.65,mChance:[0.7,0.6],sparkle:0.18,swing:0,kick:true,snare:true},
   };
   const c=CFG[track]||CFG.lofi_default;
   const BT=60/c.bpm, BAR_T=BT*4;
@@ -4774,52 +4933,43 @@ function scheduleMusic(){
       const sw=c.swing||0;
 
       if(bib===0){
+        // Pad chord — use track's pad instrument
         chord.forEach((midi,i)=>{
-          playPad(midiToFreq(midi),musicNextTime+i*0.06+Math.random()*0.02,BAR_T*0.95,c.padVol+Math.random()*0.01,ctx);
+          c.padFn(midiToFreq(midi),musicNextTime+i*0.06+Math.random()*0.02,BAR_T*0.95,c.padVol+Math.random()*0.01,ctx);
         });
         playBass(midiToFreq(root),musicNextTime,BT*2,c.bassVol,ctx);
+        // Kick on beat 1 for kick tracks
+        if(c.kick)playKick(musicNextTime,0.18,ctx);
         _lofiBar++;if(_lofiBar>=8)_lofiBar=0;
-        // Focus: kick-style sub on every bar
-        if(c.desc==='minimal')playBass(midiToFreq(root-12),musicNextTime,BT*0.4,0.16,ctx);
-        // Epic: power stab on bar 1
-        if(c.desc==='energetic'&&Math.random()<0.55){
-          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
-          playRhodes(midiToFreq(n+12),musicNextTime,BT*0.8,c.melodyVol*1.2,ctx);
-        }
       }
+
+      // Beat 3 kick for epic/focus
+      if(c.kick&&bib===2)playKick(musicNextTime,0.14,ctx);
+      // Snare on 2+4 for epic
+      if(c.snare&&(bib===1||bib===3))playSnare(musicNextTime+sw*0.5,0.12,ctx);
+
       // Bass fills
       if(bib===2){
         const nr=LOFI_CHORDS[_lofiProgIdx][((ci+1)%prog.length)][0];
         if(Math.random()<0.5)playBass(midiToFreq(nr),musicNextTime+BT*0.75,BT*1.2,c.bassVol*0.75,ctx);
       }
-      // Jazz: extra bass walk on beat 2
-      if(c.desc==='jazz'&&bib===1)playBass(midiToFreq(root+7),musicNextTime+sw,BT*0.8,c.bassVol*0.6,ctx);
-      // Focus: heavy beat on 3
-      if(c.desc==='minimal'&&bib===2)playBass(midiToFreq(root-12),musicNextTime,BT*0.3,0.12,ctx);
+      // Jazz walking bass on beat 2
+      if(track==='lofi_jazz'&&bib===1)playBass(midiToFreq(root+7),musicNextTime+sw,BT*0.8,c.bassVol*0.6,ctx);
 
-      if(c.melody!=='none'){
-        if(bib===1&&Math.random()<c.mChance[0]){
-          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
-          if(c.melody==='sparkle') playRhodes(midiToFreq(n+12),musicNextTime+sw,BT*0.35,c.melodyVol*0.7,ctx);
-          else playRhodes(midiToFreq(n),musicNextTime+Math.random()*0.1+sw,BT*(0.5+Math.random()*1.5),c.melodyVol,ctx);
-        }
-        if(bib===3&&Math.random()<c.mChance[1]){
-          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
-          playRhodes(midiToFreq(n),musicNextTime+Math.random()*0.15,BT*(0.3+Math.random()),c.melodyVol*0.85,ctx);
-        }
-        if(Math.random()<c.sparkle){
-          const n=PENTA[Math.floor(Math.random()*5)+5];
-          playRhodes(midiToFreq(n+12),musicNextTime+BT*0.5,BT*0.4,c.melodyVol*0.45,ctx);
-        }
-        // Jazz syncopation
-        if(c.desc==='jazz'&&bib===0&&Math.random()<0.4){
-          const n=PENTA[Math.floor(Math.random()*PENTA.length)];
-          playRhodes(midiToFreq(n+7),musicNextTime+BT*0.33,BT*0.55,c.melodyVol*0.6,ctx);
-        }
-        // Nature: high rain drops
-        if(c.desc==='ambient'&&Math.random()<0.14){
-          [0,1,2].forEach(k=>{if(Math.random()<0.5){const n=PENTA[Math.floor(Math.random()*PENTA.length)];playRhodes(midiToFreq(n+24),musicNextTime+k*BT*0.14,BT*0.18,0.018,ctx);}});
-        }
+      // Melody notes — use track's melody instrument
+      if(bib===1&&Math.random()<c.mChance[0]){
+        const n=PENTA[Math.floor(Math.random()*PENTA.length)];
+        const octShift = track==='lofi_nature'?12:0;
+        c.melFn(midiToFreq(n+octShift),musicNextTime+Math.random()*0.1+sw,BT*(0.5+Math.random()*1.5),c.melodyVol,ctx);
+      }
+      if(bib===3&&Math.random()<c.mChance[1]){
+        const n=PENTA[Math.floor(Math.random()*PENTA.length)];
+        c.melFn(midiToFreq(n),musicNextTime+Math.random()*0.15,BT*(0.3+Math.random()),c.melodyVol*0.85,ctx);
+      }
+      // Sparkle high notes
+      if(Math.random()<c.sparkle){
+        const n=PENTA[Math.floor(Math.random()*5)+5];
+        c.melFn(midiToFreq(n+12),musicNextTime+BT*0.5,BT*0.4,c.melodyVol*0.45,ctx);
       }
 
       c.hatPattern.forEach(off=>{if(Math.random()<0.78)playHat(musicNextTime+BT*off,c.hatVol,ctx);});
@@ -5013,11 +5163,11 @@ async function saveDailyResult(sc,total){
 // SHOP — MUSIC TRACKS + UI THEMES
 // ══════════════════════════════════════════════
 const MUSIC_TRACKS=[
-  {id:'lofi_default',name:'Lo-Fi Chill',icon:'🎹',desc:'Warm piano & bass',price:0},
-  {id:'lofi_jazz',name:'Late Night Jazz',icon:'🎷',desc:'Mellow jazz vibes',price:30},
-  {id:'lofi_nature',name:'Nature Study',icon:'🌿',desc:'Ambient with birdsong feel',price:30},
-  {id:'lofi_focus',name:'Deep Focus',icon:'🧠',desc:'Minimal beats, max focus',price:40},
-  {id:'lofi_epic',name:'Epic Study',icon:'⚡',desc:'Energetic lo-fi',price:50},
+  {id:'lofi_default',name:'Lo-Fi Chill',icon:'🎹',desc:'Rhodes piano & warm pad chords',price:0},
+  {id:'lofi_jazz',name:'Late Night Jazz',icon:'🎸',desc:'Guitar chords, plucky melody, swing hats',price:30},
+  {id:'lofi_nature',name:'Nature Study',icon:'🎻',desc:'Slow bowed strings, gentle & spacious',price:30},
+  {id:'lofi_focus',name:'Deep Focus',icon:'🔔',desc:'Metallic vibraphone, heavy bass & kick',price:40},
+  {id:'lofi_epic',name:'Epic Study',icon:'⚡',desc:'Synth lead, kick+snare drum kit, intense',price:50},
 ];
 
 const UI_THEMES=[
@@ -5303,21 +5453,6 @@ const LESSONS_ES = {
   const savedTrack=localStorage.getItem('qc_track')||localStorage.getItem('ss_track');
   if(savedTrack)_currentTrack=savedTrack;
 
-function getLessonData(subj, top) {
-  if (currentLang === 'fr' && LESSONS_FR[subj]?.[top]) return LESSONS_FR[subj][top];
-  if (currentLang === 'es' && LESSONS_ES[subj]?.[top]) return LESSONS_ES[subj][top];
-  return LESSONS[subj]?.[top];
-}
-
-// ── Language-aware lesson loader ──
-function getLessonData(subj, top) {
-  if (currentLang === 'fr' && LESSONS_FR[subj]?.[top]) return LESSONS_FR[subj][top];
-  if (currentLang === 'es' && LESSONS_ES[subj]?.[top]) return LESSONS_ES[subj][top];
-  return LESSONS[subj]?.[top];
-}
-
-
-// ── Language-aware lesson loader ──
 function getLessonData(subj, top) {
   if (currentLang === 'fr' && LESSONS_FR[subj]?.[top]) return LESSONS_FR[subj][top];
   if (currentLang === 'es' && LESSONS_ES[subj]?.[top]) return LESSONS_ES[subj][top];
@@ -5811,7 +5946,7 @@ document.addEventListener('DOMContentLoaded', initLang);
 
   // Background constellation nodes
   const NODES = [];
-  const NODE_COUNT = 90;
+  const NODE_COUNT = 55; // reduced from 90 — O(n²) line checks make high counts expensive
 
   // Cursor ripple clicks
   const ripples = [];
@@ -5878,9 +6013,9 @@ document.addEventListener('DOMContentLoaded', initLang);
     trail.push({ x: mouse.x, y: mouse.y, t: Date.now(), vx: mouse.vx, vy: mouse.vy });
     if (trail.length > MAX_TRAIL) trail.shift();
 
-    // Spawn small sparkle particles from cursor movement
+    // Spawn small sparkle particles from cursor movement — throttled
     const speed = Math.sqrt(mouse.vx * mouse.vx + mouse.vy * mouse.vy);
-    if (speed > 2 && Math.random() < 0.4) {
+    if (speed > 3 && Math.random() < 0.25) {
       spawnCursorParticle(mouse.x, mouse.y, speed);
     }
   }
@@ -5890,7 +6025,7 @@ document.addEventListener('DOMContentLoaded', initLang);
     // Big ripple on click
     spawnRipple(e.clientX, e.clientY);
     // Burst of particles
-    for (let i = 0; i < 18; i++) spawnCursorParticle(e.clientX, e.clientY, 8, true);
+    for (let i = 0; i < 10; i++) spawnCursorParticle(e.clientX, e.clientY, 8, true);
     // Add temporary gravity well
     wells.push({ x: e.clientX, y: e.clientY, strength: 120, life: 1.0, decay: 0.018, repel: false });
   }
@@ -5952,8 +6087,9 @@ document.addEventListener('DOMContentLoaded', initLang);
 
       // Mouse repulsion for orbs
       const dx = o.x - mouse.x, dy = o.y - mouse.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 300 && dist > 0) {
+      const dist2 = dx*dx + dy*dy;
+      if (dist2 < 90000 && dist2 > 0) { // 300px radius
+        const dist = Math.sqrt(dist2);
         const force = (300 - dist) / 300 * 0.4;
         o.vx += (dx / dist) * force;
         o.vy += (dy / dist) * force;
@@ -5961,13 +6097,17 @@ document.addEventListener('DOMContentLoaded', initLang);
       o.vx *= 0.98; o.vy *= 0.98;
 
       const pulse = Math.sin(o.phase) * 0.15 + 0.85;
-      const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r * pulse);
+      const pr = o.r * pulse;
+      // Only draw if orb overlaps viewport with margin
+      if (o.x + pr < 0 || o.x - pr > W || o.y + pr < 0 || o.y - pr > H) return;
+
       const [r, gr, b] = o.color;
-      g.addColorStop(0, `rgba(${r},${gr},${b},0.055)`);
-      g.addColorStop(0.4, `rgba(${r},${gr},${b},0.03)`);
+      const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, pr);
+      g.addColorStop(0, `rgba(${r},${gr},${b},0.05)`);
+      g.addColorStop(0.4, `rgba(${r},${gr},${b},0.025)`);
       g.addColorStop(1, `rgba(${r},${gr},${b},0)`);
       ctx.beginPath();
-      ctx.arc(o.x, o.y, o.r * pulse, 0, Math.PI * 2);
+      ctx.arc(o.x, o.y, pr, 0, Math.PI * 2);
       ctx.fillStyle = g;
       ctx.fill();
     });
@@ -6030,21 +6170,21 @@ document.addEventListener('DOMContentLoaded', initLang);
       ctx.fill();
     });
 
-    // Draw constellation lines between nearby nodes
+    // Draw constellation lines between nearby nodes — reduced distance threshold
     for (let i = 0; i < NODES.length; i++) {
       for (let j = i + 1; j < NODES.length; j++) {
         const a = NODES[i], b = NODES[j];
         const dx = a.x - b.x, dy = a.y - b.y;
-        const d = Math.sqrt(dx*dx + dy*dy);
-        if (d < 120) {
-          const alpha = (1 - d / 120) * 0.18;
-          // Brighter if one node is attracted
+        const d = dx*dx + dy*dy; // skip sqrt — compare squared
+        if (d < 8100) { // 90px threshold (down from 120)
+          const dist = Math.sqrt(d);
+          const alpha = (1 - dist / 90) * 0.15;
           const boost = (a.attracted || b.attracted) ? 3 : 1;
           const [r, gr, bl] = a.color;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(${r},${gr},${bl},${Math.min(alpha * boost, 0.7)})`;
+          ctx.strokeStyle = `rgba(${r},${gr},${bl},${Math.min(alpha * boost, 0.6)})`;
           ctx.lineWidth = a.attracted || b.attracted ? 1.2 : 0.5;
           ctx.stroke();
         }
@@ -6186,7 +6326,16 @@ document.addEventListener('DOMContentLoaded', initLang);
   }
 
   function draw() {
+    // Skip rendering when tab is hidden — saves huge CPU
+    if (document.hidden) { animId = requestAnimationFrame(draw); return; }
     t += 0.016;
+
+    // Throttle to ~30fps to reduce CPU on low-end devices
+    const now2 = performance.now();
+    if (!draw._last) draw._last = 0;
+    if (now2 - draw._last < 28) { animId = requestAnimationFrame(draw); return; }
+    draw._last = now2;
+
     ctx.clearRect(0, 0, W, H);
 
     drawOrbs();
