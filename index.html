@@ -1308,6 +1308,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
     <!-- FRIENDS LIST TAB -->
     <div id="ftab-friends-panel">
+      <!-- TEAM BATTLE CARD -->
+      <div style="background:linear-gradient(135deg,rgba(167,139,250,0.18),rgba(79,142,247,0.1));border:1px solid rgba(167,139,250,0.35);border-radius:20px;padding:18px 20px;margin-bottom:1rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:0.07;pointer-events:none;">&#9876;</div>
+        <div style="font-size:11px;font-weight:700;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">NEW &#10022; TEAM BATTLE</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:6px;">2v2 &amp; 4v4 Modes</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Power-ups, twists &amp; team combos. The whole team answers live — smartest squad wins.</div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="openTeamLobby('2v2')" style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(167,139,250,0.3),rgba(79,142,247,0.2));border:1px solid rgba(167,139,250,0.5);color:var(--purple);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">&#9876; 2v2</button>
+          <button onclick="openTeamLobby('4v4')" style="flex:1;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(240,192,96,0.2),rgba(240,160,80,0.15));border:1px solid rgba(240,192,96,0.4);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;">&#128081; 4v4</button>
+        </div>
+      </div>
       <div style="font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;" id="fr-friends-label">Your Friends</div>
       <div id="fr-friends-list"><div class="empty-state">No friends yet — go to Add Friend tab and share your code!</div></div>
     </div>
@@ -1350,6 +1361,9 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
     match /matches/{matchId} {
+      allow read, write: if request.auth != null;
+    }
+    match /teamMatches/{matchId} {
       allow read, write: if request.auth != null;
     }
     match /feedback/{docId} {
@@ -1455,6 +1469,178 @@ service cloud.firestore {
     <p class="section-title" style="margin-top:1.5rem;">All Users</p>
     <div id="admin-users-list"><div class="empty-state">Loading...</div></div>
   </div>
+
+
+<!-- ════════════════════════════════════════
+  TEAM BATTLE — LOBBY / MATCH / RESULT OVERLAYS
+  ════════════════════════════════════════ -->
+
+<!-- TEAM LOBBY OVERLAY -->
+<div id="team-lobby-overlay" style="position:fixed;inset:0;background:rgba(7,8,15,0.97);z-index:810;display:none;overflow-y:auto;animation:fadeIn 0.25s ease both;">
+  <div style="max-width:520px;margin:0 auto;padding:2rem 1.25rem 5rem;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+      <button onclick="closeTeamLobby()" style="width:36px;height:36px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&#8592;</button>
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:24px;" id="team-lobby-title">Team Battle</div>
+        <div style="font-size:13px;color:var(--text-muted);" id="team-lobby-sub">Create or join a room</div>
+      </div>
+    </div>
+
+    <!-- TWIST EXPLAINER -->
+    <div style="background:linear-gradient(135deg,rgba(167,139,250,0.12),rgba(79,142,247,0.07));border:1px solid rgba(167,139,250,0.3);border-radius:18px;padding:16px 18px;margin-bottom:1.25rem;">
+      <div style="font-size:11px;font-weight:700;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">&#10022; Game Twists</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text-muted);">
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">&#128293; <strong style="color:var(--text)">Hot Seat</strong><br>One player per team is picked randomly to answer solo — no team help!</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">&#9889; <strong style="color:var(--text)">Speed Bonus</strong><br>Answer in under 8s → +2 bonus pts. Under 4s → +4 bonus pts!</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">&#128162; <strong style="color:var(--text)">Team Streak</strong><br>Whole team correct = +3 bonus pts &amp; a team power-up!</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">&#127774; <strong style="color:var(--text)">Sabotage</strong><br>Power-up: cut the enemy team's answer time by 50% on next question!</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">&#128260; <strong style="color:var(--text)">Double Down</strong><br>Power-up: wager your current score — double it or lose half!</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;">&#128064; <strong style="color:var(--text)">Blind Round</strong><br>On Q4, answer options are hidden for 5 seconds before revealing!</div>
+      </div>
+    </div>
+
+    <!-- CREATE ROOM -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-bottom:1rem;">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;">&#127959; Create a Room</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px;">Subject</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;" id="team-subject-chips"></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px;">Topic</div>
+        <div style="font-size:13px;color:var(--text-dim);font-style:italic;" id="team-topic-hint">Select a subject first</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;" id="team-topic-chips"></div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px;">Difficulty</div>
+        <div style="display:flex;gap:6px;">
+          <button class="tdiff-btn active" data-diff="easy" onclick="teamSelectDiff(this)" style="flex:1;padding:9px;border-radius:10px;background:var(--green-dim);border:1px solid rgba(62,207,142,0.4);color:var(--green);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Easy</button>
+          <button class="tdiff-btn" data-diff="medium" onclick="teamSelectDiff(this)" style="flex:1;padding:9px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Medium</button>
+          <button class="tdiff-btn" data-diff="hard" onclick="teamSelectDiff(this)" style="flex:1;padding:9px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Hard</button>
+        </div>
+      </div>
+      <button onclick="createTeamRoom()" id="team-create-btn" style="width:100%;padding:14px;border-radius:13px;background:linear-gradient(135deg,var(--purple),var(--accent));color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(167,139,250,0.3);">&#127959; Create Room &amp; Get Code</button>
+    </div>
+
+    <!-- JOIN ROOM -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px 20px;">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;">&#128272; Join a Room</div>
+      <div style="display:flex;gap:8px;">
+        <input id="team-join-code" maxlength="6" placeholder="Room code…" oninput="this.value=this.value.toUpperCase()" style="flex:1;padding:12px 14px;border-radius:12px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:5px;outline:none;text-align:center;text-transform:uppercase;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        <button onclick="joinTeamRoom()" style="padding:12px 20px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Join</button>
+      </div>
+      <div id="team-join-msg" style="font-size:13px;margin-top:10px;min-height:16px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM WAITING ROOM -->
+<div id="team-waiting-overlay" style="position:fixed;inset:0;background:rgba(7,8,15,0.98);z-index:820;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;">
+  <div style="font-size:52px;margin-bottom:1rem;animation:orbFloat 3s ease-in-out infinite;">&#9876;</div>
+  <div style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:8px;" id="team-wait-title">Room Created!</div>
+  <div style="font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;" id="team-wait-sub">Share this code with your teammates and opponents</div>
+  <div style="font-family:'DM Serif Display',serif;font-size:48px;letter-spacing:12px;color:var(--purple);margin-bottom:1.5rem;background:rgba(167,139,250,0.1);padding:16px 24px;border-radius:16px;border:1px solid rgba(167,139,250,0.3);" id="team-room-code-display">——</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:1.5rem;max-width:400px;width:100%;">
+    <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Players Joined <span id="team-player-count">0</span>/<span id="team-max-players">4</span></div>
+    <div id="team-player-list" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:40px;"></div>
+  </div>
+  <div style="display:flex;gap:10px;width:100%;max-width:400px;">
+    <button onclick="cancelTeamRoom()" style="flex:1;padding:13px;border-radius:13px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+    <button onclick="startTeamMatch()" id="team-start-btn" style="flex:2;padding:13px;border-radius:13px;background:linear-gradient(135deg,var(--purple),var(--accent));color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;opacity:0.5;" disabled id="team-start-btn">Start Match</button>
+  </div>
+  <div style="font-size:12px;color:var(--text-dim);margin-top:12px;" id="team-wait-hint">Waiting for players...</div>
+</div>
+
+<!-- TEAM MATCH SCREEN -->
+<div id="team-match-overlay" style="position:fixed;inset:0;background:var(--bg);z-index:825;display:none;overflow-y:auto;">
+  <div style="max-width:600px;margin:0 auto;padding:1rem 1.25rem 5rem;">
+    <!-- Header HUD -->
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 14px;">
+      <div style="text-align:left;">
+        <div style="font-size:9px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px;" id="team-my-team-label">YOUR TEAM</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--purple);" id="team-my-score">0</div>
+        <div id="team-powerup-display" style="font-size:11px;color:var(--amber);margin-top:2px;min-height:14px;"></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:2px;" id="team-q-counter">Q 1/5</div>
+        <div id="team-twist-badge" style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--red-dim);color:var(--red);border:1px solid rgba(245,101,101,0.4);display:none;"></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:9px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px;" id="team-opp-team-label">OPPONENTS</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--amber);" id="team-opp-score">0</div>
+        <div id="team-opp-powerup-display" style="font-size:11px;color:var(--red);margin-top:2px;min-height:14px;"></div>
+      </div>
+    </div>
+
+    <!-- Timer bar -->
+    <div style="height:5px;background:rgba(255,255,255,0.05);border-radius:3px;margin-bottom:1rem;overflow:hidden;">
+      <div id="team-timer-bar" style="height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:3px;transition:width 0.1s linear;width:100%;"></div>
+    </div>
+
+    <!-- Twist announcement banner -->
+    <div id="team-twist-announce" style="display:none;background:linear-gradient(135deg,rgba(245,101,101,0.2),rgba(240,160,80,0.15));border:1px solid rgba(245,101,101,0.4);border-radius:14px;padding:13px 16px;margin-bottom:1rem;text-align:center;animation:pop 0.4s ease both;">
+      <div id="team-twist-announce-text" style="font-size:14px;font-weight:700;color:var(--red);"></div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-card" id="team-question-card" style="margin-bottom:1rem;">
+      <span class="q-tag" id="team-q-tag">Subject · Topic</span>
+      <p class="q-text" id="team-q-text">Loading question…</p>
+    </div>
+
+    <!-- Options -->
+    <div id="team-options" class="options" style="margin-bottom:1rem;"></div>
+
+    <!-- Explanation -->
+    <div id="team-explanation" style="display:none;background:var(--surface2);border-left:3px solid var(--accent);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-muted);margin-bottom:1rem;">
+      <strong style="color:var(--accent);font-size:11px;text-transform:uppercase;display:block;margin-bottom:6px;">Explanation</strong>
+      <span id="team-exp-text"></span>
+    </div>
+
+    <!-- Live team responses -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:1rem;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:10px;">Live Responses</div>
+      <div id="team-live-responses" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+    </div>
+
+    <!-- Next btn -->
+    <button id="team-next-btn" onclick="teamNextQuestion()" style="display:none;width:100%;padding:13px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;">Next →</button>
+
+    <!-- Power-up buttons -->
+    <div id="team-powerup-btns" style="display:flex;gap:8px;margin-top:8px;"></div>
+
+    <button onclick="leaveTeamMatch()" style="margin-top:12px;width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(245,101,101,0.3);color:var(--red);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;opacity:0.7;">&#128682; Leave Match</button>
+  </div>
+</div>
+
+<!-- TEAM RESULT SCREEN -->
+<div id="team-result-overlay" style="position:fixed;inset:0;background:var(--bg);z-index:830;display:none;overflow-y:auto;animation:fadeUp 0.4s ease both;">
+  <div style="max-width:560px;margin:0 auto;padding:2rem 1.25rem 5rem;text-align:center;">
+    <div style="font-size:64px;margin-bottom:1rem;animation:pop 0.5s ease both;" id="team-result-emoji">&#127942;</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:34px;margin-bottom:6px;" id="team-result-title">Your Team Wins!</div>
+    <div style="font-size:15px;color:var(--text-muted);margin-bottom:2rem;" id="team-result-scores"></div>
+
+    <!-- MVP -->
+    <div id="team-mvp-card" style="background:linear-gradient(135deg,rgba(240,192,96,0.2),rgba(240,160,80,0.1));border:1px solid rgba(240,192,96,0.4);border-radius:18px;padding:18px;margin-bottom:1.5rem;">
+      <div style="font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">&#11088; MVP of the Match</div>
+      <div style="font-size:22px;font-weight:700;color:var(--text);" id="team-mvp-name">—</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px;" id="team-mvp-stats"></div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-bottom:1.5rem;">
+      <div style="background:var(--surface2);padding:12px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-dim);display:grid;grid-template-columns:1fr auto auto auto;gap:8px;">
+        <div>Player</div><div>Correct</div><div>Speed</div><div>Score</div>
+      </div>
+      <div id="team-final-breakdown"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeTeamResult()" style="flex:1;padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Back</button>
+      <button onclick="openTeamLobby(window._lastTeamMode||'2v2')" style="flex:2;padding:14px;border-radius:14px;background:linear-gradient(135deg,var(--purple),var(--accent));color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Play Again</button>
+    </div>
+  </div>
+</div>
 
 </div><!-- end app-screen -->
 </div><!-- end page -->
@@ -3162,11 +3348,186 @@ const QUESTION_BANK={
 
 };
 
+// ── EXTRA QUESTIONS (added to expand question pools) ──
+(function expandQuestionBank(){
+  const extra = {
+
+"Physics::Waves & Sound::easy":[
+{question:"What type of wave is sound?",options:["Transverse","Longitudinal","Electromagnetic","Surface"],answer:1,explanation:"Sound is a longitudinal wave — particles vibrate parallel to the direction of travel."},
+{question:"What is the unit of frequency?",options:["Metre","Hertz","Watt","Decibel"],answer:1,explanation:"Frequency is measured in Hertz (Hz) — cycles per second."},
+{question:"What is wavelength?",options:["Height of a wave","Distance between two crests","Speed of the wave","Time for one cycle"],answer:1,explanation:"Wavelength is the distance between two successive crests (or any two identical points) on a wave."},
+{question:"Speed of light in vacuum?",options:["3×10⁶ m/s","3×10⁸ m/s","3×10¹⁰ m/s","300 m/s"],answer:1,explanation:"The speed of light in a vacuum is approximately 3×10⁸ m/s."},
+{question:"What determines the pitch of a sound?",options:["Amplitude","Speed","Frequency","Wavelength"],answer:2,explanation:"Pitch is determined by frequency — higher frequency = higher pitch."},
+{question:"Can sound travel through a vacuum?",options:["Yes","No","Only slowly","Only in one direction"],answer:1,explanation:"Sound needs a medium (particles) to travel — it cannot travel through a vacuum."},
+{question:"What is the speed of sound in air approximately?",options:["34 m/s","340 m/s","3400 m/s","3 m/s"],answer:1,explanation:"Sound travels at approximately 340 m/s in air at room temperature."},
+{question:"Which electromagnetic wave has the highest frequency?",options:["Radio waves","Microwaves","Visible light","Gamma rays"],answer:3,explanation:"Gamma rays have the highest frequency (and energy) of all electromagnetic waves."},
+{question:"What is the formula linking wave speed, frequency and wavelength?",options:["v = f + λ","v = f × λ","v = f / λ","v = λ / f"],answer:1,explanation:"Wave speed = frequency × wavelength (v = fλ)."},
+{question:"Reflection of sound is called?",options:["Refraction","Diffraction","Echo","Resonance"],answer:2,explanation:"When sound reflects off a surface and you hear it again, it is called an echo."},
+],
+
+"Physics::Energy & Work::easy":[
+{question:"What is the unit of energy?",options:["Watt","Newton","Joule","Pascal"],answer:2,explanation:"Energy is measured in Joules (J)."},
+{question:"What is kinetic energy?",options:["Stored energy","Energy of motion","Heat energy","Chemical energy"],answer:1,explanation:"Kinetic energy is the energy an object has due to its motion."},
+{question:"Formula for kinetic energy?",options:["KE = mv","KE = ½mv²","KE = mgh","KE = Fd"],answer:1,explanation:"KE = ½mv² — depends on mass and the square of velocity."},
+{question:"What is gravitational potential energy?",options:["Energy of movement","Stored energy due to height","Electrical energy","Thermal energy"],answer:1,explanation:"GPE is energy stored due to an object's position above a reference point — GPE = mgh."},
+{question:"What is the law of conservation of energy?",options:["Energy can be created","Energy can be destroyed","Energy cannot be created or destroyed, only transferred","Energy always increases"],answer:2,explanation:"Energy cannot be created or destroyed — it can only be converted from one form to another."},
+{question:"A 10 N force moves an object 5 m. Work done?",options:["2 J","15 J","50 J","0.5 J"],answer:2,explanation:"Work = Force × distance = 10 × 5 = 50 J."},
+{question:"What is power?",options:["Energy stored","Rate of doing work","Force times speed","Mass times acceleration"],answer:1,explanation:"Power = Work done / Time. The unit is the Watt (W = J/s)."},
+{question:"Which energy transformation happens in a light bulb?",options:["Chemical → mechanical","Electrical → light + heat","Kinetic → potential","Nuclear → chemical"],answer:1,explanation:"A light bulb converts electrical energy into light and heat energy."},
+],
+
+"Physics::Magnetism::easy":[
+{question:"What are the poles of a magnet called?",options:["East and West","North and South","Positive and Negative","Left and Right"],answer:1,explanation:"Every magnet has a north pole and a south pole."},
+{question:"Like poles...",options:["Attract","Repel","Have no effect","Cancel out"],answer:1,explanation:"Like poles (N–N or S–S) repel each other; unlike poles attract."},
+{question:"What material is most strongly attracted to magnets?",options:["Copper","Aluminium","Iron","Plastic"],answer:2,explanation:"Iron (and other ferromagnetic materials like nickel and cobalt) are strongly attracted to magnets."},
+{question:"What is a magnetic field?",options:["The area around a magnet where magnetic forces act","The inside of a magnet","The energy stored in a magnet","A type of electric field"],answer:0,explanation:"A magnetic field is the region around a magnet where another magnetic material would experience a force."},
+{question:"Earth behaves like a giant magnet — its geographic North Pole is near which magnetic pole?",options:["North magnetic pole","South magnetic pole","It has no magnetic pole","The equator"],answer:1,explanation:"Earth's geographic North Pole is near a magnetic south pole (so compass needles point there)."},
+],
+
+"Physics::Thermodynamics::easy":[
+{question:"What is the SI unit of temperature?",options:["Celsius","Fahrenheit","Kelvin","Joule"],answer:2,explanation:"The SI unit of temperature is the Kelvin (K). 0 K = absolute zero."},
+{question:"How is thermal energy transferred through a solid?",options:["Convection","Radiation","Conduction","Absorption"],answer:2,explanation:"In solids, thermal energy is transferred by conduction — vibrating particles pass energy to neighbours."},
+{question:"How is thermal energy transferred in fluids?",options:["Conduction","Radiation","Convection","Diffusion"],answer:2,explanation:"In fluids, thermal energy is transferred by convection — hot fluid rises, cool fluid sinks."},
+{question:"Absolute zero is approximately?",options:["0°C","−100°C","−273°C","100°C"],answer:2,explanation:"Absolute zero (0 K) is approximately −273°C — the coldest theoretically possible temperature."},
+{question:"What happens to the volume of a gas if pressure doubles (temperature fixed)?",options:["Doubles","Stays the same","Halves","Quadruples"],answer:2,explanation:"Boyle's Law: P₁V₁ = P₂V₂. If pressure doubles, volume halves (at constant temperature)."},
+],
+
+"Maths::Algebra::medium":[
+{question:"Solve 3x + 7 = 22",options:["x = 3","x = 4","x = 5","x = 29/3"],answer:2,explanation:"3x = 15, x = 5."},
+{question:"Expand (x+3)(x+5)",options:["x²+8x+15","x²+8x+8","x²+15x+8","x²+15"],answer:0,explanation:"x²+5x+3x+15 = x²+8x+15."},
+{question:"Factorise x²−9",options:["(x+3)²","(x−3)²","(x+3)(x−3)","(x−9)(x+1)"],answer:2,explanation:"Difference of two squares: x²−9 = (x+3)(x−3)."},
+{question:"What is the gradient of y = 3x − 7?",options:["−7","7","3","−3"],answer:2,explanation:"In y = mx + c, m is the gradient. Here m = 3."},
+{question:"Solve 2(x−4) = 10",options:["x = 3","x = 7","x = 9","x = 1"],answer:2,explanation:"2x − 8 = 10, 2x = 18, x = 9."},
+{question:"Rearrange v = u + at for a",options:["a = v−u−t","a = (v+u)/t","a = (v−u)/t","a = vut"],answer:2,explanation:"Subtract u: v−u = at. Divide by t: a = (v−u)/t."},
+{question:"What is the y-intercept of y = 4x + 3?",options:["4","3","7","−3"],answer:1,explanation:"In y = mx + c, c = 3 is the y-intercept."},
+{question:"Solve the inequality 2x + 1 > 7",options:["x > 3","x < 3","x > 4","x < 4"],answer:0,explanation:"2x > 6, x > 3."},
+{question:"Simplify 4x + 3y − 2x + y",options:["2x+4y","6x+4y","2x+2y","6x+2y"],answer:0,explanation:"4x−2x = 2x; 3y+y = 4y."},
+{question:"If f(x) = 2x² − 3, find f(4)",options:["29","25","14","32"],answer:0,explanation:"f(4) = 2(16)−3 = 32−3 = 29."},
+],
+
+"Maths::Number Theory::easy":[
+{question:"What is a prime number?",options:["Any even number","A number with exactly two factors: 1 and itself","A number divisible by 3","Any odd number"],answer:1,explanation:"A prime number has exactly two distinct factors: 1 and itself (e.g. 2, 3, 5, 7, 11...)."},
+{question:"What is the Highest Common Factor (HCF) of 12 and 18?",options:["3","6","9","36"],answer:1,explanation:"Factors of 12: 1,2,3,4,6,12. Factors of 18: 1,2,3,6,9,18. HCF = 6."},
+{question:"What is the Lowest Common Multiple (LCM) of 4 and 6?",options:["2","12","24","6"],answer:1,explanation:"Multiples of 4: 4,8,12... Multiples of 6: 6,12... LCM = 12."},
+{question:"Is 1 a prime number?",options:["Yes","No","It depends","Only in some countries"],answer:1,explanation:"1 is NOT prime — it has only one factor (1). Primes must have exactly two distinct factors."},
+{question:"What is 2³?",options:["6","8","16","5"],answer:1,explanation:"2³ = 2×2×2 = 8."},
+{question:"What is √144?",options:["11","12","13","14"],answer:1,explanation:"12² = 144, so √144 = 12."},
+{question:"Which of these is NOT a factor of 36?",options:["4","6","8","9"],answer:2,explanation:"36 ÷ 8 = 4.5 — not a whole number, so 8 is not a factor of 36."},
+{question:"What is 4² + 3²?",options:["7","25","49","12"],answer:1,explanation:"16 + 9 = 25. This is also related to the 3-4-5 Pythagorean triple."},
+],
+
+"Maths::Probability::easy":[
+{question:"What is the probability of rolling a 3 on a fair die?",options:["1/3","1/6","3/6","1/2"],answer:1,explanation:"There is one 3 out of six equally likely outcomes: P(3) = 1/6."},
+{question:"If P(A) = 0.3, what is P(not A)?",options:["0.3","0.6","0.7","1.3"],answer:2,explanation:"P(not A) = 1 − P(A) = 1 − 0.3 = 0.7."},
+{question:"What is certain probability?",options:["0","0.5","1","Any value"],answer:2,explanation:"A certain event has probability 1 (it will definitely happen)."},
+{question:"A bag has 3 red and 7 blue balls. P(red)?",options:["3/7","7/10","3/10","7/3"],answer:2,explanation:"P(red) = 3/(3+7) = 3/10."},
+{question:"You flip 2 fair coins. How many possible outcomes?",options:["2","3","4","8"],answer:2,explanation:"HH, HT, TH, TT — 4 equally likely outcomes."},
+],
+
+"Maths::Trigonometry::medium":[
+{question:"What is sin(30°)?",options:["1","√3/2","1/2","√2/2"],answer:2,explanation:"sin(30°) = 0.5 = 1/2."},
+{question:"What is cos(60°)?",options:["√3/2","1/2","1","0"],answer:1,explanation:"cos(60°) = 0.5 = 1/2."},
+{question:"In a right triangle, SOH means?",options:["Side Over Hypotenuse","Sin = Opposite/Hypotenuse","Sin = Over Hyp","Sine Of Hypotenuse"],answer:1,explanation:"SOH: Sine = Opposite / Hypotenuse."},
+{question:"A right triangle has opposite = 5, hypotenuse = 13. sin(θ)?",options:["5/12","12/13","5/13","13/5"],answer:2,explanation:"sin θ = opposite/hypotenuse = 5/13."},
+{question:"What is tan(45°)?",options:["0","0.5","1","√2"],answer:2,explanation:"tan(45°) = 1. At 45° the opposite and adjacent sides are equal."},
+],
+
+"Chemistry::Organic Chemistry::easy":[
+{question:"What is the general formula for alkanes?",options:["CₙH₂ₙ","CₙH₂ₙ₊₂","CₙH₂ₙ₋₂","CₙHₙ"],answer:1,explanation:"Alkanes have the general formula CₙH₂ₙ₊₂ (e.g. methane CH₄, ethane C₂H₆)."},
+{question:"What is the name of CH₄?",options:["Ethane","Propane","Methane","Butane"],answer:2,explanation:"CH₄ is methane — the simplest alkane with one carbon atom."},
+{question:"What type of bond do alkenes contain?",options:["Triple bond","Ionic bond","Double bond","No bond"],answer:2,explanation:"Alkenes contain a C=C double bond, making them more reactive than alkanes."},
+{question:"What is crude oil?",options:["A type of plastic","A mixture of hydrocarbons","Pure methane","Water and oil"],answer:1,explanation:"Crude oil is a complex mixture of hydrocarbons formed from ancient marine organisms."},
+{question:"What process separates crude oil?",options:["Distillation","Filtration","Crystallisation","Evaporation"],answer:0,explanation:"Fractional distillation separates crude oil into fractions based on boiling point."},
+],
+
+"Chemistry::Stoichiometry::easy":[
+{question:"What does a balanced equation show?",options:["That reactants equal products in mass","That atoms are conserved","That energy is produced","That water is formed"],answer:1,explanation:"A balanced equation shows that the same number of each type of atom appears on both sides."},
+{question:"What is a mole in chemistry?",options:["A small animal","6.02×10²³ particles","The molecular mass","A unit of volume"],answer:1,explanation:"A mole is 6.02×10²³ (Avogadro's number) of particles — atoms, molecules, ions etc."},
+{question:"What is the relative formula mass of H₂O?",options:["2","16","18","10"],answer:2,explanation:"H₂O: 2×H(1) + O(16) = 18 g/mol."},
+{question:"What is the relative formula mass of CO₂?",options:["28","44","12","16"],answer:1,explanation:"CO₂: C(12) + 2×O(16) = 44 g/mol."},
+{question:"Conservation of mass means?",options:["Mass is created","Mass of products > reactants","Total mass of reactants = total mass of products","Energy is conserved"],answer:2,explanation:"In a chemical reaction, atoms are rearranged but not created or destroyed — total mass is conserved."},
+],
+
+"Biology::Cells::medium":[
+{question:"What is the role of the cell membrane?",options:["Control centre of the cell","Produce energy","Control what enters and leaves the cell","Store genetic information"],answer:2,explanation:"The cell membrane controls the movement of substances in and out of the cell (selectively permeable)."},
+{question:"What is osmosis?",options:["Movement of all molecules","Active transport of glucose","Movement of water molecules from high to low water concentration through a semi-permeable membrane","Movement of ions against a gradient"],answer:2,explanation:"Osmosis is the movement of water molecules across a semi-permeable membrane from a region of high water concentration to low."},
+{question:"What is mitosis?",options:["Sexual reproduction","Cell division producing two identical daughter cells","Protein synthesis","DNA replication only"],answer:1,explanation:"Mitosis is cell division that produces two genetically identical daughter cells — used for growth and repair."},
+{question:"What is the difference between plant and animal cells?",options:["No difference","Animal cells have chloroplasts; plant cells don't","Plant cells have cell walls, chloroplasts, and large vacuoles; animal cells don't","Plant cells have mitochondria; animal cells don't"],answer:2,explanation:"Plant cells have cell walls (cellulose), chloroplasts for photosynthesis, and a large central vacuole — all absent in animal cells."},
+{question:"Where in the cell is ATP produced?",options:["Nucleus","Ribosome","Cell membrane","Mitochondria"],answer:3,explanation:"Mitochondria are the 'powerhouses' of the cell — they produce ATP through aerobic respiration."},
+],
+
+"Biology::DNA & Genetics::medium":[
+{question:"What does DNA stand for?",options:["Deoxyribonucleic Acid","Diribonucleic Acid","Deoxyribose Nucleotide Arrangement","Dynamic Nuclear Acid"],answer:0,explanation:"DNA stands for Deoxyribonucleic Acid."},
+{question:"What are the four bases in DNA?",options:["A, G, C, U","A, T, G, C","A, B, C, D","T, U, G, C"],answer:1,explanation:"DNA has four bases: Adenine (A), Thymine (T), Guanine (G), Cytosine (C). A pairs with T; G pairs with C."},
+{question:"What is a dominant allele?",options:["Always present","Always expressed even in heterozygotes","Only expressed when two copies are present","Recessive to everything"],answer:1,explanation:"A dominant allele is expressed whenever it is present (even if only one copy), unlike recessive alleles which need two copies."},
+{question:"What are homologous chromosomes?",options:["Identical chromosomes","A pair of chromosomes carrying genes for the same traits","Chromosomes from the father only","Sex chromosomes only"],answer:1,explanation:"Homologous chromosomes are pairs carrying the same gene loci — one inherited from each parent."},
+{question:"What is a genotype?",options:["Physical appearance","Genetic makeup (allele combination) of an organism","Only dominant alleles","The environment's effect on traits"],answer:1,explanation:"Genotype is the actual allele combination an organism has (e.g. Bb, TT, rr)."},
+],
+
+"Finance::Stocks & Shares::easy":[
+{question:"What is a share?",options:["A loan to a company","Part ownership in a company","A government bond","A savings account"],answer:1,explanation:"A share represents part ownership in a company. Shareholders own a fraction of the company."},
+{question:"What is a dividend?",options:["A tax on profits","A share of company profits paid to shareholders","A type of bond","A company loss"],answer:1,explanation:"Dividends are distributions of profit to shareholders, typically paid quarterly or annually."},
+{question:"What does a stock market do?",options:["Lend money to governments","Allow buying and selling of company shares","Store physical gold","Set interest rates"],answer:1,explanation:"Stock markets are platforms where shares and other securities are bought and sold."},
+{question:"What is a bear market?",options:["A rising market","A flat market","A falling market (down 20%+)","A market for animal stocks"],answer:2,explanation:"A bear market is when prices fall significantly (typically 20%+) — investor confidence is low."},
+{question:"What does 'diversification' mean?",options:["Buying one big stock","Spreading investments across different assets to reduce risk","Only buying bonds","Selling all investments"],answer:1,explanation:"Diversification means spreading your investments to reduce the risk that any single investment will ruin your portfolio."},
+],
+
+"Finance::Debt & Credit::easy":[
+{question:"What is APR?",options:["Annual Percentage Rate — the yearly cost of borrowing","A type of savings account","Average Payment Rate","Annual Premium Return"],answer:0,explanation:"APR (Annual Percentage Rate) shows the total cost of borrowing over a year, including fees."},
+{question:"What is a credit score?",options:["Your bank balance","A rating of your creditworthiness based on your borrowing history","Your salary","A tax rating"],answer:1,explanation:"A credit score rates how reliably you repay debts — lenders use it to decide whether to lend and at what rate."},
+{question:"Which type of debt generally has the highest interest rate?",options:["Mortgage","Student loan","Payday loan","Car finance"],answer:2,explanation:"Payday loans typically have extremely high APRs — sometimes thousands of percent — making them very dangerous."},
+{question:"What is an overdraft?",options:["Having too much money","Spending more than your account balance, borrowing from the bank","A type of investment","A savings goal"],answer:1,explanation:"An overdraft is when you spend more than you have in your account — the bank covers the shortfall but usually charges interest."},
+{question:"Paying only the minimum on a credit card is problematic because?",options:["The card gets cancelled","It takes much longer to clear and costs far more in interest","The balance increases faster","It affects your employer"],answer:1,explanation:"Minimum payments barely cover interest — the balance reduces very slowly and total interest paid can be enormous."},
+],
+
+"Coding::Arrays & Lists::easy":[
+{question:"What is an array?",options:["A single variable","A collection of items stored at contiguous memory locations","A type of function","A loop"],answer:1,explanation:"An array is a collection of elements stored together, accessible by index."},
+{question:"What index does the first element of an array usually have?",options:["1","0","−1","Depends on the language"],answer:1,explanation:"Most programming languages (Python, JS, Java, C++) use zero-based indexing — first element is index 0."},
+{question:"How do you find the length of a list in Python?",options:["list.size()","list.count()","len(list)","list.length()"],answer:2,explanation:"In Python, len(list) returns the number of elements in a list."},
+{question:"What does list.append(x) do in Python?",options:["Removes x","Inserts x at the start","Adds x to the end","Counts x"],answer:2,explanation:"list.append(x) adds element x to the end of the list."},
+{question:"What is a 2D array?",options:["An array with two elements","An array of arrays (like a grid/matrix)","An array that sorts itself","A 3D array"],answer:1,explanation:"A 2D array is an array where each element is itself an array — like a table with rows and columns."},
+],
+
+"Tax::Corporation Tax::easy":[
+{question:"What is Corporation Tax?",options:["Tax paid by individuals on income","Tax paid by companies on their profits","Tax on dividends only","A tax on property"],answer:1,explanation:"Corporation Tax is paid by UK companies on their taxable profits."},
+{question:"What is the main rate of UK Corporation Tax (2023 onwards) for profits over £250,000?",options:["19%","20%","25%","30%"],answer:2,explanation:"From April 2023, the main rate of UK Corporation Tax is 25% for profits over £250,000."},
+{question:"What is the small profits rate of Corporation Tax?",options:["10%","15%","19%","25%"],answer:2,explanation:"The small profits rate is 19% for companies with annual profits up to £50,000."},
+{question:"Corporation Tax is calculated on?",options:["Gross revenue","Turnover","Taxable profits (revenue minus allowable expenses)","All receipts"],answer:2,explanation:"Companies pay Corporation Tax on taxable profits — revenue minus allowable business expenses."},
+{question:"What is a tax year for companies?",options:["Always 6 April to 5 April","The company's own accounting period (up to 12 months)","Always January to December","A fixed 3-month period"],answer:1,explanation:"Companies pay Corporation Tax based on their own accounting period (financial year), which can end on any date."},
+],
+
+"Tax::Tax Avoidance vs Evasion::easy":[
+{question:"What is tax evasion?",options:["Legally reducing your tax bill","Illegally hiding income or lying to HMRC","Using an ISA","Claiming legitimate expenses"],answer:1,explanation:"Tax evasion is illegal — it involves hiding income, falsifying records, or lying to HMRC. It is a criminal offence."},
+{question:"What is tax avoidance?",options:["Illegally hiding income","Refusing to pay tax","Using legal means to reduce your tax bill","Not filing a return"],answer:2,explanation:"Tax avoidance is using legal methods to reduce your tax bill — e.g. maximising ISA contributions or pension payments."},
+{question:"Which of these is tax evasion?",options:["Putting money in an ISA","Claiming legitimate business expenses","Not declaring cash income to HMRC","Using pension relief"],answer:2,explanation:"Not declaring income you should pay tax on is tax evasion — an illegal act punishable by fines or imprisonment."},
+{question:"What is a tax haven?",options:["An ISA","A country with very low or zero tax rates used to shelter money","A type of pension","A HMRC helpline"],answer:1,explanation:"Tax havens are jurisdictions with very low tax rates, often used by corporations and wealthy individuals to reduce tax bills."},
+{question:"HMRC stands for?",options:["Her Majesty's Revenue Collection","His Majesty's Revenue and Customs","High Money Revenue Control","Home Revenue and Credit Management"],answer:1,explanation:"HMRC — His Majesty's Revenue and Customs — is the UK's tax authority."},
+],
+
+  };
+
+  Object.entries(extra).forEach(([key, qs]) => {
+    if (!QUESTION_BANK[key]) QUESTION_BANK[key] = [];
+    QUESTION_BANK[key].push(...qs);
+  });
+})();
+
+// ── ALSO: shuffle and limit to avoid repeats; prefer unseen questions ──
+const _seenQuestions = {};
 function getQuestions(subj,top,diff){
   const key=`${subj}::${top}::${diff}`;
   const bank=QUESTION_BANK[key]||[];
   if(!bank.length)return null;
-  return [...bank].sort(()=>Math.random()-0.5).slice(0,5);
+  // Avoid repeating recently seen questions
+  const seenKey = `seen_${key}`;
+  const seen = JSON.parse(sessionStorage.getItem(seenKey)||'[]');
+  const unseen = bank.filter((_,i)=>!seen.includes(i));
+  const pool = unseen.length >= 5 ? unseen : bank; // fall back to full bank if not enough unseen
+  const shuffled = [...pool].sort(()=>Math.random()-0.5).slice(0,5);
+  // Record indices as seen
+  const newSeen = [...new Set([...seen, ...shuffled.map(q=>bank.indexOf(q))])].slice(-bank.length);
+  try { sessionStorage.setItem(seenKey, JSON.stringify(newSeen)); } catch(e){}
+  return shuffled;
 }
 
 async function startQuiz(){
@@ -3190,9 +3551,11 @@ function showQuestion(){
   document.getElementById('score-badge').textContent=`Score: ${score}`;
   document.getElementById('progress-fill').style.width=((currentQ/questions.length)*100)+'%';
   const opts=document.getElementById('options');opts.innerHTML='';
-  ['A','B','C','D'].forEach((l,i)=>{
+  (q.options||[]).forEach((opt,i)=>{
+    if(opt===undefined||opt===null||opt==='')return;
+    const l=['A','B','C','D'][i]||String.fromCharCode(65+i);
     const b=document.createElement('button');b.className='option-btn';
-    b.innerHTML=`<span class="option-letter">${l}</span><span>${q.options[i]}</span>`;
+    b.innerHTML=`<span class="option-letter">${l}</span><span>${opt}</span>`;
     b.onclick=()=>selectAnswer(i);opts.appendChild(b);
   });
   hide('explanation');hide('next-btn');answered=false;
@@ -4760,6 +5123,7 @@ function pvpShowQuestion(){
       ${pvpCurrentQ<pvpQuestions.length-1?'Next question →':'Finish →'}
     </button>`;
   ['A','B','C','D'].forEach((l,i)=>{
+    if(!q.options[i]&&q.options[i]!==0)return;
     const b=document.createElement('button');b.className='option-btn';
     b.innerHTML=`<span class="option-letter">${l}</span><span>${q.options[i]}</span>`;
     b.onclick=()=>pvpSelectAnswer(i);
@@ -6599,6 +6963,512 @@ document.addEventListener('DOMContentLoaded', initLang);
   // Dispatch ready event
   document.dispatchEvent(new CustomEvent('quizclash:canvasReady'));
 })();
+
+
+// ══════════════════════════════════════════════════════
+// TEAM BATTLE SYSTEM — 2v2 & 4v4 with Twists
+// ══════════════════════════════════════════════════════
+
+let _teamMode = '2v2'; // '2v2' or '4v4'
+let _teamRoomId = null;
+let _teamRoomUnsub = null;
+let _teamIsHost = false;
+let _teamSubject = null, _teamTopic = null, _teamDiff = 'easy';
+let _teamQuestions = [], _teamCurrentQ = 0;
+let _teamMyScore = 0, _teamMyAnswers = [], _teamMyTimes = [], _teamMyBonuses = [];
+let _teamQStartTime = 0, _teamAnswered = false;
+let _teamTimerInterval = null, _teamTimerLimit = 20;
+let _teamPowerUps = []; // available power-ups for my team
+let _teamActiveTwist = null; // current question twist
+let _teamResultShown = false;
+let _teamMyTeam = null; // 'A' or 'B'
+
+const TEAM_TWISTS = [
+  { id: 'hot_seat', label: '🔥 Hot Seat!', desc: 'One random player answers solo', color: 'var(--red)' },
+  { id: 'speed_bonus', label: '⚡ Speed Bonus Active', desc: 'Answer fast for bonus pts', color: 'var(--gold)' },
+  { id: 'blind_round', label: '🙈 Blind Round!', desc: 'Options hidden for 5 seconds…', color: 'var(--purple)' },
+  { id: 'double_points', label: '✖️2 Double Points!', desc: 'Everything worth double this round', color: 'var(--green)' },
+  { id: 'normal', label: '', desc: '', color: '' },
+  { id: 'normal', label: '', desc: '', color: '' }, // weighted to appear more
+];
+
+function genTeamRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+// ── Open the team lobby UI ──
+function openTeamLobby(mode) {
+  _teamMode = mode || '2v2';
+  window._lastTeamMode = _teamMode;
+  const maxP = _teamMode === '4v4' ? 8 : 4;
+  document.getElementById('team-lobby-title').textContent = `${_teamMode} Team Battle`;
+  document.getElementById('team-lobby-sub').textContent = `Create a room or join with a code (${maxP} players total)`;
+  document.getElementById('team-lobby-overlay').style.display = 'block';
+  // Build subject chips
+  const sc = document.getElementById('team-subject-chips');
+  sc.innerHTML = '';
+  Object.keys(TOPICS).forEach(subj => {
+    const icons = {Physics:'⚡',Chemistry:'🧪',Maths:'📐',Finance:'💰',Coding:'💻',Tax:'🧾',Biology:'🧬'};
+    const b = document.createElement('button');
+    b.textContent = (icons[subj]||'') + ' ' + subj;
+    b.style.cssText = 'padding:8px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-family:\'DM Sans\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;';
+    b.onclick = () => {
+      document.querySelectorAll('#team-subject-chips button').forEach(x => { x.style.background='var(--surface2)'; x.style.borderColor='var(--border)'; x.style.color='var(--text-muted)'; });
+      b.style.background = 'var(--accent-dim)'; b.style.borderColor = 'var(--accent)'; b.style.color = 'var(--text)';
+      _teamSubject = subj;
+      // Populate topics
+      const tc = document.getElementById('team-topic-chips');
+      tc.innerHTML = '';
+      document.getElementById('team-topic-hint').style.display = 'none';
+      _teamTopic = null;
+      TOPICS[subj].forEach(tp => {
+        const tb = document.createElement('button');
+        tb.textContent = tp;
+        tb.style.cssText = 'padding:7px 13px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-family:\'DM Sans\',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;';
+        tb.onclick = () => {
+          document.querySelectorAll('#team-topic-chips button').forEach(x => { x.style.background='var(--surface2)'; x.style.borderColor='var(--border)'; x.style.color='var(--text-muted)'; });
+          tb.style.background = 'var(--purple-dim)'; tb.style.borderColor = 'var(--purple)'; tb.style.color = 'var(--text)';
+          _teamTopic = tp;
+        };
+        tc.appendChild(tb);
+      });
+    };
+    sc.appendChild(b);
+  });
+}
+
+function closeTeamLobby() {
+  document.getElementById('team-lobby-overlay').style.display = 'none';
+}
+
+function teamSelectDiff(btn) {
+  document.querySelectorAll('.tdiff-btn').forEach(b => {
+    b.style.background = 'var(--surface2)'; b.style.borderColor = 'var(--border)'; b.style.color = 'var(--text-muted)';
+  });
+  _teamDiff = btn.dataset.diff;
+  const colors = { easy: ['var(--green-dim)','rgba(62,207,142,0.4)','var(--green)'], medium: ['var(--amber-dim)','rgba(240,160,80,0.4)','var(--amber)'], hard: ['var(--red-dim)','rgba(245,101,101,0.4)','var(--red)'] };
+  const [bg, border, color] = colors[_teamDiff] || colors.easy;
+  btn.style.background = bg; btn.style.borderColor = border; btn.style.color = color;
+}
+
+async function createTeamRoom() {
+  if (!_teamSubject || !_teamTopic) { showToast('Pick a subject and topic first!'); return; }
+  const qs = getQuestions(_teamSubject, _teamTopic, _teamDiff);
+  if (!qs) { showToast('No questions for this combo yet!'); return; }
+  const maxPlayers = _teamMode === '4v4' ? 8 : 4;
+  const code = genTeamRoomCode();
+  _teamIsHost = true;
+  _teamMyTeam = 'A';
+  const myName = currentUser.displayName || currentUser.email.split('@')[0];
+  const roomData = {
+    code, mode: _teamMode, subject: _teamSubject, topic: _teamTopic, difficulty: _teamDiff,
+    questions: qs, status: 'waiting', maxPlayers,
+    players: [{ uid: currentUser.uid, name: myName, team: 'A', score: 0, answers: [], times: [], bonuses: [], powerUps: [], done: false }],
+    teamAScore: 0, teamBScore: 0,
+    teamAPowerUps: [], teamBPowerUps: [],
+    currentQ: 0, hostUid: currentUser.uid,
+    createdAt: Date.now()
+  };
+  try {
+    const ref = await db.collection('teamMatches').add(roomData);
+    _teamRoomId = ref.id;
+    closeTeamLobby();
+    showTeamWaitingRoom(code, maxPlayers);
+    listenTeamRoom();
+  } catch(e) { showToast('Error creating room: ' + e.message); }
+}
+
+async function joinTeamRoom() {
+  const code = (document.getElementById('team-join-code').value || '').trim().toUpperCase();
+  const msgEl = document.getElementById('team-join-msg');
+  if (code.length !== 6) { msgEl.style.color='var(--red)'; msgEl.textContent='Enter a 6-character code.'; return; }
+  try {
+    const snap = await db.collection('teamMatches').where('code','==',code).where('status','==','waiting').limit(1).get();
+    if (snap.empty) { msgEl.style.color='var(--red)'; msgEl.textContent='Room not found or already started.'; return; }
+    const docRef = snap.docs[0].ref;
+    const data = snap.docs[0].data();
+    if (data.players.length >= data.maxPlayers) { msgEl.style.color='var(--red)'; msgEl.textContent='Room is full!'; return; }
+    const myName = currentUser.displayName || currentUser.email.split('@')[0];
+    // Assign to team B if team A is "full" (half of maxPlayers)
+    const teamACount = data.players.filter(p=>p.team==='A').length;
+    const myTeam = teamACount < data.maxPlayers/2 ? 'A' : 'B';
+    _teamMyTeam = myTeam;
+    _teamMode = data.mode;
+    _teamRoomId = snap.docs[0].id;
+    _teamIsHost = false;
+    await docRef.update({ players: firebase.firestore.FieldValue.arrayUnion({ uid: currentUser.uid, name: myName, team: myTeam, score: 0, answers: [], times: [], bonuses: [], powerUps: [], done: false }) });
+    closeTeamLobby();
+    showTeamWaitingRoom(code, data.maxPlayers);
+    listenTeamRoom();
+  } catch(e) { msgEl.style.color='var(--red)'; msgEl.textContent='Error: ' + e.message; }
+}
+
+function showTeamWaitingRoom(code, maxP) {
+  document.getElementById('team-room-code-display').textContent = code;
+  document.getElementById('team-max-players').textContent = maxP;
+  document.getElementById('team-waiting-overlay').style.display = 'flex';
+  document.getElementById('team-start-btn').disabled = true;
+  document.getElementById('team-start-btn').style.opacity = '0.4';
+}
+
+function listenTeamRoom() {
+  if (_teamRoomUnsub) { _teamRoomUnsub(); _teamRoomUnsub = null; }
+  _teamRoomUnsub = db.collection('teamMatches').doc(_teamRoomId).onSnapshot(snap => {
+    const d = snap.data(); if (!d) return;
+    // Update waiting room player list
+    const waitEl = document.getElementById('team-waiting-overlay');
+    if (waitEl.style.display !== 'none') {
+      const pl = document.getElementById('team-player-list');
+      const pc = document.getElementById('team-player-count');
+      if (pl) { pl.innerHTML = d.players.map(p => `<div style="padding:6px 12px;border-radius:10px;background:${p.team==='A'?'rgba(167,139,250,0.15)':'rgba(240,192,96,0.12)'};border:1px solid ${p.team==='A'?'rgba(167,139,250,0.3)':'rgba(240,192,96,0.25)'};font-size:13px;font-weight:600;color:${p.team==='A'?'var(--purple)':'var(--gold)'};">${p.name} <span style="font-size:10px;opacity:0.7;">Team ${p.team}</span></div>`).join(''); }
+      if (pc) pc.textContent = d.players.length;
+      // Enable start if enough players (at least 2, one per team)
+      const startBtn = document.getElementById('team-start-btn');
+      const teamA = d.players.filter(p=>p.team==='A').length;
+      const teamB = d.players.filter(p=>p.team==='B').length;
+      const canStart = _teamIsHost && teamA >= 1 && teamB >= 1;
+      if (startBtn) { startBtn.disabled = !canStart; startBtn.style.opacity = canStart ? '1' : '0.4'; }
+      const hint = document.getElementById('team-wait-hint');
+      if (hint) hint.textContent = `Team A: ${teamA} · Team B: ${teamB} · Need at least 1 per team to start`;
+    }
+    // Match started
+    if (d.status === 'active' && waitEl.style.display !== 'none') {
+      waitEl.style.display = 'none';
+      _teamQuestions = d.questions;
+      _teamCurrentQ = 0; _teamMyScore = 0; _teamMyAnswers = []; _teamMyTimes = []; _teamMyBonuses = [];
+      _teamResultShown = false;
+      startTeamMatchScreen(d);
+    }
+    // Update scores during match
+    if (d.status === 'active') {
+      document.getElementById('team-my-score').textContent = d[_teamMyTeam==='A'?'teamAScore':'teamBScore'] || 0;
+      document.getElementById('team-opp-score').textContent = d[_teamMyTeam==='A'?'teamBScore':'teamAScore'] || 0;
+      // Update live responses
+      renderTeamLiveResponses(d);
+    }
+    // Result
+    if (d.status === 'finished' && !_teamResultShown) {
+      _teamResultShown = true;
+      setTimeout(() => showTeamResult(d), 800);
+    }
+  });
+}
+
+async function startTeamMatch() {
+  if (!_teamIsHost || !_teamRoomId) return;
+  await db.collection('teamMatches').doc(_teamRoomId).update({ status: 'active', startedAt: Date.now() });
+}
+
+async function cancelTeamRoom() {
+  document.getElementById('team-waiting-overlay').style.display = 'none';
+  if (_teamRoomId) await db.collection('teamMatches').doc(_teamRoomId).update({ status: 'cancelled' }).catch(()=>{});
+  if (_teamRoomUnsub) { _teamRoomUnsub(); _teamRoomUnsub = null; }
+  _teamRoomId = null;
+}
+
+function startTeamMatchScreen(matchData) {
+  document.getElementById('team-match-overlay').style.display = 'block';
+  // Label teams
+  const myTeamPlayers = matchData.players.filter(p=>p.team===_teamMyTeam).map(p=>p.name).join(', ');
+  const oppTeamPlayers = matchData.players.filter(p=>p.team!==_teamMyTeam).map(p=>p.name).join(', ');
+  document.getElementById('team-my-team-label').textContent = `YOUR TEAM (${_teamMyTeam})`;
+  document.getElementById('team-opp-team-label').textContent = `OPPONENTS`;
+  _teamPowerUps = [];
+  renderTeamPowerUpBtns();
+  teamShowQuestion();
+}
+
+function pickTwist(qIndex) {
+  // Q3 (index 2) is always blind round, Q4 always double points, others random
+  if (qIndex === 1) return TEAM_TWISTS.find(t=>t.id==='speed_bonus');
+  if (qIndex === 2) return TEAM_TWISTS.find(t=>t.id==='blind_round');
+  if (qIndex === 3) return TEAM_TWISTS.find(t=>t.id==='double_points');
+  return TEAM_TWISTS[Math.floor(Math.random() * TEAM_TWISTS.length)];
+}
+
+function teamShowQuestion() {
+  clearInterval(_teamTimerInterval);
+  _teamAnswered = false;
+  const q = _teamQuestions[_teamCurrentQ];
+  const twist = pickTwist(_teamCurrentQ);
+  _teamActiveTwist = twist;
+
+  // Announce twist
+  const announceEl = document.getElementById('team-twist-announce');
+  const badgeEl = document.getElementById('team-twist-badge');
+  if (twist && twist.label) {
+    announceEl.style.display = 'block';
+    document.getElementById('team-twist-announce-text').textContent = twist.label + ' — ' + twist.desc;
+    setTimeout(() => { announceEl.style.display='none'; }, 3000);
+    badgeEl.style.display = 'block';
+    badgeEl.textContent = twist.label;
+    badgeEl.style.background = twist.color + '22';
+    badgeEl.style.color = twist.color;
+    badgeEl.style.borderColor = twist.color + '55';
+  } else {
+    announceEl.style.display = 'none';
+    badgeEl.style.display = 'none';
+  }
+
+  document.getElementById('team-q-counter').textContent = `Q ${_teamCurrentQ+1}/${_teamQuestions.length}`;
+  document.getElementById('team-q-tag').textContent = `${_teamSubject || ''} · ${_teamTopic || ''}`;
+  document.getElementById('team-q-text').textContent = q.question;
+  document.getElementById('team-explanation').style.display = 'none';
+  document.getElementById('team-next-btn').style.display = 'none';
+  document.getElementById('team-live-responses').innerHTML = '';
+
+  // Determine timer
+  let timerLimit = 20;
+  // Check if enemy used sabotage on us
+  // (handled via room data — kept simple here)
+  _teamTimerLimit = timerLimit;
+
+  // Render options — blind round hides them for 5s
+  const optEl = document.getElementById('team-options');
+  optEl.innerHTML = '';
+  const renderOpts = () => {
+    optEl.innerHTML = '';
+    (q.options || []).forEach((opt, i) => {
+      if (opt === undefined || opt === null || opt === '') return;
+      const l = ['A','B','C','D'][i];
+      const b = document.createElement('button');
+      b.className = 'option-btn';
+      b.innerHTML = `<span class="option-letter">${l}</span><span>${opt}</span>`;
+      b.onclick = () => teamSelectAnswer(i);
+      optEl.appendChild(b);
+    });
+  };
+
+  if (twist && twist.id === 'blind_round') {
+    optEl.innerHTML = '<div style="text-align:center;padding:24px;font-size:28px;color:var(--text-dim);">🙈 Options hidden for 5s…</div>';
+    setTimeout(renderOpts, 5000);
+  } else {
+    renderOpts();
+  }
+
+  // Hot seat: pick a random teammate to answer solo
+  const hotSeatEl = document.getElementById('team-q-tag');
+  if (twist && twist.id === 'hot_seat') {
+    hotSeatEl.textContent += ' 🔥 HOT SEAT — You must answer alone!';
+  }
+
+  // Start timer
+  _teamQStartTime = Date.now();
+  let elapsed = 0;
+  const timerBar = document.getElementById('team-timer-bar');
+  timerBar.style.width = '100%';
+  timerBar.style.background = 'linear-gradient(90deg,var(--green),var(--accent))';
+  _teamTimerInterval = setInterval(() => {
+    elapsed += 0.1;
+    const pct = Math.max(0, 1 - elapsed / timerLimit);
+    timerBar.style.width = (pct * 100) + '%';
+    if (pct < 0.3) timerBar.style.background = 'linear-gradient(90deg,var(--red),var(--amber))';
+    else if (pct < 0.6) timerBar.style.background = 'linear-gradient(90deg,var(--amber),var(--gold))';
+    if (elapsed >= timerLimit && !_teamAnswered) {
+      clearInterval(_teamTimerInterval);
+      teamSelectAnswer(-1); // time out
+    }
+  }, 100);
+}
+
+async function teamSelectAnswer(idx) {
+  if (_teamAnswered) return;
+  _teamAnswered = true;
+  clearInterval(_teamTimerInterval);
+  const q = _teamQuestions[_teamCurrentQ];
+  const elapsed = (Date.now() - _teamQStartTime) / 1000;
+  const isCorrect = idx === q.answer;
+
+  // Disable options
+  document.querySelectorAll('#team-options .option-btn').forEach(b => b.disabled = true);
+  if (idx >= 0 && idx < document.querySelectorAll('#team-options .option-btn').length) {
+    document.querySelectorAll('#team-options .option-btn')[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  }
+  if (q.answer < document.querySelectorAll('#team-options .option-btn').length) {
+    document.querySelectorAll('#team-options .option-btn')[q.answer].classList.add('correct');
+  }
+
+  // Calculate score with twists
+  let pts = isCorrect ? 1 : 0;
+  let bonus = 0;
+  if (isCorrect) {
+    // Speed bonus
+    if (elapsed < 4) bonus += 4;
+    else if (elapsed < 8) bonus += 2;
+    // Double points twist
+    if (_teamActiveTwist && _teamActiveTwist.id === 'double_points') { pts *= 2; bonus *= 2; }
+    if (pts > 0) playCorrect();
+  } else {
+    if (pts === 0 && idx >= 0) playWrong();
+  }
+
+  _teamMyScore += pts + bonus;
+  _teamMyAnswers.push(idx);
+  _teamMyTimes.push(Math.round(elapsed * 10) / 10);
+  _teamMyBonuses.push(bonus);
+
+  // Show explanation
+  const expEl = document.getElementById('team-explanation');
+  document.getElementById('team-exp-text').textContent = q.explanation;
+  expEl.style.display = 'block';
+
+  // Push my answer to Firestore
+  await pushTeamAnswer(idx, pts + bonus, elapsed, isCorrect);
+
+  // Check if entire team correct → award power-up
+  // (Simplified: just show next button after a delay)
+  setTimeout(() => {
+    document.getElementById('team-next-btn').style.display = 'block';
+    document.getElementById('team-next-btn').textContent = _teamCurrentQ < _teamQuestions.length - 1 ? 'Next →' : 'See Results →';
+  }, 1200);
+}
+
+async function pushTeamAnswer(idx, pts, elapsed, isCorrect) {
+  if (!_teamRoomId) return;
+  try {
+    const snap = await db.collection('teamMatches').doc(_teamRoomId).get();
+    const d = snap.data();
+    const players = [...(d.players || [])];
+    const me = players.find(p => p.uid === currentUser.uid);
+    if (!me) return;
+    me.answers = [...(me.answers||[]), idx];
+    me.times = [...(me.times||[]), elapsed];
+    me.bonuses = [...(me.bonuses||[]), pts];
+    me.score = (me.score || 0) + pts;
+    // Check team streak: all teammates answered correctly this round
+    const myTeamPlayers = players.filter(p => p.team === _teamMyTeam);
+    const allRight = myTeamPlayers.every(p => {
+      const qIdx = _teamCurrentQ;
+      return p.uid === currentUser.uid ? isCorrect : (p.answers||[])[qIdx] === _teamQuestions[qIdx]?.answer;
+    });
+    const teamScoreKey = _teamMyTeam === 'A' ? 'teamAScore' : 'teamBScore';
+    const teamPUKey = _teamMyTeam === 'A' ? 'teamAPowerUps' : 'teamBPowerUps';
+    const updates = { players };
+    updates[teamScoreKey] = firebase.firestore.FieldValue.increment(pts);
+    // Award power-up on team streak
+    if (allRight && myTeamPlayers.length > 1) {
+      updates[teamScoreKey] = firebase.firestore.FieldValue.increment(pts + 3);
+      updates[teamPUKey] = firebase.firestore.FieldValue.arrayUnion({ type: Math.random() > 0.5 ? 'sabotage' : 'double_down', ts: Date.now() });
+    }
+    // Check if all players answered this question
+    const allAnswered = players.every(p => (p.answers||[]).length > _teamCurrentQ);
+    if (allAnswered && _teamCurrentQ >= _teamQuestions.length - 1) {
+      updates.status = 'finished';
+    }
+    await db.collection('teamMatches').doc(_teamRoomId).update(updates);
+  } catch(e) {}
+}
+
+async function teamNextQuestion() {
+  _teamCurrentQ++;
+  if (_teamCurrentQ >= _teamQuestions.length) {
+    // Mark myself done
+    try {
+      const snap = await db.collection('teamMatches').doc(_teamRoomId).get();
+      const d = snap.data();
+      const players = [...(d.players||[])];
+      const me = players.find(p=>p.uid===currentUser.uid);
+      if (me) { me.done = true; }
+      const allDone = players.every(p=>p.done);
+      await db.collection('teamMatches').doc(_teamRoomId).update({ players, ...(allDone?{status:'finished'}:{}) });
+    } catch(e){}
+    return;
+  }
+  document.getElementById('team-next-btn').style.display = 'none';
+  teamShowQuestion();
+}
+
+function renderTeamLiveResponses(d) {
+  const el = document.getElementById('team-live-responses');
+  if (!el) return;
+  const q = _teamQuestions[_teamCurrentQ];
+  if (!q) return;
+  el.innerHTML = (d.players || []).map(p => {
+    const answered = (p.answers||[]).length > _teamCurrentQ;
+    const correct = answered && p.answers[_teamCurrentQ] === q.answer;
+    const isMe = p.uid === currentUser.uid;
+    const teamColor = p.team === 'A' ? 'var(--purple)' : 'var(--gold)';
+    return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;background:${p.team===_teamMyTeam?'rgba(167,139,250,0.1)':'rgba(240,192,96,0.08)'};border:1px solid ${p.team===_teamMyTeam?'rgba(167,139,250,0.25)':'rgba(240,192,96,0.2)'};">
+      <span style="font-size:12px;font-weight:600;color:${teamColor};">${isMe?'You':p.name}</span>
+      <span style="font-size:14px;">${answered ? (correct?'✅':'❌') : '⏳'}</span>
+      ${answered && p.bonuses?.[_teamCurrentQ] > 1 ? `<span style="font-size:10px;color:var(--gold);font-weight:700;">+${p.bonuses[_teamCurrentQ]}</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderTeamPowerUpBtns() {
+  const el = document.getElementById('team-powerup-btns');
+  if (!el) return;
+  el.innerHTML = _teamPowerUps.map((pu, i) => {
+    const labels = { sabotage: '💥 Sabotage', double_down: '🎲 Double Down' };
+    return `<button onclick="usePowerUp(${i},'${pu.type}')" style="flex:1;padding:9px 12px;border-radius:10px;background:var(--amber-dim);border:1px solid rgba(240,160,80,0.4);color:var(--amber);font-family:\'DM Sans\',sans-serif;font-size:12px;font-weight:700;cursor:pointer;">${labels[pu.type]||pu.type}</button>`;
+  }).join('');
+}
+
+async function usePowerUp(index, type) {
+  _teamPowerUps.splice(index, 1);
+  renderTeamPowerUpBtns();
+  if (type === 'sabotage') {
+    showToast('💥 Sabotage used! Opponents\' time halved next question!');
+    // In a full impl, write to Firestore; simplified here
+  } else if (type === 'double_down') {
+    showToast('🎲 Double Down! Your next correct answer scores double!');
+  }
+}
+
+function showTeamResult(d) {
+  document.getElementById('team-match-overlay').style.display = 'none';
+  const teamA = d.teamAScore || 0, teamB = d.teamBScore || 0;
+  const myScore = _teamMyTeam === 'A' ? teamA : teamB;
+  const oppScore = _teamMyTeam === 'A' ? teamB : teamA;
+  const won = myScore > oppScore;
+  const tied = myScore === oppScore;
+  document.getElementById('team-result-emoji').textContent = won ? '🏆' : tied ? '🤝' : '😤';
+  document.getElementById('team-result-title').textContent = won ? 'Your Team Wins!' : tied ? 'It\'s a Draw!' : 'Opponents Win!';
+  document.getElementById('team-result-scores').textContent = `Team A: ${teamA} pts · Team B: ${teamB} pts`;
+  // MVP — highest scorer
+  let mvp = (d.players||[]).reduce((best,p) => (!best||p.score>best.score)?p:best, null);
+  if (mvp) {
+    document.getElementById('team-mvp-name').textContent = mvp.uid === currentUser.uid ? 'You 🎉' : mvp.name;
+    const correct = (mvp.answers||[]).filter((a,i)=>a===(_teamQuestions[i]?.answer)).length;
+    document.getElementById('team-mvp-stats').textContent = `${correct}/${_teamQuestions.length} correct · ${mvp.score} pts`;
+  }
+  // Breakdown
+  const bd = document.getElementById('team-final-breakdown');
+  bd.innerHTML = (d.players||[]).sort((a,b)=>b.score-a.score).map(p => {
+    const correct = (p.answers||[]).filter((a,i)=>a===(_teamQuestions[i]?.answer)).length;
+    const avgTime = (p.times||[]).length ? (p.times.reduce((a,b)=>a+b,0)/p.times.length).toFixed(1)+'s' : '—';
+    const isMe = p.uid === currentUser.uid;
+    return `<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);${isMe?'background:rgba(167,139,250,0.06);':''}">
+      <div><span style="font-size:13px;font-weight:600;color:${isMe?'var(--purple)':'var(--text)'};">${isMe?'You':p.name}</span><span style="font-size:10px;color:var(--text-dim);margin-left:6px;">Team ${p.team}</span></div>
+      <div style="text-align:center;font-size:13px;font-weight:600;color:${correct===_teamQuestions.length?'var(--green)':'var(--text)'};">${correct}/${_teamQuestions.length}</div>
+      <div style="text-align:center;font-size:12px;color:var(--text-muted);">${avgTime}</div>
+      <div style="text-align:center;font-size:14px;font-weight:700;color:var(--gold);">${p.score||0}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('team-result-overlay').style.display = 'block';
+  playComplete();
+}
+
+function closeTeamResult() {
+  document.getElementById('team-result-overlay').style.display = 'none';
+  if (_teamRoomUnsub) { _teamRoomUnsub(); _teamRoomUnsub = null; }
+  _teamRoomId = null;
+  showView('friends');
+}
+
+async function leaveTeamMatch() {
+  if (!confirm('Leave the match?')) return;
+  clearInterval(_teamTimerInterval);
+  document.getElementById('team-match-overlay').style.display = 'none';
+  if (_teamRoomId) await db.collection('teamMatches').doc(_teamRoomId).update({ status: 'abandoned' }).catch(()=>{});
+  if (_teamRoomUnsub) { _teamRoomUnsub(); _teamRoomUnsub = null; }
+  _teamRoomId = null;
+  showView('friends');
+  showToast('Left the match.');
+}
+
 
 // ── BG TOGGLE ──
 function toggleBG() {
