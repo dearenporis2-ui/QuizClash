@@ -100,6 +100,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @keyframes orbFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-12px) scale(1.05);}}
 @keyframes glowPulse{0%,100%{opacity:0.6;filter:blur(8px);}50%{opacity:1;filter:blur(12px);}}
 @keyframes frameGlow{0%,100%{box-shadow:0 0 8px var(--fg-color),0 0 0 2px var(--fg-color);}50%{box-shadow:0 0 24px var(--fg-color),0 0 0 2px var(--fg-color),0 0 48px var(--fg-color);}}
+@keyframes mythicPulse{
+  0%,100%{box-shadow:0 0 12px rgba(255,102,0,0.6),0 0 0 2px rgba(255,102,0,0.8),0 0 30px rgba(255,102,0,0.3);}
+  50%{box-shadow:0 0 30px rgba(255,102,0,0.9),0 0 0 3px rgba(255,150,0,0.9),0 0 60px rgba(255,102,0,0.5);}
+}
+@keyframes godlikePulse{
+  0%{box-shadow:0 0 16px rgba(255,255,255,0.6),0 0 0 2px rgba(255,255,255,0.9),0 0 40px rgba(255,200,255,0.4);}
+  33%{box-shadow:0 0 24px rgba(255,200,0,0.8),0 0 0 3px rgba(255,200,0,1),0 0 60px rgba(255,200,0,0.5);}
+  66%{box-shadow:0 0 24px rgba(100,200,255,0.8),0 0 0 3px rgba(100,200,255,1),0 0 60px rgba(100,200,255,0.5);}
+  100%{box-shadow:0 0 16px rgba(255,255,255,0.6),0 0 0 2px rgba(255,255,255,0.9),0 0 40px rgba(255,200,255,0.4);}
+}
 @keyframes legendaryFrame{
   0%{box-shadow:0 0 12px rgba(240,192,96,0.6),0 0 0 2px #f0c060,0 0 30px rgba(240,192,96,0.3);}
   50%{box-shadow:0 0 30px rgba(240,192,96,0.9),0 0 0 3px #ffe08a,0 0 60px rgba(240,192,96,0.5);}
@@ -714,28 +724,54 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
 /* ── RESPONSIVE ── */
 @media(max-width:600px){
-  .page{padding:1rem 1rem calc(var(--nav-height) + var(--safe-bottom) + 1.5rem);}
-  .topbar{margin-left:-1rem;margin-right:-1rem;padding-left:1rem;padding-right:1rem;}
-  .stats-grid{gap:8px;}
-  .stat-value{font-size:26px;}
-  .stat-card{padding:13px 14px;}
-  .subject-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
-  .subject-btn{padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
-  .s-icon{font-size:24px;margin-bottom:0;flex-shrink:0;}
+  .page{padding:0.75rem 0.75rem calc(var(--nav-height) + var(--safe-bottom) + 1rem);}
+  .topbar{margin-left:-0.75rem;margin-right:-0.75rem;padding-left:0.75rem;padding-right:0.75rem;}
+  .topbar-logo{font-size:17px;}
+  .topbar-logo .icon{width:27px;height:27px;font-size:14px;}
+  .stats-grid{gap:7px;}
+  .stat-value{font-size:22px;}
+  .stat-card{padding:11px 12px;}
+  .subject-grid{grid-template-columns:repeat(2,1fr);gap:7px;}
+  .subject-btn{padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;}
+  .s-icon{font-size:22px;margin-bottom:0;flex-shrink:0;}
   .s-desc{display:none;}
-  .topic-chip{padding:10px 18px;font-size:14px;}
-  .q-text{font-size:16px;}
-  .option-btn{padding:14px;font-size:14px;}
+  .topic-chip{padding:9px 12px;font-size:13px;}
+  .q-text{font-size:15px;line-height:1.5;}
+  .option-btn{padding:12px;font-size:13px;}
   .res-actions{flex-direction:column;}
   .achievements-grid{grid-template-columns:repeat(2,1fr);}
-  .auth-card{padding:1.5rem 1.25rem;}
+  .auth-card{padding:1.25rem 1rem;}
+  #auth-screen{padding-top:5vh;}
+  .auth-title{font-size:24px;}
   .field input{font-size:16px;}
-  .board-item{padding:12px 14px;gap:10px;}
+  .board-item{padding:10px 11px;gap:8px;}
+  .board-rank{font-size:14px;min-width:26px;}
+  .board-avatar{width:34px;height:34px;font-size:17px !important;}
+  .board-name{font-size:13px;}
+  .board-sub{font-size:10px;}
+  .board-score{font-size:16px;min-width:36px;}
+  .board-info{min-width:0;flex:1;}
+  #monthly-rewards-banner{padding:13px 14px;}
   .friend-actions{flex-direction:column;gap:4px;}
   .pvp-challenge-btn,.pvp-remove-btn{font-size:11px;padding:6px 10px;}
+  .friends-tab-btn{font-size:12px;padding:9px 8px;}
   .lessons-subject-grid{grid-template-columns:repeat(3,1fr);}
-  .code-display{font-size:26px;letter-spacing:5px;}
+  .code-display{font-size:24px;letter-spacing:4px;}
   .user-chip{display:none;}
+  .bnav-label{font-size:9px;}
+  .bnav-icon{font-size:18px;}
+  .welcome-banner{padding:14px 14px;}
+  .section-title{font-size:9px;margin-top:1.25rem;}
+  .shop-tab-btn{font-size:10px !important;padding:7px 4px !important;min-width:44px !important;}
+  #team-room-code-display{font-size:34px !important;letter-spacing:7px !important;padding:12px 16px !important;}
+  .pvp-sheet{padding:1.5rem 1.25rem;}
+  .bg-toggle-btn{font-size:10px;padding:4px 8px;}
+}
+@media(max-width:400px){
+  .stat-value{font-size:20px;}
+  .topic-chip{padding:8px 10px;font-size:12px;}
+  .bnav-label{display:none;}
+  .bnav-icon{font-size:20px;}
 }
 
 /* ════════════════════════════════════════════
@@ -1164,6 +1200,37 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 
   <!-- LEADERBOARD -->
   <div id="board-view" class="view" style="display:none;">
+    <!-- Monthly Rewards Banner -->
+    <div id="monthly-rewards-banner" style="background:linear-gradient(135deg,rgba(240,192,96,0.18),rgba(167,139,250,0.1));border:1px solid rgba(240,192,96,0.35);border-radius:20px;padding:16px 18px;margin-bottom:1rem;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.08;pointer-events:none;">🏆</div>
+      <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px;">🏆 Monthly Competition</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.5;">Top 3 players earn rewards at month end. Board resets on the 1st.</div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:10px;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Resets in</div>
+          <div id="monthly-countdown" style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--gold);">—</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:80px;background:rgba(240,192,96,0.12);border:1px solid rgba(240,192,96,0.3);border-radius:12px;padding:8px 10px;text-align:center;">
+          <div style="font-size:18px;">🥇</div><div style="font-size:11px;font-weight:700;color:var(--gold);margin-top:2px;">1st Place</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Legendary Frame + 500 credits</div>
+        </div>
+        <div style="flex:1;min-width:80px;background:rgba(192,207,224,0.08);border:1px solid rgba(192,207,224,0.2);border-radius:12px;padding:8px 10px;text-align:center;">
+          <div style="font-size:18px;">🥈</div><div style="font-size:11px;font-weight:700;color:#c0cfe0;margin-top:2px;">2nd Place</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Rare Frame + 250 credits</div>
+        </div>
+        <div style="flex:1;min-width:80px;background:rgba(224,128,96,0.08);border:1px solid rgba(224,128,96,0.2);border-radius:12px;padding:8px 10px;text-align:center;">
+          <div style="font-size:18px;">🥉</div><div style="font-size:11px;font-weight:700;color:#e08060;margin-top:2px;">3rd Place</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Common Frame + 100 credits</div>
+        </div>
+      </div>
+    </div>
+    <!-- Leaderboard Tabs -->
+    <div style="display:flex;gap:4px;margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:3px;">
+      <button id="board-tab-monthly" onclick="switchBoardTab('monthly')" style="flex:1;padding:9px;border-radius:9px;border:none;background:linear-gradient(135deg,rgba(240,192,96,0.2),rgba(167,139,250,0.15));color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">🗓️ This Month</button>
+      <button id="board-tab-alltime" onclick="switchBoardTab('alltime')" style="flex:1;padding:9px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">🏅 All Time</button>
+    </div>
     <!-- Online Users Panel -->
     <div id="online-panel">
       <div id="online-panel-header">
@@ -1275,7 +1342,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="shop-tab-btn active" onclick="showShopTab('hats')" data-tab="hats" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🎩<br>Hats</button>
       <button class="shop-tab-btn" onclick="showShopTab('glasses')" data-tab="glasses" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">👓<br>Glasses</button>
       <button class="shop-tab-btn" onclick="showShopTab('frames')" data-tab="frames" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🖼️<br>Frames</button>
-      <button class="shop-tab-btn" onclick="showShopTab('themes')" data-tab="themes" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🎨<br>Themes</button>
+      <button class="shop-tab-btn" onclick="showShopTab('badges')" data-tab="badges" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🏅<br>Badges</button>
       <button class="shop-tab-btn" onclick="showShopTab('music')" data-tab="music" style="flex:1;min-width:52px;padding:8px 6px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">🎵<br>Music</button>
       <!-- Effects tab removed -->
     </div>
@@ -1540,9 +1607,13 @@ service cloud.firestore {
   <div style="font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:8px;" id="team-wait-title">Room Created!</div>
   <div style="font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;" id="team-wait-sub">Share this code with your teammates and opponents</div>
   <div style="font-family:'DM Serif Display',serif;font-size:48px;letter-spacing:12px;color:var(--purple);margin-bottom:1.5rem;background:rgba(167,139,250,0.1);padding:16px 24px;border-radius:16px;border:1px solid rgba(167,139,250,0.3);" id="team-room-code-display">——</div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:1.5rem;max-width:400px;width:100%;">
-    <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Players Joined <span id="team-player-count">0</span>/<span id="team-max-players">4</span></div>
-    <div id="team-player-list" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;min-height:40px;"></div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:1.5rem;max-width:440px;width:100%;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;">Players <span id="team-player-count">0</span>/<span id="team-max-players">4</span></div>
+      <div id="team-host-badge" style="display:none;font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-dim);padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">&#128081; HOST</div>
+    </div>
+    <div id="team-player-list" style="display:flex;gap:10px;justify-content:center;min-height:50px;flex-wrap:wrap;"></div>
+    <div id="team-assign-hint" style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:8px;display:none;">Tap a player to switch their team</div>
   </div>
   <div style="display:flex;gap:10px;width:100%;max-width:400px;">
     <button onclick="cancelTeamRoom()" style="flex:1;padding:13px;border-radius:13px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
@@ -2145,7 +2216,7 @@ async function saveResult(sc,total){
   const prevUnlocked=new Set(s.achievements||[]);
   const newlyUnlocked=ACHIEVEMENTS.filter(a=>!prevUnlocked.has(a.id)&&a.check(newStats));
   const achievements=[...(s.achievements||[]),...newlyUnlocked.map(a=>a.id)];
-  await ref.update({topicScores:ts,streak,lastQuizDate:today,hasPerfect,perfectCount,totalQuizzes,recentQuizzes:rq,achievements,subjectCount,nightOwl,earlyBird,speedRun,credits,xp,name:userStats.name||currentUser.displayName||currentUser.email.split('@')[0]});
+  await ref.update({topicScores:ts,streak,lastQuizDate:today,hasPerfect,perfectCount,totalQuizzes,recentQuizzes:rq,achievements,subjectCount,nightOwl,earlyBird,speedRun,credits,xp,name:userStats.name||currentUser.displayName||currentUser.email.split('@')[0],monthlyScore:firebase.firestore.FieldValue.increment(sc)});
   userStats={...newStats,achievements};renderDash();
   // Show XP earned
   showToast(`+${xpEarned} XP${leveledUp?' — LEVEL UP! 🎉':''}${sc===total?' ⭐ Perfect!':''}`);
@@ -2308,14 +2379,121 @@ function playAchievementSound(type){
 }
 
 // ── LEADERBOARD ──
+let _boardTab = 'monthly'; // 'monthly' | 'alltime'
+
+function switchBoardTab(tab) {
+  _boardTab = tab;
+  const monthBtn = document.getElementById('board-tab-monthly');
+  const alltimeBtn = document.getElementById('board-tab-alltime');
+  if (monthBtn) {
+    monthBtn.style.background = tab === 'monthly' ? 'linear-gradient(135deg,rgba(240,192,96,0.2),rgba(167,139,250,0.15))' : 'transparent';
+    monthBtn.style.color = tab === 'monthly' ? 'var(--text)' : 'var(--text-muted)';
+    monthBtn.style.fontWeight = tab === 'monthly' ? '700' : '600';
+  }
+  if (alltimeBtn) {
+    alltimeBtn.style.background = tab === 'alltime' ? 'linear-gradient(135deg,rgba(79,142,247,0.2),rgba(167,139,250,0.12))' : 'transparent';
+    alltimeBtn.style.color = tab === 'alltime' ? 'var(--text)' : 'var(--text-muted)';
+    alltimeBtn.style.fontWeight = tab === 'alltime' ? '700' : '600';
+  }
+  loadLeaderboard();
+}
+
+function updateMonthlyCountdown() {
+  const el = document.getElementById('monthly-countdown');
+  if (!el) return;
+  const now = new Date();
+  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
+  const diff = nextMonth - now;
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  el.textContent = `${days}d ${hours}h ${mins}m`;
+}
+
+// Check if monthly reset is needed — stores last-reset month in Firestore meta doc
+async function checkMonthlyReset() {
+  const metaRef = db.collection('meta').doc('leaderboard');
+  try {
+    const snap = await metaRef.get();
+    const nowDate = new Date();
+    const currentMonth = `${nowDate.getFullYear()}-${nowDate.getMonth()+1}`;
+    if (snap.exists) {
+      const lastReset = snap.data().lastResetMonth;
+      if (lastReset === currentMonth) return; // already reset this month
+    }
+    // New month — snapshot top 3 into monthlyWinners, reset monthly scores
+    const topSnap = await db.collection('users').orderBy('monthlyScore','desc').limit(3).get();
+    const winners = [];
+    topSnap.forEach(doc => {
+      const d = doc.data();
+      winners.push({ uid: doc.id, name: d.name || 'Student', score: d.monthlyScore || 0, avatar: d.avatar || {} });
+    });
+    // Award rewards to top 3
+    const rewardCredits = [500, 250, 100];
+    const rewardFrames = ['aurora', 'storm', 'forest'];
+    for (let i = 0; i < winners.length; i++) {
+      const w = winners[i];
+      try {
+        const userRef = db.collection('users').doc(w.uid);
+        const userSnap = await userRef.get();
+        if (userSnap.exists) {
+          const ud = userSnap.data();
+          const owned = ud.owned || {};
+          const frames = owned.frames || [];
+          if (!frames.includes(rewardFrames[i])) frames.push(rewardFrames[i]);
+          await userRef.update({
+            credits: (ud.credits || 0) + rewardCredits[i],
+            'owned.frames': frames,
+            monthlyScore: 0 // reset
+          });
+        }
+      } catch(e) {}
+    }
+    // Reset everyone else's monthly score
+    const allSnap = await db.collection('users').get();
+    const batch = db.batch();
+    allSnap.forEach(doc => {
+      if (!winners.some(w => w.uid === doc.id)) {
+        batch.update(doc.ref, { monthlyScore: 0 });
+      }
+    });
+    await batch.commit();
+    // Store winners for display + update meta
+    await metaRef.set({ lastResetMonth: currentMonth, lastWinners: winners, updatedAt: Date.now() }, { merge: true });
+  } catch(e) { console.warn('Monthly reset check failed:', e); }
+}
+
+// Called when a quiz finishes — accumulate monthly score
+async function addMonthlyScore(points) {
+  if (!currentUser || !points) return;
+  try {
+    await db.collection('users').doc(currentUser.uid).update({
+      monthlyScore: firebase.firestore.FieldValue.increment(points)
+    });
+  } catch(e) {}
+}
+
 async function loadLeaderboard(){
   document.getElementById('board-loading').style.display='block';
   document.getElementById('board-list').innerHTML='';
+  // Cancel any running frame animations from previous render
+  cancelAllMiniFrames();
+  // Update countdown
+  updateMonthlyCountdown();
   // Load online users panel in parallel
   loadOnlineUsers();
+  // Check monthly reset (safe to call often — only acts when month changes)
+  checkMonthlyReset().catch(()=>{});
+
   try{
     const now=Date.now();
-    const snap=await db.collection('users').orderBy('totalQuizzes','desc').limit(20).get();
+    // For monthly tab, order by monthlyScore; for all-time, by avg
+    let snap;
+    if (_boardTab === 'monthly') {
+      snap = await db.collection('users').orderBy('monthlyScore','desc').limit(20).get();
+    } else {
+      snap = await db.collection('users').orderBy('totalQuizzes','desc').limit(20).get();
+    }
     // Build a quick online-status map
     const onlineMap={};
     snap.forEach(doc=>{const d=doc.data();const diff=now-(d.lastSeen||0);onlineMap[doc.id]=diff<120000?'online':diff<600000?'away':'offline';});
@@ -2331,9 +2509,17 @@ async function loadLeaderboard(){
       const hatE=(hatId&&hatId!=='h_none')?(hatMap[hatId]||''):'';
       const glassE=(glassId&&glassId!=='g_none')?(glassMap[glassId]||''):'';
       const userLevel=calcLevel(d.xp||0);
-      users.push({uid:doc.id,name:d.name||'Student',totalQuizzes:d.totalQuizzes||0,streak:d.streak||0,avg,xp:d.xp||0,level:userLevel,avBase,avColor,avFrame,hatE,glassE,presence:onlineMap[doc.id]||'offline'});
+      const monthlyScore=d.monthlyScore||0;
+      const equippedBadgeId=av.equipped?.badge||av.badge||'b_none';
+      const badgeData=SHOP_ITEMS.badges.find(b=>b.id===equippedBadgeId);
+      const badgeDisplay=(badgeData&&badgeData.id!=='b_none')?badgeData:null;
+      users.push({uid:doc.id,name:d.name||'Student',totalQuizzes:d.totalQuizzes||0,streak:d.streak||0,avg,xp:d.xp||0,level:userLevel,avBase,avColor,avFrame,hatE,glassE,presence:onlineMap[doc.id]||'offline',monthlyScore,badgeDisplay});
     });
-    users.sort((a,b)=>b.avg-a.avg||b.totalQuizzes-a.totalQuizzes);
+    if (_boardTab === 'monthly') {
+      users.sort((a,b)=>b.monthlyScore-a.monthlyScore||b.totalQuizzes-a.totalQuizzes);
+    } else {
+      users.sort((a,b)=>b.avg-a.avg||b.totalQuizzes-a.totalQuizzes);
+    }
     document.getElementById('board-loading').style.display='none';
     const list=document.getElementById('board-list');
     if(!users.length){list.innerHTML=`<div class="empty-state">${t('no_students')||'No students yet!'}</div>`;return;}
@@ -2341,32 +2527,56 @@ async function loadLeaderboard(){
       const isMe=currentUser&&u.uid===currentUser.uid;
       const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
       const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
-      const canvasFrameColors={'forest':'#3ecf8e','lava':'#ff4500','storm':'#88ccff','ocean':'#0099ff','gold':'#ffd700','shadow':'#8800cc','aurora':'#ff88ff','crystal':'#aaddff'};
+      // Top 3 monthly get crown effect
+      const isTopMonthly = _boardTab === 'monthly' && i < 3;
+      const canvasFrameColors={'forest':'#3ecf8e','lava':'#ff4500','storm':'#88ccff','ocean':'#0099ff','gold':'#ffd700','shadow':'#8800cc','aurora':'#ff88ff','crystal':'#aaddff','neon':'#ff00ff','matrix':'#00ff41','phoenix':'#ff6600','dragon':'#ff3300','blackhole':'#9b30ff','dna':'#00c8ff','godmode':'#ffffff'};
       const isCanvasFrame=canvasFrameColors.hasOwnProperty(u.avFrame);
       const fbColor=isCanvasFrame?canvasFrameColors[u.avFrame]:(u.avFrame==='rainbow'?'#4f8ef7':u.avFrame);
       const frameBorder=`border-color:${fbColor};box-shadow:0 0 10px ${fbColor}55;`;
-      const frameClass=u.avFrame==='gold'?'frame-legendary':u.avFrame==='aurora'||u.avFrame==='shadow'?'frame-legendary':u.avFrame==='storm'||u.avFrame==='forest'||u.avFrame==='lava'||u.avFrame==='ocean'?'frame-rare':'frame-common';
+      const frameClass=u.avFrame==='godmode'?'frame-legendary':u.avFrame==='gold'||u.avFrame==='aurora'||u.avFrame==='shadow'||u.avFrame==='neon'||u.avFrame==='matrix'||u.avFrame==='phoenix'||u.avFrame==='dragon'||u.avFrame==='blackhole'||u.avFrame==='dna'?'frame-legendary':u.avFrame==='storm'||u.avFrame==='forest'||u.avFrame==='lava'||u.avFrame==='ocean'?'frame-rare':'frame-common';
       const lvlColor=u.level>=15?'#f0a050':u.level>=10?'#a78bfa':u.level>=5?'#3ecf8e':'#7a80a0';
       // Online dot
       const dotClass=u.presence==='online'?'online-dot':u.presence==='away'?'online-dot away':'online-dot offline';
-      const d=document.createElement('div');d.className='board-item'+(isMe?' me':'');
+      // Score display
+      const scoreDisplay = _boardTab === 'monthly'
+        ? `<div class="board-score" style="${isTopMonthly?'color:var(--gold);':''}">${u.monthlyScore}<div style="font-size:9px;color:var(--text-dim);font-weight:500;margin-top:1px;">pts</div></div>`
+        : `<div class="board-score">${u.avg}%</div>`;
+      const d=document.createElement('div');
+      d.className='board-item'+(isMe?' me':'');
+      if (isTopMonthly) d.style.cssText += `;border-color:${i===0?'rgba(240,192,96,0.45)':i===1?'rgba(192,207,224,0.3)':'rgba(224,128,96,0.3)'};`;
+      const canvasFrameNames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal','cosmos','neon','matrix','phoenix','dragon','blackhole','dna','godmode'];
+      const needsCanvas = canvasFrameNames.includes(u.avFrame);
+      const canvasEl = needsCanvas
+        ? `<canvas data-leaderboard-frame="${u.avFrame}" style="position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);pointer-events:none;border-radius:50%;z-index:0;"></canvas>`
+        : '';
       d.innerHTML=`
         <div class="board-rank ${rankClass}">${rankIcon}</div>
-        <div class="board-avatar ${frameClass}" style="background:${u.avColor};${frameBorder}position:relative;overflow:visible;font-size:20px;">
-          ${u.hatE?`<span style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:15px;">${u.hatE}</span>`:''}
-          ${u.avBase}
-          ${u.glassE?`<span style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:10px;">${u.glassE}</span>`:''}
-          <div class="${dotClass}"></div>
+        <div class="board-avatar ${frameClass}" style="background:${u.avColor};${needsCanvas?'border-color:transparent;box-shadow:none;':''+frameBorder}position:relative;overflow:visible;font-size:20px;">
+          ${canvasEl}
+          ${u.hatE?`<span style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:15px;z-index:2;">${u.hatE}</span>`:''}
+          <span style="position:relative;z-index:1;">${u.avBase}</span>
+          ${u.glassE?`<span style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:10px;z-index:2;">${u.glassE}</span>`:''}
+          <div class="${dotClass}" style="z-index:2;"></div>
         </div>
         <div class="board-info">
-          <div class="board-name">${u.name}${isMe?` <span style="font-size:10px;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;">${t('you_label')||'You'}</span>`:''}</div>
+          <div class="board-name" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">${u.name}</span>
+            ${isMe?`<span style="font-size:10px;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;flex-shrink:0;">${t('you_label')||'You'}</span>`:''}
+            ${u.badgeDisplay?`<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;background:${u.badgeDisplay.glow};border:1px solid ${u.badgeDisplay.color}55;flex-shrink:0;${u.badgeDisplay.rarity==='godlike'?'animation:legendaryFrame 1.5s ease-in-out infinite;':''}"><span style="font-size:10px;">${u.badgeDisplay.icon}</span><span style="font-size:9px;font-weight:800;color:${u.badgeDisplay.color};letter-spacing:0.3px;${u.badgeDisplay.rarity==='godlike'||u.badgeDisplay.rarity==='mythic'?'text-shadow:0 0 6px '+u.badgeDisplay.color+';':''}">${u.badgeDisplay.name}</span></span>`:''}
+          </div>
           <div class="board-sub">
             <span style="font-size:10px;font-weight:700;color:${lvlColor};background:${lvlColor}22;padding:1px 6px;border-radius:4px;margin-right:6px;">LV${u.level}</span>${u.totalQuizzes} quizzes · ${u.streak}🔥
           </div>
         </div>
-        <div class="board-score">${u.avg}%</div>`;
+        ${scoreDisplay}`;
       list.appendChild(d);
     });
+    // Start animated canvas frames on leaderboard avatars
+    setTimeout(()=>{
+      document.querySelectorAll('canvas[data-leaderboard-frame]').forEach(c=>{
+        startMiniFrame(c, c.dataset.leaderboardFrame);
+      });
+    }, 50);
   }catch(e){document.getElementById('board-loading').textContent='Could not load leaderboard.';}
 }
 
@@ -3934,8 +4144,33 @@ const SHOP_ITEMS={
     {id:'f_gold',    icon:'✨',name:'Gilded Legend',    rarity:'legendary', price:50, frameColor:'gold',   desc:'Pure gold pulses with power'},
     {id:'f_aurora',  icon:'🌈',name:'Aurora Infinitus', rarity:'legendary', price:75, frameColor:'aurora', desc:'Northern lights dance forever'},
     {id:'f_cosmos',  icon:'🌌',name:'Cosmic Rift',      rarity:'legendary', price:100,frameColor:'cosmos', desc:'A tear in spacetime itself'},
+    {id:'f_neon',    icon:'🔮',name:'Neon Overdrive',   rarity:'mythic',    price:150,frameColor:'neon',   desc:'Cyberpunk neon grid pulses outward'},
+    {id:'f_matrix',  icon:'👾',name:'The Matrix',       rarity:'mythic',    price:175,frameColor:'matrix', desc:'Green code rain cascades around you'},
+    {id:'f_phoenix', icon:'🔥',name:'Phoenix Reborn',   rarity:'mythic',    price:200,frameColor:'phoenix',desc:'Rising flames spiral in an eternal rebirth'},
+    {id:'f_dragon',  icon:'🐉',name:'Dragon Soul',      rarity:'mythic',    price:250,frameColor:'dragon', desc:'Ancient draconic fire orbits like a comet'},
+    {id:'f_blackhole',icon:'🕳️',name:'Event Horizon',  rarity:'mythic',    price:300,frameColor:'blackhole',desc:'Reality bends as light spirals into the void'},
+    {id:'f_dna',     icon:'🧬',name:'DNA Ascendant',    rarity:'mythic',    price:350,frameColor:'dna',    desc:'Intertwined helices of pure genetic power'},
+    {id:'f_godmode', icon:'⚡',name:'GOD MODE',         rarity:'godlike',   price:500,frameColor:'godmode',desc:'Transcend existence itself. Only for the elite.'},
   ],
   effects:[{id:'e_pulse',icon:'💓',name:'Pulse',price:15,effect:'pulse'},{id:'e_glow',icon:'✨',name:'Glow',price:20,effect:'glow'},{id:'e_rainbow',icon:'🌈',name:'Rainbow Glow',price:30,effect:'rainbow'},{id:'e_none',icon:'❌',name:'No Effect',price:0,effect:'none'}],
+  badges:[
+    {id:'b_none',       icon:'',    name:'No Badge',        rarity:'common',   price:0,   color:'#6b728f', glow:'rgba(107,114,143,0.3)', desc:'No badge equipped'},
+    {id:'b_student',    icon:'📚',  name:'Student',         rarity:'common',   price:0,   color:'#7a80a0', glow:'rgba(122,128,160,0.3)', desc:'A dedicated learner'},
+    {id:'b_brainiac',   icon:'🧠',  name:'Brainiac',        rarity:'rare',     price:30,  color:'#4f8ef7', glow:'rgba(79,142,247,0.5)',  desc:'Big brain energy'},
+    {id:'b_speedrun',   icon:'⚡',  name:'Speed Runner',    rarity:'rare',     price:35,  color:'#f0c060', glow:'rgba(240,192,96,0.5)',  desc:'Answers before others blink'},
+    {id:'b_perfectionist',icon:'⭐',name:'Perfectionist',   rarity:'rare',     price:40,  color:'#3ecf8e', glow:'rgba(62,207,142,0.5)',  desc:'Never misses a question'},
+    {id:'b_streaker',   icon:'🔥',  name:'On Fire',         rarity:'epic',     price:60,  color:'#f0a050', glow:'rgba(240,160,80,0.6)',  desc:'Streak monster. Unstoppable.'},
+    {id:'b_nightowl',   icon:'🦉',  name:'Night Owl',       rarity:'epic',     price:65,  color:'#a78bfa', glow:'rgba(167,139,250,0.6)', desc:'Studies past midnight'},
+    {id:'b_champion',   icon:'🏆',  name:'Champion',        rarity:'epic',     price:80,  color:'#f0c060', glow:'rgba(240,192,96,0.6)',  desc:'Competition slayer'},
+    {id:'b_phantom',    icon:'👻',  name:'Phantom',         rarity:'epic',     price:90,  color:'#c084fc', glow:'rgba(192,132,252,0.6)', desc:'Silent. Deadly. Brilliant.'},
+    {id:'b_overlord',   icon:'👑',  name:'Overlord',        rarity:'legendary',price:120, color:'#f0c060', glow:'rgba(240,192,96,0.8)',  desc:'Absolute dominion over all subjects'},
+    {id:'b_shadow',     icon:'🌑',  name:'Shadow Lord',     rarity:'legendary',price:140, color:'#8b00ff', glow:'rgba(139,0,255,0.7)',   desc:'Feared by all. Known by none.'},
+    {id:'b_omega',      icon:'Ω',   name:'Omega',           rarity:'legendary',price:160, color:'#ff2244', glow:'rgba(255,34,68,0.7)',   desc:'The final form. The last answer.'},
+    {id:'b_godslayer',  icon:'⚔️',  name:'God Slayer',      rarity:'mythic',   price:200, color:'#ff6600', glow:'rgba(255,102,0,0.8)',   desc:'Slays even divine questions'},
+    {id:'b_singularity',icon:'🕳️',  name:'Singularity',     rarity:'mythic',   price:250, color:'#00ffff', glow:'rgba(0,255,255,0.8)',   desc:'A mind beyond comprehension'},
+    {id:'b_eternal',    icon:'♾️',  name:'Eternal',         rarity:'mythic',   price:300, color:'#ff88ff', glow:'rgba(255,136,255,0.8)', desc:'Has always existed. Always will.'},
+    {id:'b_ascended',   icon:'✦',   name:'✦ ASCENDED ✦',   rarity:'godlike',  price:500, color:'#ffffff', glow:'rgba(255,255,255,0.9)', desc:'You have transcended the quiz realm itself'},
+  ],
   themes:[
     {id:'t_dark',    icon:'🌑',name:'Void',          rarity:'common',    price:0,  desc:'The default darkness',   accent:'#4f8ef7',bg:'#07080f',surface:'#0e1018'},
     {id:'t_midnight',icon:'🌌',name:'Midnight',      rarity:'rare',      price:25, desc:'Deep space blue',        accent:'#5b7fff',bg:'#080c18',surface:'#101525'},
@@ -3984,7 +4219,7 @@ function renderAvatarPreview(){
   const fc=avatarState.frame||'default';
   el.classList.remove('effect-rainbow','effect-pulse','effect-glow','frame-common','frame-rare','frame-legendary','frame-rainbow-outer');
   el.style.boxShadow='';
-  const canvasFrames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal','cosmos'];
+  const canvasFrames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal','cosmos','neon','matrix','phoenix','dragon','blackhole','dna','godmode'];
   if(canvasFrames.includes(fc)){
     el.style.border='3px solid transparent';
     if(window.setAvatarFrame) window.setAvatarFrame(fc);
@@ -4018,6 +4253,8 @@ function showShopTab(tab){
     rare:    {label:'RARE',      color:'#4f8ef7', glow:'rgba(79,142,247,0.4)',   border:'rgba(79,142,247,0.5)'},
     epic:    {label:'EPIC',      color:'#a78bfa', glow:'rgba(167,139,250,0.5)',  border:'rgba(167,139,250,0.6)'},
     legendary:{label:'LEGENDARY',color:'#f0c060', glow:'rgba(240,192,96,0.6)',   border:'rgba(240,192,96,0.7)'},
+    mythic:  {label:'MYTHIC',    color:'#ff6600', glow:'rgba(255,102,0,0.7)',    border:'rgba(255,102,0,0.6)'},
+    godlike: {label:'✦ GODLIKE', color:'#ffffff', glow:'rgba(255,255,255,0.8)',  border:'rgba(255,255,255,0.6)'},
   };
 
   const credits=userStats.credits||0;
@@ -4045,7 +4282,7 @@ function showShopTab(tab){
         border:1.5px solid ${isEquipped?rar.color:isOwned?rar.border:'rgba(255,255,255,0.07)'};
         box-shadow:${isEquipped?'0 0 20px '+rar.glow+',0 0 40px '+rar.glow:'0 2px 8px rgba(0,0,0,0.3)'};
         cursor:pointer;transition:all 0.2s;text-align:center;
-        ${item.rarity==='legendary'&&isOwned?'animation:legendaryCardPulse 2.5s ease-in-out infinite;':''}
+        ${item.rarity==='godlike'&&isOwned?'animation:godlikePulse 1.5s linear infinite;':item.rarity==='mythic'&&isOwned?'animation:mythicPulse 2s ease-in-out infinite;':item.rarity==='legendary'&&isOwned?'animation:legendaryFrame 2.5s ease-in-out infinite;':''}
       `;
       // Rarity badge
       const badge=`<div style="position:absolute;top:8px;left:8px;font-size:9px;font-weight:800;letter-spacing:1px;color:${rar.color};text-transform:uppercase;background:${rar.glow};padding:2px 6px;border-radius:4px;">${rar.label}</div>`;
@@ -4084,6 +4321,85 @@ function showShopTab(tab){
         startMiniFrame(c, c.dataset.frame);
       });
     },50);
+    return;
+  }
+
+  // ── BADGES: grid of equippable title badges ──
+  if(tab==='badges'){
+    const RARITY_ORDER={common:0,rare:1,epic:2,legendary:3,mythic:4,godlike:5};
+    const ownedList=owned.badges||['b_none','b_student'];
+    const equippedBadge=avatarState.equipped?.badge||'b_none';
+    wrap.innerHTML='';
+    const grid=document.createElement('div');
+    grid.style.cssText='display:flex;flex-direction:column;gap:10px;';
+    SHOP_ITEMS.badges.forEach(item=>{
+      const isOwned=ownedList.includes(item.id)||item.price===0;
+      const isEquipped=equippedBadge===item.id;
+      const canAfford=(userStats.credits||0)>=item.price;
+      const RARITY_CFG2={
+        common:   {label:'COMMON',   color:'#7a80a0',glow:'rgba(122,128,160,0.3)'},
+        rare:     {label:'RARE',     color:'#4f8ef7',glow:'rgba(79,142,247,0.4)'},
+        epic:     {label:'EPIC',     color:'#a78bfa',glow:'rgba(167,139,250,0.5)'},
+        legendary:{label:'LEGENDARY',color:'#f0c060',glow:'rgba(240,192,96,0.6)'},
+        mythic:   {label:'MYTHIC',   color:'#ff6600',glow:'rgba(255,102,0,0.7)'},
+        godlike:  {label:'✦ GODLIKE',color:'#ffffff',glow:'rgba(255,255,255,0.8)'},
+      };
+      const rar=RARITY_CFG2[item.rarity||'common'];
+      const card=document.createElement('div');
+      const isGodlike=item.rarity==='godlike';
+      const isMythic=item.rarity==='mythic';
+      card.style.cssText=`
+        position:relative;border-radius:16px;padding:14px 16px;
+        background:linear-gradient(135deg,rgba(14,16,24,0.97),rgba(20,23,32,0.9));
+        border:1.5px solid ${isEquipped?item.color:isOwned?rar.glow:'rgba(255,255,255,0.07)'};
+        box-shadow:${isEquipped?'0 0 24px '+item.glow+',0 0 48px '+item.glow:'0 2px 8px rgba(0,0,0,0.3)'};
+        cursor:pointer;transition:all 0.25s;overflow:hidden;
+        ${isGodlike&&isOwned?'animation:legendaryFrame 2s ease-in-out infinite;':''}
+      `;
+      // Shimmer for high rarity
+      const shimmer=(isMythic||isGodlike)&&isOwned?`<div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,${item.glow},transparent);background-size:300% 100%;animation:shimmer 2s ease infinite;pointer-events:none;border-radius:16px;"></div>`:'';
+      // Live badge preview
+      const badgePreview=item.id!=='b_none'?`<div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:${item.glow};border:1px solid ${item.color}55;margin-top:6px;${isGodlike?'animation:legendaryFrame 1.5s ease-in-out infinite;':''}">
+        <span style="font-size:13px;">${item.icon}</span>
+        <span style="font-size:11px;font-weight:800;color:${item.color};letter-spacing:0.5px;${isGodlike?'text-shadow:0 0 10px '+item.color+';':''}">${item.name}</span>
+      </div>`:'<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">No badge shown</div>';
+      card.innerHTML=`
+        ${shimmer}
+        <div style="display:flex;align-items:center;gap:14px;position:relative;">
+          <div style="width:46px;height:46px;border-radius:12px;background:${item.glow};border:1.5px solid ${item.color}55;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${item.icon||'—'}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;">
+              <span style="font-size:14px;font-weight:800;color:${item.rarity==='godlike'?'#fff':rar.color};${isGodlike?'text-shadow:0 0 12px #fff,0 0 24px '+item.color+';':''}">${item.name}</span>
+              <span style="font-size:9px;font-weight:800;letter-spacing:1px;color:${rar.color};background:${rar.glow};padding:2px 6px;border-radius:4px;">${rar.label}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">${item.desc}</div>
+            ${badgePreview}
+          </div>
+          <div style="flex-shrink:0;text-align:right;">
+            ${isEquipped
+              ? `<div style="font-size:12px;font-weight:700;color:${item.color};">✓ ON</div>`
+              : isOwned
+                ? `<button onclick="equipBadge('${item.id}')" style="padding:7px 14px;border-radius:10px;background:${rar.glow};border:1px solid ${item.color}55;color:${rar.color};font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Equip</button>`
+                : canAfford
+                  ? `<button onclick="buyBadge('${item.id}')" style="padding:7px 14px;border-radius:10px;background:rgba(240,192,96,0.15);border:1px solid rgba(240,192,96,0.4);color:var(--gold);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⚡ ${item.price}</button>`
+                  : `<div style="font-size:11px;font-weight:700;color:var(--red);">⚡ ${item.price}<div style="font-size:9px;color:var(--text-dim);">Need more</div></div>`
+            }
+          </div>
+        </div>
+        ${!isOwned?'<div style="position:absolute;inset:0;border-radius:16px;background:rgba(0,0,0,0.45);"></div>':''}
+      `;
+      card.onclick=(e)=>{
+        if(e.target.tagName==='BUTTON')return;
+        if(isEquipped){unequipBadge();return;}
+        if(isOwned){equipBadge(item.id);return;}
+        if(canAfford)buyBadge(item.id);
+        else showToast('Not enough credits! ⚡');
+      };
+      card.onmouseenter=()=>{if(!isEquipped)card.style.transform='translateY(-2px)';card.style.boxShadow=`0 8px 32px ${item.glow}`;};
+      card.onmouseleave=()=>{card.style.transform='';card.style.boxShadow=isEquipped?`0 0 24px ${item.glow},0 0 48px ${item.glow}`:'0 2px 8px rgba(0,0,0,0.3)';};
+      grid.appendChild(card);
+    });
+    wrap.appendChild(grid);
     return;
   }
 
@@ -4273,21 +4589,39 @@ function cancelAllMiniFrames(){
 }
 
 function startMiniFrame(canvas, frameType){
+  // Cancel any existing animation on this canvas
+  if (canvas._miniFrameRaf) {
+    cancelAnimationFrame(canvas._miniFrameRaf);
+    _activeMiniAnims.delete(canvas._miniFrameRaf);
+  }
   let t=0;
   let rafId;
+  // Use a larger radius for leaderboard canvases (they have more space)
+  const isLeaderboard = !!canvas.dataset.leaderboardFrame;
   function loop(){
+    // Stop if canvas was removed from DOM
+    if (!canvas.isConnected) {
+      cancelAnimationFrame(rafId);
+      _activeMiniAnims.delete(rafId);
+      return;
+    }
     const W=canvas.offsetWidth||80, H=canvas.offsetHeight||80;
     canvas.width=W; canvas.height=H;
     const ctx=canvas.getContext('2d');
-    const cx=W/2, cy=H/2, R=Math.min(W,H)/2-8;
+    const cx=W/2, cy=H/2;
+    // Leaderboard canvases are slightly larger wrappers — draw ring near edge
+    const R=isLeaderboard ? Math.min(W,H)/2-4 : Math.min(W,H)/2-8;
     ctx.clearRect(0,0,W,H);
     const fns={
       forest:miniForest,lava:miniLava,storm:miniStorm,ocean:miniOcean,
-      gold:miniGold,shadow:miniShadow,aurora:miniAurora,crystal:miniCrystal,cosmos:miniCosmos
+      gold:miniGold,shadow:miniShadow,aurora:miniAurora,crystal:miniCrystal,cosmos:miniCosmos,
+      neon:miniNeon,matrix:miniMatrix,phoenix:miniPhoenix,dragon:miniDragon,
+      blackhole:miniBlackhole,dna:miniDna,godmode:miniGodmode
     };
     if(fns[frameType])fns[frameType](ctx,W,H,cx,cy,R,t);
     t+=0.025;
     rafId = requestAnimationFrame(loop);
+    canvas._miniFrameRaf = rafId;
     _activeMiniAnims.add(rafId);
   }
   loop();
@@ -4322,8 +4656,178 @@ function miniCosmos(ctx,W,H,cx,cy,R,t){
   ctx.beginPath();ctx.arc(cx,cy,R+7,0,Math.PI*2);const haloH=(t*30)%360;ctx.strokeStyle=`hsla(${haloH},100%,70%,0.7)`;ctx.lineWidth=2;ctx.stroke();}
 
 
+// ── NEW MYTHIC / GODLIKE FRAME ANIMATIONS ──
+function miniNeon(ctx,W,H,cx,cy,R,t){
+  // Cyberpunk grid lines pulsing outward
+  const colors=['#ff00ff','#00ffff','#ff0090','#00ff90'];
+  for(let i=0;i<3;i++){
+    const r=R+i*5+Math.sin(t*3+i)*2;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle=colors[i%colors.length];ctx.lineWidth=1.5+Math.sin(t*4+i)*0.5;
+    ctx.globalAlpha=0.6+Math.sin(t*2+i)*0.3;ctx.stroke();ctx.globalAlpha=1;
+  }
+  // Corner sparks
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2+t*0.5;const flicker=Math.abs(Math.sin(t*8+i*1.3));
+    ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);
+    ctx.lineTo(cx+Math.cos(a)*(R+8+flicker*6),cy+Math.sin(a)*(R+8+flicker*6));
+    ctx.strokeStyle=colors[i%colors.length];ctx.lineWidth=1.5;ctx.globalAlpha=flicker;ctx.stroke();ctx.globalAlpha=1;
+  }
+}
+function miniMatrix(ctx,W,H,cx,cy,R,t){
+  // Green code rain orbiting in columns
+  ctx.beginPath();ctx.arc(cx,cy,R+2,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(0,255,65,${0.4+Math.sin(t)*0.2})`;ctx.lineWidth=2;ctx.stroke();
+  const chars=['0','1','A','F','E','B','⬛','▓'];
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2+t*0.3;const drop=(t*2+i*0.7)%1;
+    const rx=cx+Math.cos(a)*(R+8+drop*10);const ry=cy+Math.sin(a)*(R+8+drop*10);
+    ctx.font=`bold ${8+Math.floor(drop*4)}px monospace`;
+    ctx.fillStyle=`rgba(0,255,65,${1-drop})`;
+    ctx.fillText(chars[Math.floor(t*5+i)%chars.length],rx-4,ry+4);
+  }
+}
+function miniPhoenix(ctx,W,H,cx,cy,R,t){
+  // Rising fire spiral
+  for(let arm=0;arm<3;arm++){
+    const baseA=(arm/3)*Math.PI*2;
+    for(let s=0;s<15;s++){
+      const p=s/15;const a=baseA+p*Math.PI*3+t*(1+arm*0.3);
+      const r=R*0.3+p*R*0.8;
+      const hue=15+p*40+Math.sin(t*2)*15;
+      const size=2+p*3+Math.sin(t*4+s)*1;
+      ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,size,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${hue},100%,${55+p*20}%,${0.8-p*0.3})`;ctx.fill();
+    }
+  }
+  // Core glow
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*0.4);
+  g.addColorStop(0,`rgba(255,200,50,0.5)`);g.addColorStop(1,`rgba(255,80,0,0)`);
+  ctx.beginPath();ctx.arc(cx,cy,R*0.4,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+}
+function miniDragon(ctx,W,H,cx,cy,R,t){
+  // Comet of fire orbiting fast
+  const cometA=t*2.5;const trailLen=20;
+  for(let i=0;i<trailLen;i++){
+    const p=i/trailLen;const a=cometA-p*1.8;
+    const r=R+3;
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,4*(1-p),0,Math.PI*2);
+    const hue=i<5?30:i<12?15:5;
+    ctx.fillStyle=`hsla(${hue+p*20},100%,60%,${1-p})`;ctx.fill();
+  }
+  // Dragon scale ring
+  for(let i=0;i<16;i++){
+    const a=(i/16)*Math.PI*2;
+    const pulse=Math.abs(Math.sin(t*3+i*0.4));
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*R,cy+Math.sin(a)*R,2+pulse*2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,${80+pulse*60},0,${0.5+pulse*0.4})`;ctx.fill();
+  }
+}
+function miniBlackhole(ctx,W,H,cx,cy,R,t){
+  // Light bending inward spiral
+  for(let arm=0;arm<5;arm++){
+    const baseA=(arm/5)*Math.PI*2+t*0.4;
+    ctx.beginPath();
+    for(let s=0;s<=30;s++){
+      const p=s/30;const a=baseA+p*Math.PI*4;const r=R*(1-p*0.7);
+      if(s===0)ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+      else ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    }
+    ctx.strokeStyle=`hsla(${270+arm*20},80%,65%,0.5)`;ctx.lineWidth=1.2;ctx.stroke();
+  }
+  // Event horizon ring
+  ctx.beginPath();ctx.arc(cx,cy,R+4,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(180,100,255,${0.4+Math.sin(t)*0.2})`;ctx.lineWidth=3;ctx.stroke();
+  // Dark core
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*0.5);
+  g.addColorStop(0,'rgba(0,0,0,0.9)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();ctx.arc(cx,cy,R*0.5,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+}
+function miniDna(ctx,W,H,cx,cy,R,t){
+  // Double helix orbiting the avatar
+  for(let strand=0;strand<2;strand++){
+    const offset=strand*Math.PI;
+    ctx.beginPath();
+    for(let s=0;s<=40;s++){
+      const p=s/40;const a=p*Math.PI*4+t+offset;const r=R+3+Math.sin(p*Math.PI*2)*4;
+      const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;
+      if(s===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=strand===0?`rgba(0,200,255,0.8)`:`rgba(255,80,200,0.8)`;ctx.lineWidth=2;ctx.stroke();
+  }
+  // Rungs between strands
+  for(let i=0;i<8;i++){
+    const p=i/8;const a=p*Math.PI*4+t;const r=R+3;
+    const x1=cx+Math.cos(a)*r,y1=cy+Math.sin(a)*r;
+    const x2=cx+Math.cos(a+Math.PI)*(r),y2=cy+Math.sin(a+Math.PI)*(r);
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    ctx.strokeStyle=`rgba(255,255,255,${0.2+Math.sin(t*3+i)*0.15})`;ctx.lineWidth=1;ctx.stroke();
+  }
+}
+function miniGodmode(ctx,W,H,cx,cy,R,t){
+  // EVERYTHING — all effects layered
+  // Outer rainbow rings
+  for(let ring=0;ring<4;ring++){
+    const r=R+ring*5+Math.sin(t*2+ring)*2;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    const hue=(t*60+ring*80)%360;
+    ctx.strokeStyle=`hsla(${hue},100%,65%,${0.6-ring*0.1})`;ctx.lineWidth=2;ctx.stroke();
+  }
+  // Lightning bolts
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2+t;const flicker=Math.abs(Math.sin(t*10+i));
+    if(flicker>0.4){
+      ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*(R+2),cy+Math.sin(a)*(R+2));
+      ctx.lineTo(cx+Math.cos(a+0.2)*(R+10+flicker*8),cy+Math.sin(a+0.2)*(R+10+flicker*8));
+      ctx.strokeStyle=`rgba(255,255,255,${flicker})`;ctx.lineWidth=1.5;ctx.stroke();
+    }
+  }
+  // Gold sparks orbiting
+  for(let i=0;i<12;i++){
+    const a=(i/12)*Math.PI*2+t*1.5;const sp=Math.abs(Math.sin(t*3+i));
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*(R+8),cy+Math.sin(a)*(R+8),sp*3+0.5,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,220,50,${sp})`;ctx.fill();
+  }
+}
+
 function equipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'};avatarState.equipped={...(avatarState.equipped||{})};avatarState.equipped[catMap[tab]]=item.id;if(tab==='frames')avatarState.frame=item.frameColor||'var(--accent)';if(tab==='effects')avatarState.effect=item.effect||'none';renderAvatarPreview();showShopTab(tab);playTone(659,'sine',0,0.15,0.2);playTone(784,'sine',0.12,0.15,0.2);}
 function unequipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'},noneMap={hats:'h_none',glasses:'g_none',frames:'f_none',effects:'e_none'};avatarState.equipped[catMap[tab]]=noneMap[tab];if(tab==='frames')avatarState.frame='var(--accent)';if(tab==='effects')avatarState.effect='none';renderAvatarPreview();showShopTab(tab);}
+async function buyBadge(id){
+  const item=SHOP_ITEMS.badges.find(b=>b.id===id);if(!item)return;
+  if(isAdmin){equipBadge(id);return;}
+  const credits=userStats.credits||0;
+  if(credits<item.price){showToast('Not enough credits! ⚡');return;}
+  const nc=credits-item.price;
+  if(!avatarState.owned)avatarState.owned={};
+  if(!avatarState.owned.badges)avatarState.owned.badges=['b_none','b_student'];
+  avatarState.owned.badges.push(id);
+  userStats.credits=nc;
+  document.getElementById('credit-count').textContent=isAdmin?'∞':nc;
+  await db.collection('users').doc(currentUser.uid).update({credits:nc,avatar:avatarState});
+  equipBadge(id);
+  playAchievementSound('sparkle');
+  showToast('Badge unlocked: '+item.icon+' '+item.name+' ✦');
+}
+function equipBadge(id){
+  if(!avatarState.equipped)avatarState.equipped={};
+  avatarState.equipped.badge=id;
+  avatarState.badge=id;
+  saveAvatar();
+  showShopTab('badges');
+  const item=SHOP_ITEMS.badges.find(b=>b.id===id);
+  if(item&&item.id!=='b_none')showToast('Badge equipped: '+item.name);
+}
+function unequipBadge(){
+  if(!avatarState.equipped)avatarState.equipped={};
+  avatarState.equipped.badge='b_none';
+  avatarState.badge='b_none';
+  saveAvatar();
+  showShopTab('badges');
+}
+async function saveAvatar(){
+  try{await db.collection('users').doc(currentUser.uid).update({avatar:avatarState});}catch(e){}
+}
+
 async function buyItem(tab,item){
   if(isAdmin) item = {...item, price: 0}; // Admin free purchases
   const credits=userStats.credits||0;
@@ -6397,7 +6901,7 @@ function applyLang(){
   setTxt('av-bg-colour', t('bg_colour'));
   setTxt('av-save-btn', t('save_avatar'));
   document.querySelectorAll('.shop-tab-btn').forEach((b,i)=>{
-    const keys=['hats','glasses','frames','themes','music'];
+    const keys=['hats','glasses','frames','badges','music'];
     if(keys[i]) b.textContent=t(keys[i]);
   });
   setTxt('av-earn-credits', t('earn_credits'));
@@ -7112,17 +7616,70 @@ function showTeamWaitingRoom(code, maxP) {
   document.getElementById('team-start-btn').style.opacity = '0.4';
 }
 
+function renderTeamWaitingPlayers(players) {
+  const pl = document.getElementById('team-player-list');
+  const hint = document.getElementById('team-assign-hint');
+  const hostBadge = document.getElementById('team-host-badge');
+  if (hostBadge) hostBadge.style.display = _teamIsHost ? 'block' : 'none';
+  if (hint) hint.style.display = _teamIsHost ? 'block' : 'none';
+  if (!pl) return;
+
+  // Build two-column layout
+  const teamA = players.filter(p => p.team === 'A');
+  const teamB = players.filter(p => p.team === 'B');
+
+  const makePlayerCard = (p) => {
+    const isMe = p.uid === currentUser?.uid;
+    const isHost = p.uid === _teamRoomHostUid;
+    const teamColor = p.team === 'A' ? 'var(--purple)' : 'var(--gold)';
+    const teamBg = p.team === 'A' ? 'rgba(167,139,250,0.15)' : 'rgba(240,192,96,0.12)';
+    const teamBorder = p.team === 'A' ? 'rgba(167,139,250,0.3)' : 'rgba(240,192,96,0.25)';
+    const otherTeam = p.team === 'A' ? 'B' : 'A';
+    const moveBtn = _teamIsHost && !isMe
+      ? `<button onclick="hostMovePlayer('${p.uid}','${otherTeam}')" style="margin-top:5px;width:100%;padding:4px;border-radius:7px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-size:10px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;" onmouseover="this.style.borderColor='${p.team==='A'?'rgba(240,192,96,0.5)':'rgba(167,139,250,0.5)'}';this.style.color='${p.team==='A'?'var(--gold)':'var(--purple)'}'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='var(--text-dim)'">→ Team ${otherTeam}</button>`
+      : '';
+    return `<div style="padding:8px 10px;border-radius:10px;background:${teamBg};border:1px solid ${teamBorder};font-size:12px;font-weight:600;color:${teamColor};text-align:center;min-width:80px;">
+      ${isHost ? '👑 ' : ''}${isMe ? '<strong>You</strong>' : p.name}
+      ${moveBtn}
+    </div>`;
+  };
+
+  pl.innerHTML = `
+    <div style="flex:1;min-width:110px;">
+      <div style="font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;text-align:center;">Team A (${teamA.length})</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${teamA.map(makePlayerCard).join('') || '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px;">Empty</div>'}</div>
+    </div>
+    <div style="width:1px;background:var(--border);align-self:stretch;margin:0 4px;"></div>
+    <div style="flex:1;min-width:110px;">
+      <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;text-align:center;">Team B (${teamB.length})</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">${teamB.map(makePlayerCard).join('') || '<div style="font-size:11px;color:var(--text-dim);text-align:center;padding:8px;">Empty</div>'}</div>
+    </div>`;
+}
+
+let _teamRoomHostUid = null;
+
+async function hostMovePlayer(uid, newTeam) {
+  if (!_teamIsHost || !_teamRoomId) return;
+  try {
+    const snap = await db.collection('teamMatches').doc(_teamRoomId).get();
+    const d = snap.data();
+    const updatedPlayers = (d.players || []).map(p => p.uid === uid ? { ...p, team: newTeam } : p);
+    await db.collection('teamMatches').doc(_teamRoomId).update({ players: updatedPlayers });
+    showToast(`Moved player to Team ${newTeam}`);
+  } catch(e) { showToast('Could not move player.'); }
+}
+
 function listenTeamRoom() {
   if (_teamRoomUnsub) { _teamRoomUnsub(); _teamRoomUnsub = null; }
   _teamRoomUnsub = db.collection('teamMatches').doc(_teamRoomId).onSnapshot(snap => {
     const d = snap.data(); if (!d) return;
+    _teamRoomHostUid = d.hostUid;
     // Update waiting room player list
     const waitEl = document.getElementById('team-waiting-overlay');
     if (waitEl.style.display !== 'none') {
-      const pl = document.getElementById('team-player-list');
       const pc = document.getElementById('team-player-count');
-      if (pl) { pl.innerHTML = d.players.map(p => `<div style="padding:6px 12px;border-radius:10px;background:${p.team==='A'?'rgba(167,139,250,0.15)':'rgba(240,192,96,0.12)'};border:1px solid ${p.team==='A'?'rgba(167,139,250,0.3)':'rgba(240,192,96,0.25)'};font-size:13px;font-weight:600;color:${p.team==='A'?'var(--purple)':'var(--gold)'};">${p.name} <span style="font-size:10px;opacity:0.7;">Team ${p.team}</span></div>`).join(''); }
       if (pc) pc.textContent = d.players.length;
+      renderTeamWaitingPlayers(d.players);
       // Enable start if enough players (at least 2, one per team)
       const startBtn = document.getElementById('team-start-btn');
       const teamA = d.players.filter(p=>p.team==='A').length;
@@ -7135,6 +7692,9 @@ function listenTeamRoom() {
     // Match started
     if (d.status === 'active' && waitEl.style.display !== 'none') {
       waitEl.style.display = 'none';
+      // Refresh my team in case host reassigned me
+      const myPlayer = (d.players || []).find(p => p.uid === currentUser?.uid);
+      if (myPlayer) _teamMyTeam = myPlayer.team;
       _teamQuestions = d.questions;
       _teamCurrentQ = 0; _teamMyScore = 0; _teamMyAnswers = []; _teamMyTimes = []; _teamMyBonuses = [];
       _teamResultShown = false;
@@ -7483,6 +8043,14 @@ function toggleBG() {
   }
 }
 window.toggleBG = toggleBG;
+window.hostMovePlayer = hostMovePlayer;
+window.equipBadge = equipBadge;
+window.buyBadge = buyBadge;
+window.unequipBadge = unequipBadge;
+window.switchBoardTab = switchBoardTab;
+
+// Tick monthly countdown every minute when leaderboard is open
+setInterval(() => { if (document.getElementById('monthly-countdown')) updateMonthlyCountdown(); }, 60000);
 
 function _applyBGToggleUI(on) {
   const btn = document.getElementById('bg-toggle-btn');
