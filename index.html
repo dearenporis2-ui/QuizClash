@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>QuizClash — AI Science & Maths Quizzes</title>
+<title>QuizClash — Science & Maths Quizzes</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -208,6 +208,15 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   z-index:100;margin-left:-1.25rem;margin-right:-1.25rem;padding-left:1.25rem;padding-right:1.25rem;padding-top:0.75rem;
   box-shadow:0 1px 0 rgba(255,255,255,0.06), 0 8px 24px rgba(0,0,0,0.4);
+  transform:translateY(0);
+  transition:transform 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, margin-bottom 0.4s ease;
+  will-change:transform;
+}
+.topbar.hidden{
+  transform:translateY(-110%);
+  opacity:0;
+  pointer-events:none;
+  margin-bottom:0;
 }
 .topbar-logo{font-family:'DM Serif Display',serif;font-size:20px;display:flex;align-items:center;gap:9px;}
 .topbar-logo .icon{
@@ -1028,6 +1037,242 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   border:1.5px solid rgba(255,255,255,0.07);
   cursor:pointer;transition:all 0.2s;text-align:center;
 }
+
+/* ══════════════════════════════════════════
+   REFERENCE TOOLS BAR
+   ══════════════════════════════════════════ */
+#ref-tools-bar{
+  display:none;
+  gap:6px;flex-wrap:wrap;
+  margin-top:14px;
+  margin-bottom:12px;
+  animation:fadeUp 0.3s ease both;
+  padding-top:0;
+}
+#ref-tools-bar.visible{ display:flex; }
+
+.ref-tool-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 13px;border-radius:999px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  color:var(--text-muted);
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;
+  white-space:nowrap;
+}
+.ref-tool-btn:hover{border-color:var(--border-hover);color:var(--text);transform:translateY(-1px);}
+.ref-tool-btn.active{background:var(--accent-dim);border-color:rgba(79,142,247,0.5);color:var(--accent);}
+
+/* ── MODAL OVERLAY ── */
+.ref-modal-overlay{
+  position:fixed;inset:0;background:rgba(7,8,15,0.85);z-index:900;
+  display:none;align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding:0;padding-top:140px;
+}
+.ref-modal-overlay.open{ display:flex; }
+
+.ref-modal{
+  width:100%;max-width:720px;
+  max-height:76vh;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:28px 28px 0 0;
+  /* NO overflow:hidden here — that breaks sticky header */
+  overflow:visible;
+  display:flex;flex-direction:column;
+  animation:slideUp 0.35s cubic-bezier(0.16,1,0.3,1) both;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.6);
+}
+
+/* Header is ALWAYS visible — pinned outside the scroll area */
+.ref-modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 14px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  /* Rounded top corners to match modal */
+  border-radius:28px 28px 0 0;
+  background:var(--surface);
+  position:relative;
+  z-index:10;
+}
+.ref-modal-title{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.ref-modal-close{
+  width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.15);
+  background:var(--surface3);color:var(--text);font-size:20px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(0,0,0,0.4);
+  line-height:1;
+}
+.ref-modal-close:hover{background:var(--red);border-color:var(--red);color:#fff;transform:scale(1.1);}
+
+/* Body is the ONLY scrollable part */
+.ref-modal-body{
+  overflow-y:auto;padding:16px 20px 24px;flex:1;
+  -webkit-overflow-scrolling:touch;
+  /* Rounded bottom of the visible sheet */
+  border-radius:0 0 0 0;
+  /* Clip body content to modal bounds without breaking sticky */
+  overflow-x:hidden;
+}
+
+/* ── CALCULATOR ── */
+.calc-display{
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:16px;padding:16px 18px;margin-bottom:14px;
+  text-align:right;
+}
+.calc-expr{font-size:12px;color:var(--text-dim);min-height:18px;margin-bottom:4px;word-break:break-all;}
+.calc-value{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);word-break:break-all;}
+.calc-display{
+  background:var(--surface3);border:1px solid var(--border);
+  border-radius:16px;padding:14px 18px 12px;margin-bottom:10px;
+  text-align:right;min-height:76px;display:flex;flex-direction:column;justify-content:flex-end;
+}
+.calc-expr{font-size:13px;color:var(--text-dim);min-height:18px;margin-bottom:4px;word-break:break-all;line-height:1.4;}
+.calc-value{font-family:'DM Serif Display',serif;font-size:30px;color:var(--text);word-break:break-all;line-height:1.1;}
+.calc-mode-row{display:flex;gap:6px;margin-bottom:10px;}
+.calc-mode-btn{flex:1;padding:6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);
+  color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}
+.calc-mode-btn.active{background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.5);color:var(--purple);}
+.calc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.calc-btn{
+  padding:13px 4px;border-radius:11px;border:none;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all 0.12s;
+  background:var(--surface2);color:var(--text);
+  border:1px solid var(--border);
+  line-height:1;
+}
+.calc-btn:active{transform:scale(0.91);}
+.calc-btn:hover{filter:brightness(1.15);}
+.calc-btn.op{background:rgba(79,142,247,0.12);color:var(--accent);border-color:rgba(79,142,247,0.3);}
+.calc-btn.eq{background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;box-shadow:0 4px 12px rgba(79,142,247,0.3);grid-column:span 2;}
+.calc-btn.clear{background:rgba(245,101,101,0.1);color:var(--red);border-color:rgba(245,101,101,0.3);}
+.calc-btn.fn{background:rgba(167,139,250,0.1);color:var(--purple);border-color:rgba(167,139,250,0.3);font-size:11px;}
+.calc-btn.paren{background:rgba(62,207,142,0.1);color:var(--green);border-color:rgba(62,207,142,0.3);}
+.calc-btn.num0{grid-column:span 2;}
+
+/* ── PERIODIC TABLE ── */
+.pt-search{
+  width:100%;padding:10px 14px;border-radius:12px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  margin-bottom:12px;
+}
+.pt-search:focus{border-color:var(--accent);}
+.pt-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.pt-filter-btn{
+  padding:5px 11px;border-radius:999px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-muted);
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;
+}
+.pt-filter-btn.active{background:var(--accent-dim);border-color:rgba(79,142,247,0.5);color:var(--accent);}
+.pt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:5px;}
+.pt-el{
+  padding:7px 4px;border-radius:10px;border:1px solid var(--border);
+  background:var(--surface2);cursor:pointer;text-align:center;
+  transition:all 0.15s;
+}
+.pt-el:hover{border-color:var(--border-hover);transform:scale(1.06);}
+.pt-el.highlight{border-color:rgba(79,142,247,0.5);background:var(--accent-dim);}
+.pt-num{font-size:9px;color:var(--text-dim);}
+.pt-sym{font-size:16px;font-weight:700;color:var(--text);}
+.pt-name{font-size:8px;color:var(--text-muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pt-mass{font-size:8px;color:var(--text-dim);}
+
+/* Element category colours */
+.pt-el[data-cat="alkali-metal"]{border-color:rgba(245,101,101,0.4);background:rgba(245,101,101,0.07);}
+.pt-el[data-cat="alkaline-earth-metal"]{border-color:rgba(240,160,80,0.4);background:rgba(240,160,80,0.07);}
+.pt-el[data-cat="transition-metal"]{border-color:rgba(240,192,96,0.3);background:rgba(240,192,96,0.06);}
+.pt-el[data-cat="post-transition-metal"]{border-color:rgba(62,207,142,0.3);background:rgba(62,207,142,0.06);}
+.pt-el[data-cat="metalloid"]{border-color:rgba(79,142,247,0.4);background:rgba(79,142,247,0.08);}
+.pt-el[data-cat="nonmetal"]{border-color:rgba(167,139,250,0.4);background:rgba(167,139,250,0.08);}
+.pt-el[data-cat="halogen"]{border-color:rgba(99,202,247,0.4);background:rgba(99,202,247,0.08);}
+.pt-el[data-cat="noble-gas"]{border-color:rgba(236,139,250,0.4);background:rgba(236,139,250,0.08);}
+.pt-el[data-cat="lanthanide"]{border-color:rgba(240,192,96,0.2);background:rgba(240,192,96,0.04);}
+.pt-el[data-cat="actinide"]{border-color:rgba(245,101,101,0.2);background:rgba(245,101,101,0.04);}
+
+/* Element detail card */
+.pt-detail{
+  background:var(--surface2);border:1px solid var(--border);border-radius:16px;
+  padding:14px 16px;margin-bottom:14px;display:none;
+  animation:fadeUp 0.2s ease both;
+}
+.pt-detail.show{display:block;}
+.pt-detail-sym{font-family:'DM Serif Display',serif;font-size:48px;color:var(--accent);}
+.pt-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.pt-detail-row{font-size:12px;}
+.pt-detail-label{color:var(--text-dim);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.pt-detail-val{color:var(--text);font-weight:600;}
+
+/* Category legend */
+.pt-legend{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.pt-legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);}
+.pt-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+
+/* ── FORMULA SHEET ── */
+.formula-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+.formula-tab-btn{
+  padding:7px 12px;border-radius:999px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-muted);
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;
+}
+.formula-tab-btn.active{background:var(--accent-dim);border-color:rgba(79,142,247,0.5);color:var(--accent);}
+.formula-section{display:none;}
+.formula-section.active{display:block;}
+.formula-card{
+  background:var(--surface2);border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;
+}
+.formula-card:hover{border-color:rgba(79,142,247,0.3);background:rgba(79,142,247,0.05);}
+.formula-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.formula-eq{
+  font-family:'DM Serif Display',serif;font-size:18px;color:var(--accent);
+  background:rgba(79,142,247,0.06);border:1px solid rgba(79,142,247,0.15);border-left:3px solid var(--accent);
+  border-radius:8px;padding:8px 12px;margin:6px 0;
+}
+.formula-desc{font-size:11px;color:var(--text-muted);line-height:1.5;}
+.formula-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.formula-var{
+  font-size:10px;padding:2px 8px;border-radius:999px;
+  background:var(--surface3);border:1px solid var(--border);color:var(--text-dim);
+}
+
+/* ── UNIT CONVERTER ── */
+.conv-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+.conv-tab-btn{
+  padding:7px 12px;border-radius:999px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text-muted);
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;
+}
+.conv-tab-btn.active{background:var(--green-dim);border-color:rgba(62,207,142,0.4);color:var(--green);}
+.conv-section{display:none;}
+.conv-section.active{display:block;}
+.conv-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;margin-bottom:12px;}
+.conv-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-dim);margin-bottom:5px;display:block;}
+.conv-field input{
+  width:100%;padding:11px 12px;border-radius:10px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;
+}
+.conv-field input:focus{border-color:var(--green);}
+.conv-arrow{font-size:20px;color:var(--text-dim);padding-bottom:10px;text-align:center;}
+.conv-from-sel,.conv-to-sel{
+  width:100%;padding:10px 12px;border-radius:10px;margin-top:8px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;cursor:pointer;
+}
+.conv-from-sel:focus,.conv-to-sel:focus{border-color:var(--green);}
+.conv-result-box{
+  background:var(--green-dim);border:1px solid rgba(62,207,142,0.3);
+  border-radius:14px;padding:14px 16px;text-align:center;margin-top:4px;
+}
+.conv-result-big{font-family:'DM Serif Display',serif;font-size:28px;color:var(--green);}
+.conv-result-label{font-size:12px;color:var(--text-muted);margin-top:4px;}
 </style>
 </head>
 <body>
@@ -1180,8 +1425,133 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       <div class="question-card"><span class="q-tag" id="q-tag"></span><p class="q-text" id="q-text"></p></div>
       <div class="options" id="options"></div>
-      <div id="explanation"><strong>AI Explanation</strong><span id="exp-text"></span></div>
+      <div id="explanation"><strong>Explanation</strong><span id="exp-text"></span></div>
+      <!-- REFERENCE TOOLS BAR — lives below the question so it never overlaps the sticky topbar -->
+      <div id="ref-tools-bar">
+        <button class="ref-tool-btn" id="reftool-calc" onclick="openRefTool('calc')">🧮 Calculator</button>
+        <button class="ref-tool-btn" id="reftool-ptable" onclick="openRefTool('ptable')">⚗️ Periodic Table</button>
+        <button class="ref-tool-btn" id="reftool-formulas" onclick="openRefTool('formulas')">📐 Formulas</button>
+        <button class="ref-tool-btn" id="reftool-convert" onclick="openRefTool('convert')">🔄 Unit Converter</button>
+      </div>
       <button id="next-btn" onclick="nextQuestion()">Next question →</button>
+    </div>
+
+    <!-- CALCULATOR MODAL -->
+    <div class="ref-modal-overlay" id="modal-calc" onclick="refModalBgClick(event,'modal-calc')">
+      <div class="ref-modal">
+        <div class="ref-modal-header" style="position:relative;padding-top:22px;">
+          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div>
+          <div class="ref-modal-title">🧮 Scientific Calculator</div>
+          <button class="ref-modal-close" onclick="closeRefModal('modal-calc')">✕</button>
+        </div>
+        <div class="ref-modal-body">
+          <div class="calc-display">
+            <div class="calc-expr" id="calc-expr"></div>
+            <div class="calc-value" id="calc-val">0</div>
+          </div>
+          <!-- Deg / Rad toggle -->
+          <div class="calc-mode-row">
+            <button class="calc-mode-btn active" id="calc-deg-btn" onclick="calcSetMode('deg')">DEG</button>
+            <button class="calc-mode-btn" id="calc-rad-btn" onclick="calcSetMode('rad')">RAD</button>
+            <button class="calc-mode-btn" id="calc-2nd-btn" onclick="calcToggle2nd()" style="flex:0.6;">2nd</button>
+          </div>
+          <div class="calc-grid">
+            <!-- Row 1: scientific -->
+            <button class="calc-btn fn" id="cbtn-sin" onclick="calcFn('sin')">sin</button>
+            <button class="calc-btn fn" id="cbtn-cos" onclick="calcFn('cos')">cos</button>
+            <button class="calc-btn fn" id="cbtn-tan" onclick="calcFn('tan')">tan</button>
+            <button class="calc-btn fn" onclick="calcFn('sqrt')">√</button>
+            <button class="calc-btn fn" onclick="calcInput('^')">xʸ</button>
+            <!-- Row 2: more scientific -->
+            <button class="calc-btn fn" onclick="calcFn('log')">log</button>
+            <button class="calc-btn fn" onclick="calcFn('ln')">ln</button>
+            <button class="calc-btn fn" onclick="calcInput('e')">e</button>
+            <button class="calc-btn fn" onclick="calcInput('π')">π</button>
+            <button class="calc-btn fn" onclick="calcSquare()">x²</button>
+            <!-- Row 3: parens, special ops -->
+            <button class="calc-btn paren" onclick="calcInput('(')"> ( </button>
+            <button class="calc-btn paren" onclick="calcInput(')')"> ) </button>
+            <button class="calc-btn fn" onclick="calcReciprocal()">1/x</button>
+            <button class="calc-btn fn" onclick="calcNegate()">±</button>
+            <button class="calc-btn fn" onclick="calcInput('%')">%</button>
+            <!-- Row 4: clear row -->
+            <button class="calc-btn clear" onclick="calcClear()" style="grid-column:span 2;">AC</button>
+            <button class="calc-btn clear" onclick="calcBack()">⌫</button>
+            <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+            <button class="calc-btn op" onclick="calcInput('*')">×</button>
+            <!-- Row 5 -->
+            <button class="calc-btn" onclick="calcInput('7')">7</button>
+            <button class="calc-btn" onclick="calcInput('8')">8</button>
+            <button class="calc-btn" onclick="calcInput('9')">9</button>
+            <button class="calc-btn op" style="grid-row:span 2;padding:0;" onclick="calcInput('-')">−</button>
+            <button class="calc-btn fn" onclick="calcAns()">Ans</button>
+            <!-- Row 6 -->
+            <button class="calc-btn" onclick="calcInput('4')">4</button>
+            <button class="calc-btn" onclick="calcInput('5')">5</button>
+            <button class="calc-btn" onclick="calcInput('6')">6</button>
+            <button class="calc-btn fn" onclick="calcFn('abs')">|x|</button>
+            <!-- Row 7 -->
+            <button class="calc-btn" onclick="calcInput('1')">1</button>
+            <button class="calc-btn" onclick="calcInput('2')">2</button>
+            <button class="calc-btn" onclick="calcInput('3')">3</button>
+            <button class="calc-btn op" style="grid-row:span 2;padding:0;" onclick="calcInput('+')">+</button>
+            <button class="calc-btn fn" onclick="calcFn('cbrt')">∛</button>
+            <!-- Row 8 -->
+            <button class="calc-btn num0" onclick="calcInput('0')">0</button>
+            <button class="calc-btn" onclick="calcInput('.')">.</button>
+            <button class="calc-btn eq" onclick="calcEquals()">=</button>
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:10px;text-align:center;">Does not affect your quiz score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERIODIC TABLE MODAL -->
+    <div class="ref-modal-overlay" id="modal-ptable" onclick="refModalBgClick(event,'modal-ptable')">
+      <div class="ref-modal">
+        <div class="ref-modal-header" style="position:relative;padding-top:22px;">
+          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div>
+          <div class="ref-modal-title">⚗️ Periodic Table</div>
+          <button class="ref-modal-close" onclick="closeRefModal('modal-ptable')">✕</button>
+        </div>
+        <div class="ref-modal-body">
+          <input class="pt-search" id="pt-search" placeholder="Search element, symbol or number…" oninput="filterPT(this.value)">
+          <div class="pt-filter-row" id="pt-filter-row"></div>
+          <div class="pt-detail" id="pt-detail"></div>
+          <div class="pt-legend" id="pt-legend"></div>
+          <div class="pt-grid" id="pt-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMULA SHEET MODAL -->
+    <div class="ref-modal-overlay" id="modal-formulas" onclick="refModalBgClick(event,'modal-formulas')">
+      <div class="ref-modal">
+        <div class="ref-modal-header" style="position:relative;padding-top:22px;">
+          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div>
+          <div class="ref-modal-title">📐 Formula Sheet</div>
+          <button class="ref-modal-close" onclick="closeRefModal('modal-formulas')">✕</button>
+        </div>
+        <div class="ref-modal-body">
+          <div class="formula-tabs" id="formula-tabs"></div>
+          <div id="formula-sections"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNIT CONVERTER MODAL -->
+    <div class="ref-modal-overlay" id="modal-convert" onclick="refModalBgClick(event,'modal-convert')">
+      <div class="ref-modal">
+        <div class="ref-modal-header" style="position:relative;padding-top:22px;">
+          <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;"></div>
+          <div class="ref-modal-title">🔄 Unit Converter</div>
+          <button class="ref-modal-close" onclick="closeRefModal('modal-convert')">✕</button>
+        </div>
+        <div class="ref-modal-body">
+          <div class="conv-tabs" id="conv-tabs"></div>
+          <div id="conv-sections"></div>
+        </div>
+      </div>
     </div>
     <div id="quiz-result">
       <div id="unlock-banner"></div>
@@ -2597,6 +2967,8 @@ function showView(name){
   if(name==='friends') loadFriendsView();
   if(name==='daily') loadDailyChallenge();
   if(name==='settings') loadSettings();
+  // Always restore topbar when switching views (quiz hides it only during active questions)
+  document.querySelector('.topbar').classList.remove('hidden');
   window.scrollTo({top:0,behavior:'smooth'});
   playNav();
 }
@@ -2614,6 +2986,8 @@ function selectSubject(btn){
     c.onclick=()=>selectTopic(c,tp);row.appendChild(c);
   });
   updateBtn();
+  // Show relevant reference tools for this subject
+  updateRefToolsBar(subject);
 }
 function selectTopic(chip,tp){
   document.querySelectorAll('.topic-chip').forEach(c=>c.classList.remove('active'));
@@ -3746,6 +4120,8 @@ async function startQuiz(){
     const qs=getQuestions(subject,topic,difficulty);
     if(!qs){hide('quiz-loading');show('quiz-setup');showToast(`No questions yet for "${topic}" on ${difficulty} difficulty.`);return;}
     questions=qs;currentQ=0;score=0;answered=false;
+    // Only hide topbar now — when the actual quiz questions appear
+    document.querySelector('.topbar').classList.add('hidden');
     hide('quiz-loading');show('active-quiz');quizStartTime=Date.now();
     document.getElementById('unlock-banner').style.display='none';
     document.getElementById('ring-fill').style.strokeDashoffset='307.9';
@@ -3780,7 +4156,7 @@ function selectAnswer(idx){
   if(idx!==q.answer){btns[idx].classList.add('wrong');playWrong();}
   else{score++;playCorrect();}
   const expEl=document.getElementById('explanation');
-  expEl.querySelector('strong').textContent='AI Explanation';
+  expEl.querySelector('strong').textContent='Explanation';
   document.getElementById('exp-text').textContent=q.explanation;
   show('explanation');
   const nb=document.getElementById('next-btn');
@@ -3799,7 +4175,7 @@ async function showResults(){
   } else {
     await saveResult(score,questions.length);
   }
-  hide('active-quiz');show('quiz-result');
+  hide('active-quiz');show('quiz-result');document.querySelector('.topbar').classList.remove('hidden');updateRefToolsBar(null);
   document.getElementById('res-score').textContent=score;
   document.getElementById('res-total').textContent='/'+questions.length;
   const pct=score/questions.length;
@@ -3818,7 +4194,7 @@ async function showResults(){
 }
 
 function retryQuiz(){hide('quiz-result');startQuiz();}
-function backToSetup(){hide('quiz-result');show('quiz-setup');}
+function backToSetup(){hide('quiz-result');show('quiz-setup');document.querySelector('.topbar').classList.remove('hidden');updateRefToolsBar(null);}
 
 // ── FEEDBACK ──
 let selectedStar=0;
@@ -5620,7 +5996,7 @@ function pvpShowQuestion(){
     </div>
     <div class="options" id="pvp-options"></div>
     <div id="pvp-explanation" style="display:none;background:var(--surface2);border-left:3px solid var(--accent);border-radius:12px;padding:14px 16px;font-size:14px;color:var(--text-muted);margin-bottom:1rem;">
-      <strong style="color:var(--accent);font-size:11px;text-transform:uppercase;display:block;margin-bottom:6px;">AI Explanation</strong>
+      <strong style="color:var(--accent);font-size:11px;text-transform:uppercase;display:block;margin-bottom:6px;">Explanation</strong>
       ${q.explanation}
     </div>
     <button id="pvp-next-btn" style="display:none;width:100%;padding:13px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;margin-top:0.5rem;" onclick="pvpNextQuestion()">
@@ -6553,7 +6929,7 @@ const LANG = {
     select_begin:'Select a subject and topic', choose_topic_above:'Choose a topic above',
     generating:'Generating your quiz...',
     question:'Question', of:'of', score:'Score',
-    ai_explanation:'AI Explanation', next_question:'Next question →', see_results:'See results →',
+    ai_explanation:'Explanation', next_question:'Next question →', see_results:'See results →',
     try_again:'Try again', new_topic:'New topic',
     perfect_title:'Perfect score!', perfect_sub:'Absolutely flawless. ✨',
     almost_title:'Almost perfect!', almost_sub:'Really strong work.',
@@ -6627,7 +7003,7 @@ const LANG = {
     select_begin:'Sélectionnez une matière et un sujet', choose_topic_above:'Choisissez un sujet ci-dessus',
     generating:'Génération de votre quiz...',
     question:'Question', of:'sur', score:'Score',
-    ai_explanation:'Explication IA', next_question:'Question suivante →', see_results:'Voir les résultats →',
+    ai_explanation:'Explication', next_question:'Question suivante →', see_results:'Voir les résultats →',
     try_again:'Réessayer', new_topic:'Nouveau sujet',
     perfect_title:'Score parfait !', perfect_sub:'Absolument impeccable.',
     almost_title:'Presque parfait !', almost_sub:'Très bon travail.',
@@ -6701,7 +7077,7 @@ const LANG = {
     select_begin:'Selecciona una materia y un tema', choose_topic_above:'Elige un tema arriba',
     generating:'Generando tu quiz...',
     question:'Pregunta', of:'de', score:'Puntuación',
-    ai_explanation:'Explicación IA', next_question:'Siguiente →', see_results:'Ver resultados →',
+    ai_explanation:'Explicación', next_question:'Siguiente →', see_results:'Ver resultados →',
     try_again:'Intentar de nuevo', new_topic:'Nuevo tema',
     perfect_title:'¡Puntuación perfecta!', perfect_sub:'Absolutamente impecable.',
     almost_title:'¡Casi perfecto!', almost_sub:'Muy buen trabajo.',
@@ -8029,6 +8405,608 @@ async function leaveTeamMatch() {
   showToast('Left the match.');
 }
 
+
+// ══════════════════════════════════════════════════════
+// REFERENCE TOOLS — Calculator, Periodic Table,
+//                   Formula Sheet, Unit Converter
+// ══════════════════════════════════════════════════════
+
+// ── Which tools to show per subject ──
+const REF_TOOL_SUBJECTS = {
+  calc:    ['Maths','Physics','Finance','Tax','Chemistry','Biology','Coding'],
+  ptable:  ['Chemistry','Biology','Physics'],
+  formulas:['Maths','Physics','Chemistry','Biology'],
+  convert: ['Physics','Chemistry','Maths','Biology'],
+};
+
+function updateRefToolsBar(subject) {
+  const bar = document.getElementById('ref-tools-bar');
+  if (!subject) { bar.classList.remove('visible'); return; }
+  const btns = {
+    calc:     document.getElementById('reftool-calc'),
+    ptable:   document.getElementById('reftool-ptable'),
+    formulas: document.getElementById('reftool-formulas'),
+    convert:  document.getElementById('reftool-convert'),
+  };
+  let anyVisible = false;
+  for (const [key, btn] of Object.entries(btns)) {
+    const show = REF_TOOL_SUBJECTS[key].includes(subject);
+    btn.style.display = show ? '' : 'none';
+    if (show) anyVisible = true;
+  }
+  bar.classList.toggle('visible', anyVisible);
+}
+
+function openRefTool(tool) {
+  document.getElementById('modal-' + tool).classList.add('open');
+  if (tool === 'ptable' && !window._ptBuilt) buildPeriodicTable();
+  if (tool === 'formulas' && !window._formulasBuilt) buildFormulas();
+  if (tool === 'convert' && !window._convertBuilt) buildConverter();
+}
+function closeRefModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function refModalBgClick(e, id) {
+  if (e.target === document.getElementById(id)) closeRefModal(id);
+}
+
+// Hook into the existing selectSubject function to show/hide tools
+
+// ══════════════════════════════════════════
+//   CALCULATOR  — full scientific rebuild
+// ══════════════════════════════════════════
+let _calcExpr = '';
+let _calcJustEvaled = false;
+let _calcAns = '0';
+let _calcDeg = true;   // true = degrees, false = radians
+let _calc2nd = false;  // 2nd function toggle
+
+function calcSetMode(mode) {
+  _calcDeg = (mode === 'deg');
+  document.getElementById('calc-deg-btn').classList.toggle('active', _calcDeg);
+  document.getElementById('calc-rad-btn').classList.toggle('active', !_calcDeg);
+}
+
+function calcToggle2nd() {
+  _calc2nd = !_calc2nd;
+  const btn = document.getElementById('calc-2nd-btn');
+  btn.classList.toggle('active', _calc2nd);
+  // Swap sin/cos/tan labels
+  const sinBtn = document.getElementById('cbtn-sin');
+  const cosBtn = document.getElementById('cbtn-cos');
+  const tanBtn = document.getElementById('cbtn-tan');
+  if (_calc2nd) {
+    sinBtn.textContent = 'sin⁻¹'; sinBtn.onclick = () => calcFn('asin');
+    cosBtn.textContent = 'cos⁻¹'; cosBtn.onclick = () => calcFn('acos');
+    tanBtn.textContent = 'tan⁻¹'; tanBtn.onclick = () => calcFn('atan');
+  } else {
+    sinBtn.textContent = 'sin'; sinBtn.onclick = () => calcFn('sin');
+    cosBtn.textContent = 'cos'; cosBtn.onclick = () => calcFn('cos');
+    tanBtn.textContent = 'tan'; tanBtn.onclick = () => calcFn('tan');
+  }
+}
+
+// Smart input: auto-close or auto-multiply where logical
+function calcInput(ch) {
+  if (_calcJustEvaled && /[0-9.(]/.test(ch)) { _calcExpr = ''; }
+  if (_calcJustEvaled && ch === '(') { _calcExpr = ''; }
+  _calcJustEvaled = false;
+
+  // Auto-multiply before ( if preceded by digit, ) or constant
+  if (ch === '(' && _calcExpr.length > 0 && /[0-9)eπ]$/.test(_calcExpr)) {
+    _calcExpr += '×';
+  }
+  // Replace special display chars
+  if (ch === 'π') { _calcExpr += 'π'; _renderCalc(); return; }
+  if (ch === 'e')  { _calcExpr += 'e'; _renderCalc(); return; }
+
+  _calcExpr += ch;
+  _renderCalc();
+}
+
+function calcFn(fn) {
+  if (_calcJustEvaled) { _calcExpr = ''; _calcJustEvaled = false; }
+  // Auto-multiply if preceded by a number or closing paren
+  if (_calcExpr.length > 0 && /[0-9)eπ]$/.test(_calcExpr)) _calcExpr += '×';
+  _calcExpr += fn + '(';
+  _renderCalc();
+}
+
+function calcSquare() {
+  if (_calcExpr === '') return;
+  _calcExpr = '(' + _calcExpr + ')²';
+  _renderCalc();
+}
+
+function calcReciprocal() {
+  if (_calcExpr === '') return;
+  _calcExpr = '1÷(' + _calcExpr + ')';
+  _renderCalc();
+}
+
+function calcNegate() {
+  if (_calcExpr === '' || _calcExpr === '0') return;
+  if (_calcExpr.startsWith('-(') && _calcExpr.endsWith(')')) {
+    _calcExpr = _calcExpr.slice(2, -1); // un-negate
+  } else {
+    _calcExpr = '-(' + _calcExpr + ')';
+  }
+  _renderCalc();
+}
+
+function calcAns() {
+  if (_calcJustEvaled) { _calcExpr = ''; _calcJustEvaled = false; }
+  _calcExpr += _calcAns;
+  _renderCalc();
+}
+
+function calcBack() {
+  if (_calcJustEvaled) { calcClear(); return; }
+  // Remove last token (handles multi-char like 'sin(', 'cos(', 'asin(', etc.)
+  const multis = ['asin(','acos(','atan(','sin(','cos(','tan(','sqrt(','cbrt(','log(','abs(','ln('];
+  for (const m of multis) {
+    if (_calcExpr.endsWith(m)) { _calcExpr = _calcExpr.slice(0, -m.length); _renderCalc(); return; }
+  }
+  _calcExpr = _calcExpr.slice(0, -1);
+  _renderCalc();
+}
+
+function calcClear() {
+  _calcExpr = '';
+  _calcJustEvaled = false;
+  document.getElementById('calc-val').textContent = '0';
+  document.getElementById('calc-expr').textContent = '';
+}
+
+// Core evaluator — converts display expression to JS-evaluable string
+function _calcPrepare(raw) {
+  // Replace display symbols
+  let e = raw
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/²/g, '**2')
+    .replace(/\^/g, '**')
+    .replace(/π/g, 'Math.PI')
+    .replace(/\be\b/g, 'Math.E')   // bare 'e' constant
+    .replace(/%/g, '/100');
+
+  // Trig: handle deg vs rad
+  const toRad = _calcDeg ? '*Math.PI/180' : '';
+  const fromRad = _calcDeg ? '*180/Math.PI' : '';
+
+  e = e
+    .replace(/asin\(/g,  `_asin(`)
+    .replace(/acos\(/g,  `_acos(`)
+    .replace(/atan\(/g,  `_atan(`)
+    .replace(/sin\(/g,   `_sin(`)
+    .replace(/cos\(/g,   `_cos(`)
+    .replace(/tan\(/g,   `_tan(`)
+    .replace(/sqrt\(/g,  `Math.sqrt(`)
+    .replace(/cbrt\(/g,  `Math.cbrt(`)
+    .replace(/log\(/g,   `Math.log10(`)
+    .replace(/ln\(/g,    `Math.log(`)
+    .replace(/abs\(/g,   `Math.abs(`);
+
+  return { expr: e, toRad, fromRad };
+}
+
+function _calcEvalSafe(raw) {
+  const { expr, toRad, fromRad } = _calcPrepare(raw);
+  function _sin(x)  { return Math.sin(x  * (toRad  ? Math.PI/180 : 1)); }
+  function _cos(x)  { return Math.cos(x  * (toRad  ? Math.PI/180 : 1)); }
+  function _tan(x)  { return Math.tan(x  * (toRad  ? Math.PI/180 : 1)); }
+  function _asin(x) { return Math.asin(x) * (fromRad ? 180/Math.PI : 1); }
+  function _acos(x) { return Math.acos(x) * (fromRad ? 180/Math.PI : 1); }
+  function _atan(x) { return Math.atan(x) * (fromRad ? 180/Math.PI : 1); }
+  // eslint-disable-next-line no-new-func
+  return Function('_sin,_cos,_tan,_asin,_acos,_atan',
+    '"use strict";return (' + expr + ')')(
+    _sin,_cos,_tan,_asin,_acos,_atan);
+}
+
+function calcEquals() {
+  if (_calcExpr === '') return;
+  try {
+    // Auto-close unclosed parens
+    let expr = _calcExpr;
+    const opens = (expr.match(/\(/g)||[]).length;
+    const closes = (expr.match(/\)/g)||[]).length;
+    if (opens > closes) expr += ')'.repeat(opens - closes);
+
+    const result = _calcEvalSafe(expr);
+    if (!isFinite(result)) throw new Error('Invalid');
+
+    const display = parseFloat(result.toPrecision(12)).toString();
+    document.getElementById('calc-expr').textContent = _calcExpr + ' =';
+    document.getElementById('calc-val').textContent = display;
+    _calcAns = display;
+    _calcExpr = display;
+    _calcJustEvaled = true;
+  } catch(e) {
+    document.getElementById('calc-val').textContent = 'Error';
+    document.getElementById('calc-expr').textContent = _calcExpr;
+    _calcJustEvaled = true;
+  }
+}
+
+function _renderCalc() {
+  // Pretty-print expression for display
+  const pretty = _calcExpr
+    .replace(/\*/g,'×')
+    .replace(/\//g,'÷');
+  document.getElementById('calc-expr').textContent = pretty;
+
+  // Live result preview
+  try {
+    let expr = _calcExpr;
+    // Auto-close unclosed parens for preview
+    const opens  = (expr.match(/\(/g)||[]).length;
+    const closes = (expr.match(/\)/g)||[]).length;
+    if (opens > closes) expr += ')'.repeat(opens - closes);
+
+    const r = _calcEvalSafe(expr);
+    if (isFinite(r) && _calcExpr.length > 0) {
+      const preview = parseFloat(r.toPrecision(10)).toString();
+      // Only show preview if different from what's being typed
+      if (preview !== _calcExpr) {
+        document.getElementById('calc-val').textContent = preview;
+      }
+    }
+  } catch(e) {
+    // Still typing — no preview yet
+    if (!_calcJustEvaled) document.getElementById('calc-val').textContent = _calcExpr || '0';
+  }
+}
+
+// ══════════════════════
+//   PERIODIC TABLE
+// ══════════════════════
+const PT_ELEMENTS = [
+  {n:1,sym:'H',name:'Hydrogen',mass:'1.008',cat:'nonmetal',config:'1s¹',group:1,period:1,state:'Gas',discovered:'1766'},
+  {n:2,sym:'He',name:'Helium',mass:'4.003',cat:'noble-gas',config:'1s²',group:18,period:1,state:'Gas',discovered:'1868'},
+  {n:3,sym:'Li',name:'Lithium',mass:'6.941',cat:'alkali-metal',config:'[He]2s¹',group:1,period:2,state:'Solid',discovered:'1817'},
+  {n:4,sym:'Be',name:'Beryllium',mass:'9.012',cat:'alkaline-earth-metal',config:'[He]2s²',group:2,period:2,state:'Solid',discovered:'1798'},
+  {n:5,sym:'B',name:'Boron',mass:'10.81',cat:'metalloid',config:'[He]2s²2p¹',group:13,period:2,state:'Solid',discovered:'1808'},
+  {n:6,sym:'C',name:'Carbon',mass:'12.011',cat:'nonmetal',config:'[He]2s²2p²',group:14,period:2,state:'Solid',discovered:'ancient'},
+  {n:7,sym:'N',name:'Nitrogen',mass:'14.007',cat:'nonmetal',config:'[He]2s²2p³',group:15,period:2,state:'Gas',discovered:'1772'},
+  {n:8,sym:'O',name:'Oxygen',mass:'15.999',cat:'nonmetal',config:'[He]2s²2p⁴',group:16,period:2,state:'Gas',discovered:'1774'},
+  {n:9,sym:'F',name:'Fluorine',mass:'18.998',cat:'halogen',config:'[He]2s²2p⁵',group:17,period:2,state:'Gas',discovered:'1886'},
+  {n:10,sym:'Ne',name:'Neon',mass:'20.180',cat:'noble-gas',config:'[He]2s²2p⁶',group:18,period:2,state:'Gas',discovered:'1898'},
+  {n:11,sym:'Na',name:'Sodium',mass:'22.990',cat:'alkali-metal',config:'[Ne]3s¹',group:1,period:3,state:'Solid',discovered:'1807'},
+  {n:12,sym:'Mg',name:'Magnesium',mass:'24.305',cat:'alkaline-earth-metal',config:'[Ne]3s²',group:2,period:3,state:'Solid',discovered:'1755'},
+  {n:13,sym:'Al',name:'Aluminium',mass:'26.982',cat:'post-transition-metal',config:'[Ne]3s²3p¹',group:13,period:3,state:'Solid',discovered:'1825'},
+  {n:14,sym:'Si',name:'Silicon',mass:'28.086',cat:'metalloid',config:'[Ne]3s²3p²',group:14,period:3,state:'Solid',discovered:'1824'},
+  {n:15,sym:'P',name:'Phosphorus',mass:'30.974',cat:'nonmetal',config:'[Ne]3s²3p³',group:15,period:3,state:'Solid',discovered:'1669'},
+  {n:16,sym:'S',name:'Sulfur',mass:'32.06',cat:'nonmetal',config:'[Ne]3s²3p⁴',group:16,period:3,state:'Solid',discovered:'ancient'},
+  {n:17,sym:'Cl',name:'Chlorine',mass:'35.45',cat:'halogen',config:'[Ne]3s²3p⁵',group:17,period:3,state:'Gas',discovered:'1774'},
+  {n:18,sym:'Ar',name:'Argon',mass:'39.948',cat:'noble-gas',config:'[Ne]3s²3p⁶',group:18,period:3,state:'Gas',discovered:'1894'},
+  {n:19,sym:'K',name:'Potassium',mass:'39.098',cat:'alkali-metal',config:'[Ar]4s¹',group:1,period:4,state:'Solid',discovered:'1807'},
+  {n:20,sym:'Ca',name:'Calcium',mass:'40.078',cat:'alkaline-earth-metal',config:'[Ar]4s²',group:2,period:4,state:'Solid',discovered:'1808'},
+  {n:26,sym:'Fe',name:'Iron',mass:'55.845',cat:'transition-metal',config:'[Ar]3d⁶4s²',group:8,period:4,state:'Solid',discovered:'ancient'},
+  {n:29,sym:'Cu',name:'Copper',mass:'63.546',cat:'transition-metal',config:'[Ar]3d¹⁰4s¹',group:11,period:4,state:'Solid',discovered:'ancient'},
+  {n:30,sym:'Zn',name:'Zinc',mass:'65.38',cat:'transition-metal',config:'[Ar]3d¹⁰4s²',group:12,period:4,state:'Solid',discovered:'ancient'},
+  {n:35,sym:'Br',name:'Bromine',mass:'79.904',cat:'halogen',config:'[Ar]3d¹⁰4s²4p⁵',group:17,period:4,state:'Liquid',discovered:'1826'},
+  {n:36,sym:'Kr',name:'Krypton',mass:'83.798',cat:'noble-gas',config:'[Ar]3d¹⁰4s²4p⁶',group:18,period:4,state:'Gas',discovered:'1898'},
+  {n:47,sym:'Ag',name:'Silver',mass:'107.87',cat:'transition-metal',config:'[Kr]4d¹⁰5s¹',group:11,period:5,state:'Solid',discovered:'ancient'},
+  {n:50,sym:'Sn',name:'Tin',mass:'118.71',cat:'post-transition-metal',config:'[Kr]4d¹⁰5s²5p²',group:14,period:5,state:'Solid',discovered:'ancient'},
+  {n:53,sym:'I',name:'Iodine',mass:'126.90',cat:'halogen',config:'[Kr]4d¹⁰5s²5p⁵',group:17,period:5,state:'Solid',discovered:'1811'},
+  {n:54,sym:'Xe',name:'Xenon',mass:'131.29',cat:'noble-gas',config:'[Kr]4d¹⁰5s²5p⁶',group:18,period:5,state:'Gas',discovered:'1898'},
+  {n:56,sym:'Ba',name:'Barium',mass:'137.33',cat:'alkaline-earth-metal',config:'[Xe]6s²',group:2,period:6,state:'Solid',discovered:'1808'},
+  {n:74,sym:'W',name:'Tungsten',mass:'183.84',cat:'transition-metal',config:'[Xe]4f¹⁴5d⁴6s²',group:6,period:6,state:'Solid',discovered:'1783'},
+  {n:78,sym:'Pt',name:'Platinum',mass:'195.08',cat:'transition-metal',config:'[Xe]4f¹⁴5d⁹6s¹',group:10,period:6,state:'Solid',discovered:'1735'},
+  {n:79,sym:'Au',name:'Gold',mass:'196.97',cat:'transition-metal',config:'[Xe]4f¹⁴5d¹⁰6s¹',group:11,period:6,state:'Solid',discovered:'ancient'},
+  {n:80,sym:'Hg',name:'Mercury',mass:'200.59',cat:'transition-metal',config:'[Xe]4f¹⁴5d¹⁰6s²',group:12,period:6,state:'Liquid',discovered:'ancient'},
+  {n:82,sym:'Pb',name:'Lead',mass:'207.2',cat:'post-transition-metal',config:'[Xe]4f¹⁴5d¹⁰6s²6p²',group:14,period:6,state:'Solid',discovered:'ancient'},
+  {n:86,sym:'Rn',name:'Radon',mass:'222',cat:'noble-gas',config:'[Xe]4f¹⁴5d¹⁰6s²6p⁶',group:18,period:6,state:'Gas',discovered:'1900'},
+  {n:88,sym:'Ra',name:'Radium',mass:'226',cat:'alkaline-earth-metal',config:'[Rn]7s²',group:2,period:7,state:'Solid',discovered:'1898'},
+  {n:92,sym:'U',name:'Uranium',mass:'238.03',cat:'actinide',config:'[Rn]5f³6d¹7s²',group:3,period:7,state:'Solid',discovered:'1789'},
+];
+
+const PT_CATS = {
+  'alkali-metal':          {label:'Alkali Metal',          color:'#f56565'},
+  'alkaline-earth-metal':  {label:'Alkaline Earth',        color:'#f0a050'},
+  'transition-metal':      {label:'Transition Metal',      color:'#f0c060'},
+  'post-transition-metal': {label:'Post-Transition',       color:'#3ecf8e'},
+  'metalloid':             {label:'Metalloid',             color:'#4f8ef7'},
+  'nonmetal':              {label:'Nonmetal',              color:'#a78bfa'},
+  'halogen':               {label:'Halogen',               color:'#63caf7'},
+  'noble-gas':             {label:'Noble Gas',             color:'#ec8bfa'},
+  'lanthanide':            {label:'Lanthanide',            color:'#f0c060'},
+  'actinide':              {label:'Actinide',              color:'#f56565'},
+};
+
+function buildPeriodicTable() {
+  window._ptBuilt = true;
+  // Legend
+  const legend = document.getElementById('pt-legend');
+  legend.innerHTML = Object.entries(PT_CATS).map(([k,v])=>
+    `<div class="pt-legend-item"><div class="pt-legend-dot" style="background:${v.color};"></div><span>${v.label}</span></div>`
+  ).join('');
+  // Filter buttons
+  const filterRow = document.getElementById('pt-filter-row');
+  filterRow.innerHTML = `<button class="pt-filter-btn active" onclick="filterPTCat('',this)">All</button>` +
+    Object.entries(PT_CATS).map(([k,v])=>
+      `<button class="pt-filter-btn" onclick="filterPTCat('${k}',this)">${v.label}</button>`
+    ).join('');
+  renderPTGrid(PT_ELEMENTS);
+}
+
+let _ptCurrentCat = '';
+
+function filterPTCat(cat, btn) {
+  _ptCurrentCat = cat;
+  document.querySelectorAll('.pt-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const search = document.getElementById('pt-search').value;
+  _applyPTFilter(search, cat);
+}
+
+function filterPT(search) {
+  _applyPTFilter(search, _ptCurrentCat);
+}
+
+function _applyPTFilter(search, cat) {
+  let filtered = PT_ELEMENTS;
+  if (cat) filtered = filtered.filter(e=>e.cat===cat);
+  if (search) {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(e=>
+      e.name.toLowerCase().includes(s) ||
+      e.sym.toLowerCase().includes(s) ||
+      String(e.n).includes(s)
+    );
+  }
+  renderPTGrid(filtered);
+}
+
+function renderPTGrid(elements) {
+  const grid = document.getElementById('pt-grid');
+  grid.innerHTML = elements.map(e=>`
+    <div class="pt-el" data-cat="${e.cat}" onclick="showPTDetail(${e.n})">
+      <div class="pt-num">${e.n}</div>
+      <div class="pt-sym">${e.sym}</div>
+      <div class="pt-name">${e.name}</div>
+      <div class="pt-mass">${e.mass}</div>
+    </div>
+  `).join('');
+}
+
+function showPTDetail(n) {
+  const el = PT_ELEMENTS.find(e=>e.n===n);
+  if (!el) return;
+  const catColor = PT_CATS[el.cat]?.color || '#4f8ef7';
+  const detail = document.getElementById('pt-detail');
+  detail.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="text-align:center;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:14px;padding:12px 18px;min-width:80px;">
+        <div style="font-size:11px;color:var(--text-dim);">${el.n}</div>
+        <div class="pt-detail-sym" style="color:${catColor};">${el.sym}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text);">${el.mass}</div>
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:8px;">${el.name}</div>
+        <div class="pt-detail-grid">
+          <div class="pt-detail-row"><div class="pt-detail-label">Category</div><div class="pt-detail-val" style="color:${catColor};">${PT_CATS[el.cat]?.label}</div></div>
+          <div class="pt-detail-row"><div class="pt-detail-label">State (STP)</div><div class="pt-detail-val">${el.state}</div></div>
+          <div class="pt-detail-row"><div class="pt-detail-label">Group / Period</div><div class="pt-detail-val">${el.group} / ${el.period}</div></div>
+          <div class="pt-detail-row"><div class="pt-detail-label">Discovered</div><div class="pt-detail-val">${el.discovered}</div></div>
+          <div class="pt-detail-row" style="grid-column:span 2"><div class="pt-detail-label">Electron Config</div><div class="pt-detail-val">${el.config}</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+  detail.classList.add('show');
+}
+
+// ══════════════════════
+//   FORMULA SHEET
+// ══════════════════════
+const FORMULAS = {
+  'Maths': [
+    {name:'Quadratic Formula',eq:'x = (−b ± √(b²−4ac)) / 2a',desc:'Roots of ax² + bx + c = 0',vars:['a, b, c = coefficients','x = roots']},
+    {name:'Area of Circle',eq:'A = πr²',desc:'Area of a circle',vars:['r = radius']},
+    {name:'Circumference',eq:'C = 2πr',desc:'Perimeter of a circle',vars:['r = radius']},
+    {name:'Pythagorean Theorem',eq:'a² + b² = c²',desc:'Right-angled triangle sides',vars:['c = hypotenuse']},
+    {name:'Gradient of a Line',eq:'m = (y₂−y₁) / (x₂−x₁)',desc:'Slope between two points',vars:['m = gradient']},
+    {name:'Equation of a Line',eq:'y = mx + c',desc:'Straight line form',vars:['m = gradient','c = y-intercept']},
+    {name:'Sine Rule',eq:'a/sin A = b/sin B = c/sin C',desc:'For any triangle',vars:[]},
+    {name:'Cosine Rule',eq:'a² = b² + c² − 2bc·cos A',desc:'For any triangle',vars:[]},
+    {name:'Area of Triangle',eq:'A = ½bh  OR  ½ab·sin C',desc:'',vars:['b = base','h = height']},
+    {name:'Compound Interest',eq:'A = P(1 + r/n)^(nt)',desc:'',vars:['P = principal','r = annual rate','n = times per year','t = years']},
+    {name:'Differentiation (Power Rule)',eq:"d/dx(xⁿ) = nxⁿ⁻¹",desc:'',vars:[]},
+    {name:'Integration (Power Rule)',eq:'∫xⁿ dx = xⁿ⁺¹/(n+1) + C',desc:'n ≠ −1',vars:[]},
+  ],
+  'Physics': [
+    {name:'Speed',eq:'v = d / t',desc:'',vars:['v = speed (m/s)','d = distance (m)','t = time (s)']},
+    {name:"Newton's 2nd Law",eq:'F = ma',desc:'',vars:['F = force (N)','m = mass (kg)','a = acceleration (m/s²)']},
+    {name:'Work Done',eq:'W = Fd·cos θ',desc:'',vars:['W = work (J)','F = force (N)','d = displacement (m)']},
+    {name:'Kinetic Energy',eq:'KE = ½mv²',desc:'',vars:['m = mass (kg)','v = velocity (m/s)']},
+    {name:'Gravitational PE',eq:'GPE = mgh',desc:'',vars:['m = mass (kg)','g = 9.81 m/s²','h = height (m)']},
+    {name:"Ohm's Law",eq:'V = IR',desc:'',vars:['V = voltage (V)','I = current (A)','R = resistance (Ω)']},
+    {name:'Power',eq:'P = IV = V²/R = I²R',desc:'',vars:['P = power (W)']},
+    {name:'Wave Speed',eq:'v = fλ',desc:'',vars:['f = frequency (Hz)','λ = wavelength (m)']},
+    {name:'Pressure',eq:'P = F / A',desc:'',vars:['P = pressure (Pa)','A = area (m²)']},
+    {name:'Density',eq:'ρ = m / V',desc:'',vars:['ρ = density (kg/m³)','V = volume (m³)']},
+    {name:'Momentum',eq:'p = mv',desc:'',vars:['p = momentum (kg·m/s)']},
+    {name:'Equations of Motion',eq:'v = u + at\ns = ut + ½at²\nv² = u² + 2as',desc:'SUVAT equations',vars:['u = initial velocity','v = final velocity','a = acceleration','s = displacement','t = time']},
+  ],
+  'Chemistry': [
+    {name:'Ideal Gas Law',eq:'PV = nRT',desc:'',vars:['P = pressure (Pa)','V = volume (m³)','n = moles','R = 8.314 J/mol·K','T = temperature (K)']},
+    {name:'Moles',eq:'n = m / M',desc:'',vars:['n = moles','m = mass (g)','M = molar mass (g/mol)']},
+    {name:'Concentration',eq:'c = n / V',desc:'',vars:['c = concentration (mol/L)','n = moles','V = volume (L)']},
+    {name:'pH Definition',eq:'pH = −log₁₀[H⁺]',desc:'',vars:['[H⁺] = hydrogen ion conc.']},
+    {name:'Enthalpy Change',eq:'ΔH = mcΔT',desc:'',vars:['m = mass (g)','c = 4.18 J/g°C for water','ΔT = temp change (°C)']},
+    {name:'Avogadro Constant',eq:'Nₐ = 6.022 × 10²³ mol⁻¹',desc:'Number of particles per mole',vars:[]},
+    {name:'Percent Yield',eq:'% yield = (actual/theoretical) × 100',desc:'',vars:[]},
+    {name:'Atom Economy',eq:'atom economy = (desired product Mr / total Mr reactants) × 100',desc:'',vars:[]},
+  ],
+  'Biology': [
+    {name:'Magnification',eq:'magnification = image size / actual size',desc:'',vars:[]},
+    {name:'Net Productivity',eq:'NP = GP − R',desc:'',vars:['GP = gross productivity','R = respiration losses']},
+    {name:'Hardy-Weinberg (freq)',eq:'p + q = 1\np² + 2pq + q² = 1',desc:'Allele & genotype frequencies',vars:['p = dominant allele freq','q = recessive allele freq']},
+    {name:'Simpson\'s Diversity',eq:"D = 1 − Σ(n(n−1)) / N(N−1)",desc:'Biodiversity index',vars:['n = individuals per species','N = total individuals']},
+    {name:'Cardiac Output',eq:'CO = SV × HR',desc:'',vars:['SV = stroke volume (mL)','HR = heart rate (bpm)']},
+    {name:'Surface Area to Volume',eq:'SA:V = surface area / volume',desc:'Key for diffusion efficiency',vars:[]},
+  ],
+};
+
+function buildFormulas() {
+  window._formulasBuilt = true;
+  const tabsEl = document.getElementById('formula-tabs');
+  const sectionsEl = document.getElementById('formula-sections');
+  const subjects = Object.keys(FORMULAS);
+  tabsEl.innerHTML = subjects.map((s,i)=>
+    `<button class="formula-tab-btn${i===0?' active':''}" onclick="switchFormulaTab('${s}',this)">${s}</button>`
+  ).join('');
+  sectionsEl.innerHTML = subjects.map((s,i)=>`
+    <div class="formula-section${i===0?' active':''}" id="fsec-${s}">
+      ${FORMULAS[s].map(f=>`
+        <div class="formula-card">
+          <div class="formula-name">${f.name}</div>
+          <div class="formula-eq">${f.eq.replace(/\n/g,'<br>')}</div>
+          ${f.desc?`<div class="formula-desc">${f.desc}</div>`:''}
+          ${f.vars.length?`<div class="formula-vars">${f.vars.map(v=>`<span class="formula-var">${v}</span>`).join('')}</div>`:''}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function switchFormulaTab(subject, btn) {
+  document.querySelectorAll('.formula-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.formula-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  const sec = document.getElementById('fsec-'+subject);
+  if (sec) sec.classList.add('active');
+}
+
+// ══════════════════════
+//   UNIT CONVERTER
+// ══════════════════════
+const CONV_CATEGORIES = {
+  'Length': {
+    units: ['mm','cm','m','km','in','ft','yd','mi','nm','μm'],
+    toBase: {mm:0.001,cm:0.01,m:1,km:1000,in:0.0254,ft:0.3048,yd:0.9144,mi:1609.344,nm:1e-9,'μm':1e-6},
+    base:'m'
+  },
+  'Mass': {
+    units: ['mg','g','kg','tonnes','oz','lb','st'],
+    toBase: {mg:1e-6,g:0.001,kg:1,tonnes:1000,oz:0.028349523,lb:0.453592,st:6.35029},
+    base:'kg'
+  },
+  'Temperature': {
+    units: ['°C','°F','K'],
+    toBase: null, // special
+    base:'°C'
+  },
+  'Speed': {
+    units: ['m/s','km/h','mph','knots','ft/s'],
+    toBase: {'m/s':1,'km/h':1/3.6,'mph':0.44704,'knots':0.514444,'ft/s':0.3048},
+    base:'m/s'
+  },
+  'Volume': {
+    units: ['mL','L','m³','cm³','pint','gallon (UK)','fl oz'],
+    toBase: {mL:0.001,L:1,'m³':1000,'cm³':0.001,'pint':0.568261,'gallon (UK)':4.54609,'fl oz':0.0284131},
+    base:'L'
+  },
+  'Energy': {
+    units: ['J','kJ','MJ','cal','kcal','kWh','eV'],
+    toBase: {J:1,kJ:1000,MJ:1e6,cal:4.184,kcal:4184,'kWh':3.6e6,'eV':1.602176634e-19},
+    base:'J'
+  },
+  'Pressure': {
+    units: ['Pa','kPa','MPa','bar','atm','psi','mmHg'],
+    toBase: {Pa:1,kPa:1000,MPa:1e6,bar:100000,atm:101325,psi:6894.757,mmHg:133.322},
+    base:'Pa'
+  },
+  'Time': {
+    units: ['ms','s','min','h','days','weeks','years'],
+    toBase: {ms:0.001,s:1,min:60,h:3600,days:86400,weeks:604800,years:31557600},
+    base:'s'
+  },
+};
+
+function buildConverter() {
+  window._convertBuilt = true;
+  const tabs = document.getElementById('conv-tabs');
+  const sections = document.getElementById('conv-sections');
+  const cats = Object.keys(CONV_CATEGORIES);
+  tabs.innerHTML = cats.map((c,i)=>
+    `<button class="conv-tab-btn${i===0?' active':''}" onclick="switchConvTab('${c}',this)">${c}</button>`
+  ).join('');
+  sections.innerHTML = cats.map((cat,i)=>{
+    const cfg = CONV_CATEGORIES[cat];
+    return `
+      <div class="conv-section${i===0?' active':''}" id="csec-${cat}">
+        <div class="conv-row">
+          <div class="conv-field">
+            <label>From</label>
+            <input type="number" id="conv-from-${cat}" placeholder="Enter value" oninput="doConvert('${cat}')">
+            <select class="conv-from-sel" id="conv-from-unit-${cat}" onchange="doConvert('${cat}')">
+              ${cfg.units.map(u=>`<option value="${u}">${u}</option>`).join('')}
+            </select>
+          </div>
+          <div class="conv-arrow">→</div>
+          <div class="conv-field">
+            <label>To</label>
+            <input type="number" id="conv-to-${cat}" placeholder="Result" readonly style="opacity:0.7;cursor:default;">
+            <select class="conv-to-sel" id="conv-to-unit-${cat}" onchange="doConvert('${cat}')">
+              ${cfg.units.map((u,i)=>`<option value="${u}"${i===1?' selected':''}>${u}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="conv-result-box" id="conv-result-${cat}" style="display:none;">
+          <div class="conv-result-big" id="conv-result-big-${cat}"></div>
+          <div class="conv-result-label" id="conv-result-label-${cat}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function switchConvTab(cat, btn) {
+  document.querySelectorAll('.conv-tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.conv-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  const sec = document.getElementById('csec-'+cat);
+  if (sec) sec.classList.add('active');
+}
+
+function doConvert(cat) {
+  const cfg = CONV_CATEGORIES[cat];
+  const fromVal = parseFloat(document.getElementById('conv-from-'+cat).value);
+  const fromUnit = document.getElementById('conv-from-unit-'+cat).value;
+  const toUnit = document.getElementById('conv-to-unit-'+cat).value;
+  const resultInput = document.getElementById('conv-to-'+cat);
+  const resultBox = document.getElementById('conv-result-'+cat);
+  const resultBig = document.getElementById('conv-result-big-'+cat);
+  const resultLabel = document.getElementById('conv-result-label-'+cat);
+
+  if (isNaN(fromVal)) { resultBox.style.display='none'; resultInput.value=''; return; }
+
+  let result;
+  if (cat === 'Temperature') {
+    // Special case
+    let celsius;
+    if (fromUnit==='°C') celsius = fromVal;
+    else if (fromUnit==='°F') celsius = (fromVal - 32) * 5/9;
+    else celsius = fromVal - 273.15; // K
+
+    if (toUnit==='°C') result = celsius;
+    else if (toUnit==='°F') result = celsius * 9/5 + 32;
+    else result = celsius + 273.15; // K
+  } else {
+    const toBaseMultiplier = cfg.toBase[fromUnit];
+    const fromBaseMultiplier = cfg.toBase[toUnit];
+    result = (fromVal * toBaseMultiplier) / fromBaseMultiplier;
+  }
+
+  const display = parseFloat(result.toPrecision(8)).toString();
+  resultInput.value = display;
+  resultBox.style.display = 'block';
+  resultBig.textContent = display + ' ' + toUnit;
+  resultLabel.textContent = `${fromVal} ${fromUnit} = ${display} ${toUnit}`;
+}
 
 // ── BG TOGGLE ──
 function toggleBG() {
