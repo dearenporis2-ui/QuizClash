@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2315,7 +2314,7 @@ function calcAvg(s){const scores=Object.values(s.topicScores||{});return scores.
 let currentUser=null,userStats={};
 let subject=null,topic=null,difficulty='easy';
 let questions=[],currentQ=0,score=0,answered=false;
-let quizStartTime=null,quizElapsed=999;
+let quizStartTime=null,quizElapsed=999,_quizResultSaved=false;
 
 // ── TOAST ──
 function showToast(msg, duration=2500){
@@ -4120,7 +4119,7 @@ async function startQuiz(){
   setTimeout(()=>{
     const qs=getQuestions(subject,topic,difficulty);
     if(!qs){hide('quiz-loading');show('quiz-setup');showToast(`No questions yet for "${topic}" on ${difficulty} difficulty.`);return;}
-    questions=qs;currentQ=0;score=0;answered=false;
+    questions=qs;currentQ=0;score=0;answered=false;_quizResultSaved=false;
     // Only hide topbar now — when the actual quiz questions appear
     document.querySelector('.topbar').classList.add('hidden');
     hide('quiz-loading');show('active-quiz');quizStartTime=Date.now();
@@ -4172,9 +4171,9 @@ async function showResults(){
   // Handle daily challenge mode
   if(window._isDailyChallenge){
     window._isDailyChallenge=false;
-    await saveDailyResult(score,questions.length);
+    if(!_quizResultSaved){_quizResultSaved=true;await saveDailyResult(score,questions.length);}
   } else {
-    await saveResult(score,questions.length);
+    if(!_quizResultSaved){_quizResultSaved=true;await saveResult(score,questions.length);}
   }
   hide('active-quiz');show('quiz-result');document.querySelector('.topbar').classList.remove('hidden');updateRefToolsBar(null);
   document.getElementById('res-score').textContent=score;
@@ -6561,7 +6560,7 @@ function startDailyChallenge(){
   if(!qs){showToast("No questions for today's challenge yet!");return;}
   // Set quiz state
   subject=challenge.subject;topic=challenge.topic;difficulty=challenge.difficulty;
-  questions=qs;currentQ=0;score=0;answered=false;
+  questions=qs;currentQ=0;score=0;answered=false;_quizResultSaved=false;
   quizStartTime=Date.now();
   // Mark as daily mode
   window._isDailyChallenge=true;
