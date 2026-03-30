@@ -784,6 +784,94 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 }
 
 /* ════════════════════════════════════════════
+   RANKED SEASON SYSTEM
+   ════════════════════════════════════════════ */
+
+/* Rank badge pill shown in leaderboard rows */
+.rank-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:999px;font-size:10px;font-weight:800;
+  letter-spacing:0.4px;flex-shrink:0;white-space:nowrap;
+}
+.rank-badge svg{flex-shrink:0;}
+
+/* Rank card on dashboard */
+.rank-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:18px 20px;margin-bottom:1.25rem;position:relative;overflow:hidden;
+  transition:border-color 0.3s;
+}
+.rank-card::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--rank-glow,rgba(79,142,247,0.6)),transparent);
+}
+.rank-card-inner{display:flex;align-items:center;gap:14px;}
+.rank-icon-wrap{position:relative;flex-shrink:0;}
+.rank-card-info{flex:1;min-width:0;}
+.rank-card-name{font-family:'DM Serif Display',serif;font-size:20px;line-height:1.2;}
+.rank-card-sub{font-size:12px;color:var(--text-muted);margin-top:3px;}
+.rank-lp-bar-wrap{margin-top:10px;}
+.rank-lp-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:5px;}
+.rank-lp-track{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.rank-lp-fill{height:6px;border-radius:3px;transition:width 1s cubic-bezier(0.4,0,0.2,1);}
+
+/* Rank-change modal */
+#rank-change-overlay{
+  position:fixed;inset:0;z-index:2000;background:rgba(7,8,15,0.96);
+  display:none;align-items:center;justify-content:center;padding:1rem;
+  animation:fadeIn 0.25s ease both;
+}
+#rank-change-overlay.show{display:flex;}
+.rank-change-sheet{
+  background:var(--surface);border:1px solid var(--border);border-radius:28px;
+  padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;
+  position:relative;overflow:hidden;
+  animation:pop 0.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+.rank-change-sheet::before{
+  content:'';position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--modal-glow,rgba(79,142,247,0.7)),transparent);
+}
+#rank-change-canvas{position:absolute;inset:0;pointer-events:none;border-radius:28px;}
+.rank-change-icon{
+  width:100px;height:100px;margin:0 auto 1rem;position:relative;display:flex;align-items:center;justify-content:center;
+}
+.rank-change-title{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:6px;}
+.rank-change-sub{font-size:14px;color:var(--text-muted);margin-bottom:1.75rem;line-height:1.6;}
+.rank-change-close{
+  width:100%;padding:14px;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 20px rgba(79,142,247,0.4);transition:all 0.2s;
+}
+.rank-change-close:hover{transform:translateY(-2px);}
+
+/* Rank tab on leaderboard */
+#board-tab-ranked{flex:1;padding:9px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+
+/* Rank tier glows for rank card border */
+.rank-card[data-tier="iron"]    {--rank-glow:rgba(140,140,160,0.5);}
+.rank-card[data-tier="bronze"]  {--rank-glow:rgba(180,100,60,0.6);}
+.rank-card[data-tier="silver"]  {--rank-glow:rgba(160,180,210,0.6);}
+.rank-card[data-tier="gold"]    {--rank-glow:rgba(240,192,96,0.7);}
+.rank-card[data-tier="platinum"]{--rank-glow:rgba(100,220,200,0.7);}
+.rank-card[data-tier="diamond"] {--rank-glow:rgba(100,180,255,0.8);}
+.rank-card[data-tier="master"]  {--rank-glow:rgba(167,139,250,0.8);}
+.rank-card[data-tier="grandmaster"]{--rank-glow:rgba(255,80,80,0.8);}
+.rank-card[data-tier="challenger"]{--rank-glow:rgba(255,255,255,0.9);}
+
+@keyframes rankUp{
+  0%{transform:scale(0.7) translateY(20px);opacity:0;}
+  60%{transform:scale(1.08) translateY(-4px);}
+  100%{transform:scale(1) translateY(0);opacity:1;}
+}
+@keyframes rankDown{
+  0%{transform:scale(0.8);opacity:0;}
+  100%{transform:scale(1);opacity:1;}
+}
+@keyframes lpFill{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+
+/* ════════════════════════════════════════════
    MAJESTIC HUD OVERRIDES
    ════════════════════════════════════════════ */
 
@@ -1385,6 +1473,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         <div class="stat-label">🏅 Best Subject</div><div class="stat-value" style="font-size:18px;line-height:1.4;" id="stat-best">—</div><div class="stat-sub" id="stat-best-sub"></div>
       </div>
     </div>
+    <!-- ── RANK CARD ── -->
+    <div class="rank-card" id="rank-card-wrap" data-tier="iron" style="border-color:rgba(140,140,160,0.35);">
+      <div class="rank-card-inner">
+        <div class="rank-icon-wrap" style="opacity:0.4;font-size:30px;">🏅</div>
+        <div class="rank-card-info">
+          <div class="rank-card-name" style="color:var(--text-muted)">Loading rank…</div>
+          <div class="rank-card-sub">Complete quizzes to earn LP</div>
+        </div>
+      </div>
+    </div>
+
     <p class="section-title" id="ach-section">Achievements</p>
     <div class="achievements-grid" id="ach-grid"></div>
     <p class="section-title" id="weak-section">Weak Topics</p>
@@ -1600,6 +1699,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div style="display:flex;gap:4px;margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:3px;">
       <button id="board-tab-monthly" onclick="switchBoardTab('monthly')" style="flex:1;padding:9px;border-radius:9px;border:none;background:linear-gradient(135deg,rgba(240,192,96,0.2),rgba(167,139,250,0.15));color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">🗓️ This Month</button>
       <button id="board-tab-alltime" onclick="switchBoardTab('alltime')" style="flex:1;padding:9px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">🏅 All Time</button>
+      <button id="board-tab-ranked" onclick="switchBoardTab('ranked')" style="flex:1;padding:9px;border-radius:9px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">🏆 Ranked</button>
     </div>
     <!-- Online Users Panel -->
     <div id="online-panel">
@@ -1869,6 +1969,17 @@ service cloud.firestore {
     </div>
   </div>
 
+
+  <!-- ════ RANK CHANGE MODAL ════ -->
+  <div id="rank-change-overlay">
+    <div class="rank-change-sheet">
+      <canvas id="rank-change-canvas"></canvas>
+      <div class="rank-change-icon" id="rank-change-icon"></div>
+      <div class="rank-change-title" id="rank-change-title">Rank Up!</div>
+      <div class="rank-change-sub" id="rank-change-sub"></div>
+      <button class="rank-change-close" onclick="closeRankModal()">Continue</button>
+    </div>
+  </div>
 
   <!-- ════ WARNING MODAL (shown to users on login if admin sent a warning) ════ -->
   <div id="warning-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;">
@@ -2578,6 +2689,9 @@ function renderDash(){
   if(dailySub)dailySub.textContent=dailyDone?"Come back tomorrow":"Tap to start today's challenge";
   if(dailyIcon)dailyIcon.textContent=dailyDone?'✅':'🎯';
   if(dailyBonus)dailyBonus.textContent=dailyDone?'Streak: '+(s.streak||0)+'🔥':'+50 XP bonus';
+  // Render rank card
+  renderRankCard();
+
   const scores=Object.values(s.topicScores||{});
   document.getElementById('stat-avg').textContent=scores.length?Math.round(scores.reduce((a,b)=>a+b.avg,0)/scores.length)+'%':'—';
   const bySubj={};
@@ -2648,6 +2762,16 @@ async function saveResult(sc,total){
   const achievements=[...(s.achievements||[]),...newlyUnlocked.map(a=>a.id)];
   await ref.update({topicScores:ts,streak,lastQuizDate:today,hasPerfect,perfectCount,totalQuizzes,recentQuizzes:rq,achievements,subjectCount,nightOwl,earlyBird,speedRun,credits,xp,name:userStats.name||currentUser.displayName||currentUser.email.split('@')[0],monthlyScore:firebase.firestore.FieldValue.increment(sc)});
   userStats={...newStats,achievements};renderDash();
+
+  // ── Ranked LP update ──
+  const oldLP = lpFromScore(s.monthlyScore || 0);
+  const newMonthlyScore = (s.monthlyScore || 0) + sc;
+  const newLP = lpFromScore(newMonthlyScore);
+  userStats.monthlyScore = newMonthlyScore;
+  setTimeout(() => {
+    renderRankCard();
+    showRankChangeModal(oldLP, newLP);
+  }, 800);
   // Show XP earned
   showToast(`+${xpEarned} XP${leveledUp?' — LEVEL UP! 🎉':''}${sc===total?' ⭐ Perfect!':''}`);
   if(leveledUp)playLevelUp();
@@ -2813,17 +2937,23 @@ let _boardTab = 'monthly'; // 'monthly' | 'alltime'
 
 function switchBoardTab(tab) {
   _boardTab = tab;
-  const monthBtn = document.getElementById('board-tab-monthly');
-  const alltimeBtn = document.getElementById('board-tab-alltime');
+  const monthBtn  = document.getElementById('board-tab-monthly');
+  const alltimeBtn= document.getElementById('board-tab-alltime');
+  const rankedBtn = document.getElementById('board-tab-ranked');
   if (monthBtn) {
-    monthBtn.style.background = tab === 'monthly' ? 'linear-gradient(135deg,rgba(240,192,96,0.2),rgba(167,139,250,0.15))' : 'transparent';
-    monthBtn.style.color = tab === 'monthly' ? 'var(--text)' : 'var(--text-muted)';
-    monthBtn.style.fontWeight = tab === 'monthly' ? '700' : '600';
+    monthBtn.style.background  = tab==='monthly'  ? 'linear-gradient(135deg,rgba(240,192,96,0.2),rgba(167,139,250,0.15))' : 'transparent';
+    monthBtn.style.color       = tab==='monthly'  ? 'var(--text)' : 'var(--text-muted)';
+    monthBtn.style.fontWeight  = tab==='monthly'  ? '700' : '600';
   }
   if (alltimeBtn) {
-    alltimeBtn.style.background = tab === 'alltime' ? 'linear-gradient(135deg,rgba(79,142,247,0.2),rgba(167,139,250,0.12))' : 'transparent';
-    alltimeBtn.style.color = tab === 'alltime' ? 'var(--text)' : 'var(--text-muted)';
-    alltimeBtn.style.fontWeight = tab === 'alltime' ? '700' : '600';
+    alltimeBtn.style.background= tab==='alltime'  ? 'linear-gradient(135deg,rgba(79,142,247,0.2),rgba(167,139,250,0.12))' : 'transparent';
+    alltimeBtn.style.color     = tab==='alltime'  ? 'var(--text)' : 'var(--text-muted)';
+    alltimeBtn.style.fontWeight= tab==='alltime'  ? '700' : '600';
+  }
+  if (rankedBtn) {
+    rankedBtn.style.background = tab==='ranked'   ? 'linear-gradient(135deg,rgba(240,192,96,0.22),rgba(255,80,80,0.12))' : 'transparent';
+    rankedBtn.style.color      = tab==='ranked'   ? '#f0c060' : 'var(--text-muted)';
+    rankedBtn.style.fontWeight = tab==='ranked'   ? '700' : '600';
   }
   loadLeaderboard();
 }
@@ -2906,25 +3036,19 @@ async function addMonthlyScore(points) {
 async function loadLeaderboard(){
   document.getElementById('board-loading').style.display='block';
   document.getElementById('board-list').innerHTML='';
-  // Cancel any running frame animations from previous render
   cancelAllMiniFrames();
-  // Update countdown
   updateMonthlyCountdown();
-  // Load online users panel in parallel
   loadOnlineUsers();
-  // Check monthly reset (safe to call often — only acts when month changes)
   checkMonthlyReset().catch(()=>{});
 
   try{
     const now=Date.now();
-    // For monthly tab, order by monthlyScore; for all-time, by avg
     let snap;
-    if (_boardTab === 'monthly') {
-      snap = await db.collection('users').orderBy('monthlyScore','desc').limit(20).get();
+    if (_boardTab === 'monthly' || _boardTab === 'ranked') {
+      snap = await db.collection('users').orderBy('monthlyScore','desc').limit(50).get();
     } else {
       snap = await db.collection('users').orderBy('totalQuizzes','desc').limit(20).get();
     }
-    // Build a quick online-status map
     const onlineMap={};
     snap.forEach(doc=>{const d=doc.data();const diff=now-(d.lastSeen||0);onlineMap[doc.id]=diff<120000?'online':diff<600000?'away':'offline';});
     const users=[];
@@ -2940,24 +3064,57 @@ async function loadLeaderboard(){
       const glassE=(glassId&&glassId!=='g_none')?(glassMap[glassId]||''):'';
       const userLevel=calcLevel(d.xp||0);
       const monthlyScore=d.monthlyScore||0;
+      const lp=lpFromScore(monthlyScore);
+      const userRank=getRankFromLP(lp);
       const equippedBadgeId=av.equipped?.badge||av.badge||'b_none';
       const badgeData=SHOP_ITEMS.badges.find(b=>b.id===equippedBadgeId);
       const badgeDisplay=(badgeData&&badgeData.id!=='b_none')?badgeData:null;
-      users.push({uid:doc.id,name:d.name||'Student',totalQuizzes:d.totalQuizzes||0,streak:d.streak||0,avg,xp:d.xp||0,level:userLevel,avBase,avColor,avFrame,hatE,glassE,presence:onlineMap[doc.id]||'offline',monthlyScore,badgeDisplay});
+      users.push({uid:doc.id,name:d.name||'Student',totalQuizzes:d.totalQuizzes||0,streak:d.streak||0,avg,xp:d.xp||0,level:userLevel,avBase,avColor,avFrame,hatE,glassE,presence:onlineMap[doc.id]||'offline',monthlyScore,lp,userRank,badgeDisplay});
     });
+
     if (_boardTab === 'monthly') {
       users.sort((a,b)=>b.monthlyScore-a.monthlyScore||b.totalQuizzes-a.totalQuizzes);
+    } else if (_boardTab === 'ranked') {
+      users.sort((a,b)=>b.lp-a.lp||b.monthlyScore-a.monthlyScore);
     } else {
       users.sort((a,b)=>b.avg-a.avg||b.totalQuizzes-a.totalQuizzes);
     }
+
     document.getElementById('board-loading').style.display='none';
     const list=document.getElementById('board-list');
+
+    // Ranked tab: show tier group headers
+    if (_boardTab === 'ranked') {
+      if (!users.length){list.innerHTML=`<div class="empty-state">No ranked players yet!</div>`;return;}
+      // Insert a ranked season explainer at top
+      const infoEl = document.createElement('div');
+      infoEl.style.cssText='background:linear-gradient(135deg,rgba(240,192,96,0.1),rgba(167,139,250,0.07));border:1px solid rgba(240,192,96,0.25);border-radius:16px;padding:14px 16px;margin-bottom:1rem;';
+      infoEl.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:4px;">🏆 Season Rankings</div><div style="font-size:12px;color:var(--text-muted);line-height:1.5;">LP is earned by completing quizzes. Win streaks boost LP, wrong answers cost LP. Season resets monthly.</div>`;
+      list.appendChild(infoEl);
+    }
+
     if(!users.length){list.innerHTML=`<div class="empty-state">${t('no_students')||'No students yet!'}</div>`;return;}
+
+    let lastTier = null;
     users.forEach((u,i)=>{
+      // Ranked tab: inject tier dividers
+      if (_boardTab === 'ranked') {
+        const tier = u.userRank.tier;
+        if (tier !== lastTier) {
+          lastTier = tier;
+          const divEl = document.createElement('div');
+          divEl.style.cssText=`display:flex;align-items:center;gap:10px;margin:${i===0?'0':'1rem'} 0 8px;`;
+          divEl.innerHTML=`
+            <div style="flex-shrink:0;">${getRankSVG(tier,28)}</div>
+            <div style="font-size:12px;font-weight:800;color:${u.userRank.color};letter-spacing:0.5px;text-transform:uppercase;">${u.userRank.name}</div>
+            <div style="flex:1;height:1px;background:${u.userRank.color}33;"></div>`;
+          list.appendChild(divEl);
+        }
+      }
+
       const isMe=currentUser&&u.uid===currentUser.uid;
       const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
       const rankIcon=i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
-      // Top 3 monthly get crown effect
       const isTopMonthly = _boardTab === 'monthly' && i < 3;
       const canvasFrameColors={'forest':'#3ecf8e','lava':'#ff4500','storm':'#88ccff','ocean':'#0099ff','gold':'#ffd700','shadow':'#8800cc','aurora':'#ff88ff','crystal':'#aaddff','neon':'#ff00ff','matrix':'#00ff41','phoenix':'#ff6600','dragon':'#ff3300','blackhole':'#9b30ff','dna':'#00c8ff','godmode':'#ffffff'};
       const isCanvasFrame=canvasFrameColors.hasOwnProperty(u.avFrame);
@@ -2965,46 +3122,88 @@ async function loadLeaderboard(){
       const frameBorder=`border-color:${fbColor};box-shadow:0 0 10px ${fbColor}55;`;
       const frameClass=u.avFrame==='godmode'?'frame-legendary':u.avFrame==='gold'||u.avFrame==='aurora'||u.avFrame==='shadow'||u.avFrame==='neon'||u.avFrame==='matrix'||u.avFrame==='phoenix'||u.avFrame==='dragon'||u.avFrame==='blackhole'||u.avFrame==='dna'?'frame-legendary':u.avFrame==='storm'||u.avFrame==='forest'||u.avFrame==='lava'||u.avFrame==='ocean'?'frame-rare':'frame-common';
       const lvlColor=u.level>=15?'#f0a050':u.level>=10?'#a78bfa':u.level>=5?'#3ecf8e':'#7a80a0';
-      // Online dot
       const dotClass=u.presence==='online'?'online-dot':u.presence==='away'?'online-dot away':'online-dot offline';
+
+      // Rank badge — always shown, different styles by tier
+      const r = u.userRank;
+      const isGlowRank = ['gold','platinum','diamond','master','grandmaster','challenger'].includes(r.tier);
+      const rankBadgeHtml = `<span class="rank-badge" style="background:${r.bg};border:1px solid ${r.color}55;color:${r.color};${isGlowRank?`box-shadow:0 0 8px ${r.glow};text-shadow:0 0 6px ${r.color};`:''}">
+        <span style="display:inline-flex;align-items:center;">${getRankSVG(r.tier,12)}</span>
+        <span style="margin-left:3px;">${r.name}</span>
+      </span>`;
+
       // Score display
-      const scoreDisplay = _boardTab === 'monthly'
-        ? `<div class="board-score" style="${isTopMonthly?'color:var(--gold);':''}">${u.monthlyScore}<div style="font-size:9px;color:var(--text-dim);font-weight:500;margin-top:1px;">pts</div></div>`
-        : `<div class="board-score">${u.avg}%</div>`;
+      let scoreDisplay;
+      if (_boardTab === 'ranked') {
+        const lpInTier = u.lp - r.minLP;
+        const nextR = RANKS[RANKS.indexOf(r)+1];
+        const tierRange = nextR ? nextR.minLP - r.minLP : 200;
+        const pct = Math.min(100, Math.round((lpInTier/tierRange)*100));
+        scoreDisplay = `<div style="text-align:right;min-width:52px;">
+          <div style="font-family:'DM Serif Display',serif;font-size:18px;color:${r.color};line-height:1;">${u.lp}</div>
+          <div style="font-size:9px;color:var(--text-dim);font-weight:500;margin-top:1px;">LP</div>
+          <div style="width:44px;height:3px;background:var(--surface2);border-radius:2px;margin-top:4px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${r.color};box-shadow:0 0 4px ${r.glow};border-radius:2px;"></div>
+          </div>
+        </div>`;
+      } else if (_boardTab === 'monthly') {
+        scoreDisplay = `<div class="board-score" style="${isTopMonthly?'color:var(--gold);':''}">${u.monthlyScore}<div style="font-size:9px;color:var(--text-dim);font-weight:500;margin-top:1px;">pts</div></div>`;
+      } else {
+        scoreDisplay = `<div class="board-score">${u.avg}%</div>`;
+      }
+
       const d=document.createElement('div');
       d.className='board-item'+(isMe?' me':'');
-      if (isTopMonthly) d.style.cssText += `;border-color:${i===0?'rgba(240,192,96,0.45)':i===1?'rgba(192,207,224,0.3)':'rgba(224,128,96,0.3)'};`;
+      if (_boardTab === 'ranked' && isGlowRank) {
+        d.style.cssText += `;border-color:${r.color}33;background:${r.bg};`;
+      } else if (isTopMonthly) {
+        d.style.cssText += `;border-color:${i===0?'rgba(240,192,96,0.45)':i===1?'rgba(192,207,224,0.3)':'rgba(224,128,96,0.3)'};`;
+      }
       const canvasFrameNames=['forest','lava','storm','ocean','gold','shadow','aurora','crystal','cosmos','neon','matrix','phoenix','dragon','blackhole','dna','godmode'];
       const needsCanvas = canvasFrameNames.includes(u.avFrame);
+      // Avatar-frame canvas (existing cosmetic frame)
       const canvasEl = needsCanvas
         ? `<canvas data-leaderboard-frame="${u.avFrame}" style="position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);pointer-events:none;border-radius:50%;z-index:0;"></canvas>`
         : '';
+      // Rank background canvas — always present, fills the circle with the tier's animated aura
+      const rankBgEl = `<canvas data-rank-bg="${r.tier}" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:50%;z-index:0;border-radius:50%;overflow:hidden;"></canvas>`;
+
+      // For ranked tab, show tier position icon instead of #N
+      const posDisplay = _boardTab === 'ranked'
+        ? `<div style="width:28px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;">${getRankSVG(r.tier,24)}<span style="font-size:9px;font-weight:700;color:${r.color};">#${i+1}</span></div>`
+        : `<div class="board-rank ${rankClass}">${rankIcon}</div>`;
+
       d.innerHTML=`
-        <div class="board-rank ${rankClass}">${rankIcon}</div>
-        <div class="board-avatar ${frameClass}" style="background:${u.avColor};${needsCanvas?'border-color:transparent;box-shadow:none;':''+frameBorder}position:relative;overflow:visible;font-size:20px;">
+        ${posDisplay}
+        <div class="board-avatar ${frameClass}" style="background:${u.avColor};${needsCanvas?'border-color:transparent;box-shadow:none;':''+frameBorder}position:relative;overflow:hidden;font-size:20px;">
+          ${rankBgEl}
           ${canvasEl}
           ${u.hatE?`<span style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:15px;z-index:2;">${u.hatE}</span>`:''}
           <span style="position:relative;z-index:1;">${u.avBase}</span>
           ${u.glassE?`<span style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:10px;z-index:2;">${u.glassE}</span>`:''}
-          <div class="${dotClass}" style="z-index:2;"></div>
+          <div class="${dotClass}" style="z-index:3;"></div>
         </div>
         <div class="board-info">
           <div class="board-name" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">${u.name}</span>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px;">${u.name}</span>
             ${isMe?`<span style="font-size:10px;color:var(--accent);background:var(--accent-dim);padding:2px 6px;border-radius:4px;flex-shrink:0;">${t('you_label')||'You'}</span>`:''}
             ${u.badgeDisplay?`<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:999px;background:${u.badgeDisplay.glow};border:1px solid ${u.badgeDisplay.color}55;flex-shrink:0;${u.badgeDisplay.rarity==='godlike'?'animation:legendaryFrame 1.5s ease-in-out infinite;':''}"><span style="font-size:10px;">${u.badgeDisplay.icon}</span><span style="font-size:9px;font-weight:800;color:${u.badgeDisplay.color};letter-spacing:0.3px;${u.badgeDisplay.rarity==='godlike'||u.badgeDisplay.rarity==='mythic'?'text-shadow:0 0 6px '+u.badgeDisplay.color+';':''}">${u.badgeDisplay.name}</span></span>`:''}
           </div>
-          <div class="board-sub">
-            <span style="font-size:10px;font-weight:700;color:${lvlColor};background:${lvlColor}22;padding:1px 6px;border-radius:4px;margin-right:6px;">LV${u.level}</span>${u.totalQuizzes} quizzes · ${u.streak}🔥
+          <div class="board-sub" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+            <span style="font-size:10px;font-weight:700;color:${lvlColor};background:${lvlColor}22;padding:1px 6px;border-radius:4px;">LV${u.level}</span>
+            ${rankBadgeHtml}
+            <span style="color:var(--text-dim);">${u.streak}🔥</span>
           </div>
         </div>
         ${scoreDisplay}`;
       list.appendChild(d);
     });
-    // Start animated canvas frames on leaderboard avatars
     setTimeout(()=>{
       document.querySelectorAll('canvas[data-leaderboard-frame]').forEach(c=>{
         startMiniFrame(c, c.dataset.leaderboardFrame);
+      });
+      document.querySelectorAll('canvas[data-rank-bg]').forEach(c=>{
+        startRankBg(c, c.dataset.rankBg);
       });
     }, 50);
   }catch(e){document.getElementById('board-loading').textContent='Could not load leaderboard.';}
@@ -5234,6 +5433,170 @@ function miniGodmode(ctx,W,H,cx,cy,R,t){
     ctx.beginPath();ctx.arc(cx+Math.cos(a)*(R+8),cy+Math.sin(a)*(R+8),sp*3+0.5,0,Math.PI*2);
     ctx.fillStyle=`rgba(255,220,50,${sp})`;ctx.fill();
   }
+}
+
+
+// ════════════════════════════════════════════
+// RANK BACKGROUND CANVAS ANIMATIONS
+// ════════════════════════════════════════════
+
+function startRankBg(canvas, tier) {
+  if (!canvas) return;
+  if (canvas._rankBgRaf) { cancelAnimationFrame(canvas._rankBgRaf); _activeMiniAnims.delete(canvas._rankBgRaf); }
+  let t = 0; let rafId;
+  const fns = { iron:rankBgIron,bronze:rankBgBronze,silver:rankBgSilver,gold:rankBgGold,platinum:rankBgPlatinum,diamond:rankBgDiamond,master:rankBgMaster,grandmaster:rankBgGrandmaster,challenger:rankBgChallenger };
+  const fn = fns[tier]; if (!fn) return;
+  function loop() {
+    if (!canvas.isConnected) { cancelAnimationFrame(rafId); _activeMiniAnims.delete(rafId); return; }
+    const W=canvas.offsetWidth||40, H=canvas.offsetHeight||40;
+    if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
+    const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,W,H);
+    ctx.save(); ctx.beginPath(); ctx.arc(W/2,H/2,Math.min(W,H)/2,0,Math.PI*2); ctx.clip();
+    fn(ctx,W,H,W/2,H/2,t); ctx.restore();
+    t+=0.022; rafId=requestAnimationFrame(loop); canvas._rankBgRaf=rafId; _activeMiniAnims.add(rafId);
+  }
+  loop();
+}
+
+function rankBgIron(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy-H*.2,0,cx,cy,H*.7);
+  bg.addColorStop(0,'rgba(80,82,100,0.55)');bg.addColorStop(1,'rgba(30,32,45,0.7)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const sz=H*.28;
+  for(let row=-1;row<=2;row++){for(let col=-1;col<=3;col++){
+    const ox=col*sz*1.73+(row%2)*sz*.87,oy=row*sz*1.5;
+    const bri=.08+.06*Math.sin(t*.8+row*1.3+col*1.7);
+    ctx.beginPath();
+    for(let k=0;k<6;k++){const a=k/6*Math.PI*2-Math.PI/6;ctx[k===0?'moveTo':'lineTo'](cx-W*.5+ox+Math.cos(a)*sz*.48,cy-H*.5+oy+Math.sin(a)*sz*.48);}
+    ctx.closePath();ctx.strokeStyle=`rgba(160,165,200,${bri})`;ctx.lineWidth=.8;ctx.stroke();
+  }}
+  const sw=(t*.4%1)*H*1.4-H*.2,sg=ctx.createLinearGradient(0,sw-6,0,sw+6);
+  sg.addColorStop(0,'rgba(200,205,230,0)');sg.addColorStop(.5,'rgba(200,205,230,0.12)');sg.addColorStop(1,'rgba(200,205,230,0)');
+  ctx.fillStyle=sg;ctx.fillRect(0,sw-6,W,12);
+}
+function rankBgBronze(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,H*.7);
+  bg.addColorStop(0,'rgba(90,50,20,0.75)');bg.addColorStop(1,'rgba(40,18,8,0.85)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let v=0;v<4;v++){
+    ctx.beginPath();const ox=(v/4)*W;
+    for(let y=0;y<=H;y+=2){const x=ox+Math.sin(y*.18+t*1.2+v*1.4)*W*.22;y===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle=`rgba(${180+v*10},${80+v*8},${20+v*4},${.1+.12*Math.sin(t*1.5+v)})`;ctx.lineWidth=1.2;ctx.stroke();
+  }
+  for(let s=0;s<6;s++){const a=(s/6)*Math.PI*2+t*.4,r=H*.25+Math.sin(t*2+s)*H*.08,glow=.3+.4*Math.abs(Math.sin(t*2+s*.9));
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,1.5,0,Math.PI*2);ctx.fillStyle=`rgba(255,${120+s*10},20,${glow})`;ctx.fill();}
+}
+function rankBgSilver(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy-H*.15,H*.1,cx,cy,H*.75);
+  bg.addColorStop(0,'rgba(200,210,230,0.45)');bg.addColorStop(.5,'rgba(120,130,160,0.35)');bg.addColorStop(1,'rgba(50,55,80,0.55)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let b=0;b<3;b++){
+    const bx=((t*.3+b*.33)%1.2-.1)*W*1.4,sg=ctx.createLinearGradient(bx-10,0,bx+10,H);
+    sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,`rgba(255,255,255,${.06+b*.02})`);sg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=sg;ctx.save();ctx.transform(1,0,-.4,1,0,0);ctx.fillRect(bx-14,0,28,H);ctx.restore();
+  }
+  for(let s=0;s<5;s++){
+    const px=cx+Math.sin(s*1.9+t*.2)*cx*.7,py=cy+Math.cos(s*2.3+t*.15)*cy*.7;
+    const alpha=Math.max(0,Math.sin(t*2+s*1.4)),sz=alpha*3;
+    ctx.save();ctx.translate(px,py);ctx.rotate(t+s);
+    ctx.strokeStyle=`rgba(230,240,255,${alpha*.8})`;ctx.lineWidth=.8;
+    for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(k*Math.PI/2)*sz,Math.sin(k*Math.PI/2)*sz);ctx.stroke();}
+    ctx.restore();
+  }
+}
+function rankBgGold(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,H*.8);
+  bg.addColorStop(0,'rgba(120,80,0,0.7)');bg.addColorStop(.6,'rgba(80,45,0,0.75)');bg.addColorStop(1,'rgba(40,20,0,0.8)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let arm=0;arm<3;arm++){
+    ctx.beginPath();
+    for(let s=0;s<=36;s++){const p=s/36,a=(arm/3)*Math.PI*2+p*Math.PI*3+t*.6,r=p*H*.46;ctx[s===0?'moveTo':'lineTo'](cx+Math.cos(a)*r,cy+Math.sin(a)*r);}
+    ctx.strokeStyle=`hsla(${45+arm*8},100%,55%,${.25+.2*Math.sin(t+arm)})`;ctx.lineWidth=1.5;ctx.stroke();
+  }
+  for(let s=0;s<10;s++){const a=(s/10)*Math.PI*2+t*.8,r=H*.2+Math.sin(t*3+s)*H*.1,glow=.4+.5*Math.abs(Math.sin(t*2.5+s*.7)),sz=glow*3+.5;
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,sz,0,Math.PI*2);ctx.fillStyle=`rgba(255,220,80,${glow})`;ctx.fill();}
+  for(let k=0;k<8;k++){const a=(k/8)*Math.PI*2+t*.15,pulse=.05+.08*Math.abs(Math.sin(t*1.5+k));
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*H*.5,cy+Math.sin(a)*H*.5);
+    ctx.strokeStyle=`rgba(255,200,60,${pulse})`;ctx.lineWidth=1;ctx.stroke();}
+}
+function rankBgPlatinum(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,H*.8);
+  bg.addColorStop(0,'rgba(0,60,55,0.65)');bg.addColorStop(1,'rgba(0,25,30,0.8)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let l=0;l<3;l++){
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=2){const y=cy+Math.sin(x*.12+t*1.3+l*1.1)*H*.18+Math.sin(x*.07+t*.9+l)*H*.1;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle=`hsla(${170+l*15+Math.sin(t+l)*10},90%,60%,${.2-l*.04})`;ctx.lineWidth=2+l;ctx.stroke();
+  }
+  for(let p=0;p<12;p++){const a=(p/12)*Math.PI*2+t*.3+p,r=H*.18+Math.sin(t*2+p)*H*.12,alpha=.25+.35*Math.abs(Math.sin(t*1.5+p*.8));
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,1.2,0,Math.PI*2);ctx.fillStyle=`rgba(80,230,200,${alpha})`;ctx.fill();}
+}
+function rankBgDiamond(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy,H*.05,cx,cy,H*.75);
+  bg.addColorStop(0,'rgba(10,40,100,0.75)');bg.addColorStop(.5,'rgba(5,20,70,0.8)');bg.addColorStop(1,'rgba(2,8,40,0.85)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let r=0;r<6;r++){const a=(r/6)*Math.PI*2+t*.1,len=H*(.4+.1*Math.sin(t*1.2+r)),alpha=.06+.06*Math.abs(Math.sin(t*.8+r*1.1));
+    const g=ctx.createLinearGradient(cx,cy,cx+Math.cos(a)*len,cy+Math.sin(a)*len);
+    g.addColorStop(0,`rgba(150,200,255,${alpha*3})`);g.addColorStop(1,'rgba(150,200,255,0)');
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*len,cy+Math.sin(a)*len);ctx.strokeStyle=g;ctx.lineWidth=2+r%2;ctx.stroke();}
+  for(let c=0;c<3;c++){const ca=(c/3)*Math.PI*2+t*.4+c,cr=H*.2+c*H*.07,px=cx+Math.cos(ca)*cr,py=cy+Math.sin(ca)*cr,sz=2.5+c;
+    ctx.save();ctx.translate(px,py);ctx.rotate(t*.8+c);ctx.beginPath();
+    for(let k=0;k<6;k++){const a2=k/6*Math.PI*2;ctx[k===0?'moveTo':'lineTo'](Math.cos(a2)*sz,Math.sin(a2)*sz);}
+    ctx.closePath();ctx.fillStyle=`rgba(140,200,255,${.25+.2*Math.sin(t*2+c)})`;ctx.fill();ctx.restore();}
+  for(let s=0;s<8;s++){const a=(s/8)*Math.PI*2+t*.5+s,r=H*.3+Math.sin(t*2+s)*H*.1,alpha=Math.max(0,Math.sin(t*3+s*1.2))*.7;
+    ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,1.5,0,Math.PI*2);ctx.fillStyle=`rgba(200,230,255,${alpha})`;ctx.fill();}
+}
+function rankBgMaster(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,H*.8);
+  bg.addColorStop(0,'rgba(50,15,90,0.8)');bg.addColorStop(.5,'rgba(25,5,55,0.85)');bg.addColorStop(1,'rgba(8,0,25,0.9)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let ring=0;ring<3;ring++){const phase=(t*.5+ring*.33)%1,r2=phase*H*.5,alpha=(1-phase)*.25;
+    ctx.beginPath();ctx.arc(cx,cy,r2,0,Math.PI*2);ctx.strokeStyle=`rgba(180,100,255,${alpha})`;ctx.lineWidth=1.5;ctx.stroke();}
+  for(let o=0;o<4;o++){const a=(o/4)*Math.PI*2+t*(.8+o*.1),r=H*.28+Math.sin(t+o)*H*.06,px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;
+    const glow=ctx.createRadialGradient(px,py,0,px,py,5),hue=270+o*20+Math.sin(t)*20;
+    glow.addColorStop(0,`hsla(${hue},100%,75%,0.9)`);glow.addColorStop(1,`hsla(${hue},80%,50%,0)`);
+    ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fillStyle=glow;ctx.fill();
+    for(let tr=1;tr<=5;tr++){const ta=a-tr*.12;
+      ctx.beginPath();ctx.arc(cx+Math.cos(ta)*r,cy+Math.sin(ta)*r,3*(1-tr/6),0,Math.PI*2);ctx.fillStyle=`hsla(${hue},80%,65%,${(1-tr/6)*.3})`;ctx.fill();}}
+  for(let w=0;w<2;w++){ctx.beginPath();
+    for(let x=0;x<=W;x+=3){const y=cy+Math.sin(x*.1+t*.7+w*2.5)*H*.22;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle=`rgba(140,60,255,${.07+w*.03})`;ctx.lineWidth=3-w;ctx.stroke();}
+}
+function rankBgGrandmaster(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy+H*.2,0,cx,cy,H*.85);
+  bg.addColorStop(0,'rgba(120,20,0,0.85)');bg.addColorStop(.4,'rgba(70,10,0,0.9)');bg.addColorStop(1,'rgba(20,3,0,0.92)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  for(let f=0;f<3;f++){const fx=W*(.25+f*.25);ctx.beginPath();
+    for(let y=H;y>=0;y-=2){const p=1-(y/H),x=fx+Math.sin(y*.15+t*2+f*1.2)*W*.08*(1-p*.5);y===H?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle=`hsla(${10+f*12+Math.sin(t*2)*8},100%,55%,${.12+.1*Math.sin(t*1.5+f)})`;ctx.lineWidth=4-f;ctx.stroke();}
+  for(let e=0;e<14;e++){const phase=(t*.8+e*.07)%1,startX=W*.2+Math.sin(e*1.7)*W*.6,px=startX+Math.sin(phase*Math.PI*2+e)*W*.15,py=H*(1-phase*1.1);
+    if(py<-5)continue;const alpha=(1-phase)*.8,sz=1.5+Math.sin(e*2.3)*1;
+    ctx.beginPath();ctx.arc(px,py,sz,0,Math.PI*2);ctx.fillStyle=`rgba(255,${80+Math.sin(e)*40},10,${alpha})`;ctx.fill();}
+}
+function rankBgChallenger(ctx,W,H,cx,cy,t){
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,H*.8);
+  bg.addColorStop(0,'rgba(20,25,50,0.9)');bg.addColorStop(1,'rgba(2,3,12,0.95)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const coreR=H*.08+Math.sin(t*2)*H*.02,coreG=ctx.createRadialGradient(cx,cy,0,cx,cy,coreR*3);
+  coreG.addColorStop(0,'rgba(255,255,255,0.9)');coreG.addColorStop(.3,'rgba(200,220,255,0.4)');coreG.addColorStop(1,'rgba(100,150,255,0)');
+  ctx.beginPath();ctx.arc(cx,cy,coreR*3,0,Math.PI*2);ctx.fillStyle=coreG;ctx.fill();
+  for(let beam=0;beam<4;beam++){const a=(beam/4)*Math.PI+t*.05,len=H*.5;
+    const g=ctx.createLinearGradient(cx,cy,cx+Math.cos(a)*len,cy+Math.sin(a)*len);
+    g.addColorStop(0,'rgba(255,255,255,0.6)');g.addColorStop(.3,'rgba(180,200,255,0.15)');g.addColorStop(1,'rgba(100,130,255,0)');
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*len,cy+Math.sin(a)*len);ctx.strokeStyle=g;ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx-Math.cos(a)*len,cy-Math.sin(a)*len);ctx.strokeStyle=g;ctx.lineWidth=2;ctx.stroke();}
+  [{count:8,r:H*.3,speed:.7,hue:210,sz:2.2},{count:12,r:H*.38,speed:-.5,hue:260,sz:1.5},{count:6,r:H*.22,speed:1.2,hue:45,sz:2.8}].forEach(({count,r,speed,hue,sz})=>{
+    for(let s=0;s<count;s++){const a=(s/count)*Math.PI*2+t*speed,px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r,pulse=.5+.5*Math.sin(t*3+s*.9);
+      ctx.beginPath();ctx.arc(px,py,sz*pulse,0,Math.PI*2);ctx.fillStyle=`hsla(${hue},100%,85%,${.6+pulse*.3})`;ctx.fill();
+      if(pulse>.8){ctx.save();ctx.translate(px,py);ctx.strokeStyle=`hsla(${hue},80%,95%,${(pulse-.8)*2})`;ctx.lineWidth=.6;
+        for(let k=0;k<4;k++){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(k*Math.PI/2)*sz*3,Math.sin(k*Math.PI/2)*sz*3);ctx.stroke();}ctx.restore();}}});
+  for(let arm=0;arm<2;arm++){ctx.beginPath();
+    for(let s=0;s<=50;s++){const p=s/50,a=(arm/2)*Math.PI*2+p*Math.PI*2.5+t*.2,r2=p*H*.45;ctx[s===0?'moveTo':'lineTo'](cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);}
+    ctx.strokeStyle=`hsla(${(t*20+arm*180)%360},80%,75%,0.12)`;ctx.lineWidth=1.5;ctx.stroke();}
+  for(let sp=0;sp<5;sp++){const a=(sp/5)*Math.PI*2+t*.3+Math.PI/2,spike=H*.28+Math.sin(t*2+sp)*H*.06;
+    const g=ctx.createLinearGradient(cx,cy,cx+Math.cos(a)*spike,cy+Math.sin(a)*spike);
+    g.addColorStop(0,'rgba(255,220,100,0.4)');g.addColorStop(1,'rgba(255,220,100,0)');
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*spike,cy+Math.sin(a)*spike);ctx.strokeStyle=g;ctx.lineWidth=3;ctx.stroke();}
 }
 
 function equipItem(tab,item){const catMap={hats:'hat',glasses:'glasses',frames:'frame',effects:'effect'};avatarState.equipped={...(avatarState.equipped||{})};avatarState.equipped[catMap[tab]]=item.id;if(tab==='frames')avatarState.frame=item.frameColor||'var(--accent)';if(tab==='effects')avatarState.effect=item.effect||'none';renderAvatarPreview();showShopTab(tab);playTone(659,'sine',0,0.15,0.2);playTone(784,'sine',0.12,0.15,0.2);}
@@ -9215,6 +9578,257 @@ function doConvert(cat) {
   resultBox.style.display = 'block';
   resultBig.textContent = display + ' ' + toUnit;
   resultLabel.textContent = `${fromVal} ${fromUnit} = ${display} ${toUnit}`;
+}
+
+// ── RANKED SEASON SYSTEM ──
+const RANKS = [
+  { id:'iron',        name:'Iron',        tier:'iron',        minLP:0,    maxLP:100, color:'#8c8ca0', glow:'rgba(140,140,160,0.6)', bg:'rgba(140,140,160,0.08)' },
+  { id:'bronze',      name:'Bronze',      tier:'bronze',      minLP:100,  maxLP:250, color:'#b46c3c', glow:'rgba(180,108,60,0.7)',  bg:'rgba(180,108,60,0.08)'  },
+  { id:'silver',      name:'Silver',      tier:'silver',      minLP:250,  maxLP:450, color:'#a0b4d2', glow:'rgba(160,180,210,0.7)', bg:'rgba(160,180,210,0.08)' },
+  { id:'gold',        name:'Gold',        tier:'gold',        minLP:450,  maxLP:700, color:'#f0c060', glow:'rgba(240,192,96,0.8)',  bg:'rgba(240,192,96,0.10)'  },
+  { id:'platinum',    name:'Platinum',    tier:'platinum',    minLP:700,  maxLP:1000,color:'#4dd9c0', glow:'rgba(77,217,192,0.8)',  bg:'rgba(77,217,192,0.08)'  },
+  { id:'diamond',     name:'Diamond',     tier:'diamond',     minLP:1000, maxLP:1400,color:'#64b4ff', glow:'rgba(100,180,255,0.85)',bg:'rgba(100,180,255,0.09)' },
+  { id:'master',      name:'Master',      tier:'master',      minLP:1400, maxLP:1900,color:'#a78bfa', glow:'rgba(167,139,250,0.9)', bg:'rgba(167,139,250,0.10)' },
+  { id:'grandmaster', name:'Grandmaster', tier:'grandmaster', minLP:1900, maxLP:2500,color:'#ff5050', glow:'rgba(255,80,80,0.9)',   bg:'rgba(255,80,80,0.09)'   },
+  { id:'challenger',  name:'Challenger',  tier:'challenger',  minLP:2500, maxLP:9999,color:'#ffffff', glow:'rgba(255,255,255,0.95)',bg:'rgba(255,255,255,0.06)' },
+];
+
+// LP per correct answer on quiz finish, modified by difficulty
+const LP_PER_CORRECT = { easy: 8, medium: 12, hard: 18 };
+const LP_PER_WRONG   = { easy:-4, medium:-3, hard:-2 };
+
+function getRankFromLP(lp) {
+  for (let i = RANKS.length - 1; i >= 0; i--) {
+    if (lp >= RANKS[i].minLP) return RANKS[i];
+  }
+  return RANKS[0];
+}
+
+// ── SVG rank icons (inline, no external deps) ──
+function getRankSVG(tierId, size=40) {
+  const s = size;
+  const icons = {
+    iron: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="20,4 36,14 36,26 20,36 4,26 4,14" fill="rgba(140,140,160,0.15)" stroke="#8c8ca0" stroke-width="1.5"/>
+      <polygon points="20,9 31,16 31,24 20,31 9,24 9,16" fill="rgba(140,140,160,0.1)" stroke="#8c8ca0" stroke-width="1"/>
+      <text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="#8c8ca0" font-family="sans-serif">I</text>
+    </svg>`,
+    bronze: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="20,3 37,13.5 37,26.5 20,37 3,26.5 3,13.5" fill="rgba(180,108,60,0.15)" stroke="#b46c3c" stroke-width="1.8"/>
+      <polygon points="20,9 31,16 31,24 20,31 9,24 9,16" fill="rgba(180,108,60,0.12)" stroke="#b46c3c" stroke-width="1"/>
+      <circle cx="20" cy="20" r="5" fill="rgba(180,108,60,0.3)" stroke="#b46c3c" stroke-width="1.5"/>
+      <text x="20" y="24" text-anchor="middle" font-size="9" font-weight="800" fill="#b46c3c" font-family="sans-serif">II</text>
+    </svg>`,
+    silver: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="20,3 37,13.5 37,26.5 20,37 3,26.5 3,13.5" fill="rgba(160,180,210,0.12)" stroke="#a0b4d2" stroke-width="1.8"/>
+      <polygon points="20,8 32,15 32,25 20,32 8,25 8,15" fill="rgba(160,180,210,0.1)" stroke="#a0b4d2" stroke-width="1"/>
+      <line x1="15" y1="15" x2="25" y2="25" stroke="#a0b4d2" stroke-width="1.5"/>
+      <line x1="25" y1="15" x2="15" y2="25" stroke="#a0b4d2" stroke-width="1.5"/>
+      <circle cx="20" cy="20" r="3" fill="#a0b4d2"/>
+    </svg>`,
+    gold: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><radialGradient id="gg"><stop offset="0%" stop-color="#ffe08a"/><stop offset="100%" stop-color="#c08000"/></radialGradient></defs>
+      <polygon points="20,2 24,15 38,15 27,23 31,37 20,29 9,37 13,23 2,15 16,15" fill="url(#gg)" stroke="#f0c060" stroke-width="1"/>
+      <polygon points="20,8 23,16 32,16 25.5,21 28,29 20,24 12,29 14.5,21 8,16 17,16" fill="rgba(240,192,96,0.3)"/>
+    </svg>`,
+    platinum: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><radialGradient id="pg"><stop offset="0%" stop-color="#a0ffe8"/><stop offset="100%" stop-color="#1a8070"/></radialGradient></defs>
+      <polygon points="20,3 37,13.5 37,26.5 20,37 3,26.5 3,13.5" fill="url(#pg)" stroke="#4dd9c0" stroke-width="1.5" opacity="0.9"/>
+      <polygon points="20,9 31,16 31,24 20,31 9,24 9,16" fill="none" stroke="#4dd9c0" stroke-width="1" opacity="0.7"/>
+      <path d="M14,20 L20,14 L26,20 L20,26 Z" fill="rgba(77,217,192,0.5)" stroke="#4dd9c0" stroke-width="1.2"/>
+    </svg>`,
+    diamond: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#c0e8ff"/><stop offset="50%" stop-color="#64b4ff"/><stop offset="100%" stop-color="#0060d0"/></linearGradient>
+      </defs>
+      <polygon points="20,2 38,16 30,38 10,38 2,16" fill="url(#dg)" stroke="#64b4ff" stroke-width="1.5"/>
+      <polygon points="20,7 34,18 27,35 13,35 6,18" fill="rgba(100,180,255,0.2)" stroke="#a0d4ff" stroke-width="0.8"/>
+      <line x1="20" y1="2" x2="20" y2="38" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+      <line x1="2" y1="16" x2="38" y2="16" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+    </svg>`,
+    master: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="mg" cx="50%" cy="30%"><stop offset="0%" stop-color="#d4b0ff"/><stop offset="100%" stop-color="#5020a0"/></radialGradient>
+      </defs>
+      <path d="M20,2 L24,10 L32,8 L28,16 L36,18 L28,22 L32,30 L24,28 L20,36 L16,28 L8,30 L12,22 L4,18 L12,16 L8,8 L16,10 Z" fill="url(#mg)" stroke="#a78bfa" stroke-width="1.2"/>
+      <circle cx="20" cy="18" r="5" fill="rgba(167,139,250,0.5)" stroke="#d4b0ff" stroke-width="1"/>
+      <path d="M20,4 L20,13 M20,23 L20,34 M4,18 L13,18 M27,18 L36,18" stroke="rgba(200,160,255,0.5)" stroke-width="0.8"/>
+    </svg>`,
+    grandmaster: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gmg" cx="50%" cy="40%"><stop offset="0%" stop-color="#ff9090"/><stop offset="100%" stop-color="#800000"/></radialGradient>
+      </defs>
+      <path d="M20,2 C20,2 38,12 38,22 C38,32 30,38 20,38 C10,38 2,32 2,22 C2,12 20,2 20,2Z" fill="url(#gmg)" stroke="#ff5050" stroke-width="1.5"/>
+      <path d="M20,8 C20,8 32,15 32,22 C32,29 27,34 20,34 C13,34 8,29 8,22 C8,15 20,8 20,8Z" fill="rgba(255,80,80,0.15)" stroke="rgba(255,150,150,0.5)" stroke-width="0.8"/>
+      <path d="M14,18 L18,26 L20,20 L22,26 L26,18" fill="none" stroke="#ff9090" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="20" cy="20" r="2" fill="#ff9090"/>
+    </svg>`,
+    challenger: `<svg width="${s}" height="${s}" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cg" cx="50%" cy="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="60%" stop-color="#c8e0ff"/><stop offset="100%" stop-color="#4080ff"/></radialGradient>
+        <filter id="cglow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="20" cy="20" r="17" fill="url(#cg)" stroke="white" stroke-width="1.5" filter="url(#cglow)"/>
+      <circle cx="20" cy="20" r="12" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.8"/>
+      <path d="M20,6 L23,14 L32,14 L25,19 L28,28 L20,23 L12,28 L15,19 L8,14 L17,14 Z" fill="rgba(255,255,255,0.9)" stroke="white" stroke-width="0.5"/>
+    </svg>`,
+  };
+  return icons[tierId] || icons.iron;
+}
+
+// Draw rank icon on canvas (for the big display in modal/card)
+function drawRankCanvas(canvas, tierId, size) {
+  if (!canvas) return;
+  const rank = RANKS.find(r => r.tier === tierId) || RANKS[0];
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+
+  // Glow background
+  const grd = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  grd.addColorStop(0, rank.glow.replace(')',',0.25)').replace('rgba','rgba'));
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, size, size);
+}
+
+// Rank card particle system
+function spawnRankParticles(canvas, color, up=true) {
+  if (!canvas) return;
+  const w = canvas.width = canvas.offsetWidth || 380;
+  const h = canvas.height = canvas.offsetHeight || 300;
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  const count = up ? 80 : 30;
+  const hex = color.startsWith('#') ? color : '#4f8ef7';
+
+  function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `${r},${g},${b}`;}
+  const rgb = hexToRgb(hex.length===7?hex:'#4f8ef7');
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: w/2 + (Math.random()-0.5)*80,
+      y: h/2 + (Math.random()-0.5)*40,
+      vx: (Math.random()-0.5) * (up?7:4),
+      vy: up ? -(Math.random()*8+4) : (Math.random()*5+2),
+      size: Math.random()*4+1.5,
+      life: 1,
+      decay: Math.random()*0.015+0.012,
+      shape: Math.random()<0.3?'star':'circle',
+    });
+  }
+
+  let frame;
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach((p, i) => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= p.decay;
+      if (p.life <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = `rgba(${rgb},${p.life})`;
+      if (p.shape === 'star') {
+        ctx.translate(p.x, p.y);
+        ctx.beginPath();
+        for (let j=0;j<5;j++){
+          const a=j*(Math.PI*2/5)-Math.PI/2;
+          const ia=a+Math.PI/5;
+          ctx.lineTo(Math.cos(a)*p.size, Math.sin(a)*p.size);
+          ctx.lineTo(Math.cos(ia)*p.size*0.4, Math.sin(ia)*p.size*0.4);
+        }
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size/2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+    if (particles.some(p => p.life > 0)) {
+      frame = requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, w, h);
+    }
+  }
+  if (frame) cancelAnimationFrame(frame);
+  draw();
+}
+
+// Calculate LP from monthlyScore (smooth scaling)
+function lpFromScore(monthlyScore) {
+  return Math.floor(Math.sqrt(monthlyScore) * 2.8);
+}
+
+function renderRankCard() {
+  const lp = lpFromScore(userStats.monthlyScore || 0);
+  const rank = getRankFromLP(lp);
+  const nextRank = RANKS[RANKS.indexOf(rank) + 1];
+  const lpInTier = lp - rank.minLP;
+  const tierRange = (nextRank ? nextRank.minLP : rank.minLP + 200) - rank.minLP;
+  const pct = Math.min(100, Math.round((lpInTier / tierRange) * 100));
+
+  const card = document.getElementById('rank-card-wrap');
+  if (!card) return;
+  card.setAttribute('data-tier', rank.tier);
+  card.style.borderColor = rank.color + '55';
+
+  card.innerHTML = `
+    <div class="rank-card-inner">
+      <div class="rank-icon-wrap">${getRankSVG(rank.tier, 52)}</div>
+      <div class="rank-card-info">
+        <div class="rank-card-name" style="color:${rank.color}">${rank.name}</div>
+        <div class="rank-card-sub">${lp} LP${nextRank ? ` · ${nextRank.minLP - lp} to ${nextRank.name}` : ' · Max Rank'}</div>
+      </div>
+    </div>
+    <div class="rank-lp-bar-wrap">
+      <div class="rank-lp-label"><span>Season LP</span><span style="color:${rank.color}">${lpInTier} / ${tierRange}</span></div>
+      <div class="rank-lp-track"><div class="rank-lp-fill" style="width:${pct}%;background:linear-gradient(90deg,${rank.color}88,${rank.color});box-shadow:0 0 8px ${rank.glow};"></div></div>
+    </div>`;
+}
+
+function showRankChangeModal(oldLp, newLp) {
+  const oldRank = getRankFromLP(oldLp);
+  const newRank = getRankFromLP(newLp);
+  const promoted = RANKS.indexOf(newRank) > RANKS.indexOf(oldRank);
+  const demoted  = RANKS.indexOf(newRank) < RANKS.indexOf(oldRank);
+  if (!promoted && !demoted) return; // same tier, no modal
+
+  const overlay = document.getElementById('rank-change-overlay');
+  const canvas  = document.getElementById('rank-change-canvas');
+  const iconEl  = document.getElementById('rank-change-icon');
+  const titleEl = document.getElementById('rank-change-title');
+  const subEl   = document.getElementById('rank-change-sub');
+
+  overlay.style.setProperty('--modal-glow', newRank.glow);
+  iconEl.innerHTML = getRankSVG(newRank.tier, 80);
+  if (promoted) {
+    titleEl.textContent = 'Rank Up!';
+    titleEl.style.color = newRank.color;
+    subEl.innerHTML = `You've advanced to <strong style="color:${newRank.color}">${newRank.name}</strong>! Keep climbing.`;
+    overlay.classList.add('show');
+    setTimeout(()=>spawnRankParticles(canvas, newRank.color.startsWith('#')?newRank.color:'#4f8ef7', true), 200);
+    playLevelUp();
+  } else {
+    titleEl.textContent = 'Rank Lost';
+    titleEl.style.color = '#f56565';
+    subEl.innerHTML = `You've dropped to <strong style="color:${newRank.color}">${newRank.name}</strong>. Win quizzes to climb back up!`;
+    overlay.classList.add('show');
+    spawnRankParticles(canvas, '#f56565', false);
+  }
+}
+
+function closeRankModal() {
+  document.getElementById('rank-change-overlay').classList.remove('show');
+}
+
+// Compute LP delta from quiz result
+function computeLP(score, total, difficulty) {
+  const correct = score;
+  const wrong = total - score;
+  const gain = LP_PER_CORRECT[difficulty] || 10;
+  const loss = LP_PER_WRONG[difficulty] || -3;
+  return (correct * gain) + (wrong * loss);
 }
 
 // ── BG TOGGLE ──
