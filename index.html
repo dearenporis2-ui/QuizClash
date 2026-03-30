@@ -1850,11 +1850,38 @@ service cloud.firestore {
       <div id="redeem-result" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
     </div>
 
-    <!-- Danger zone -->
+    <!-- Change Username -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-bottom:1rem;">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">✏️ Change Username</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Update your display name across the app.</div>
+      <div style="display:flex;gap:8px;">
+        <input id="settings-new-name" type="text" placeholder="New username…" maxlength="20" style="flex:1;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;" />
+        <button onclick="changeUsername()" style="padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Save</button>
+      </div>
+      <div id="settings-name-result" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+    </div>
+
+        <!-- Danger zone -->
     <div style="background:var(--red-dim);border:1px solid rgba(245,101,101,0.25);border-radius:18px;padding:18px 20px;">
       <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px;">Account</div>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Sign out of your account</div>
       <button onclick="doSignout()" style="padding:10px 20px;border-radius:10px;background:var(--red-dim);border:1px solid rgba(245,101,101,0.4);color:var(--red);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sign out</button>
+    </div>
+  </div>
+
+
+  <!-- ════ WARNING MODAL (shown to users on login if admin sent a warning) ════ -->
+  <div id="warning-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--surface);border:1.5px solid rgba(245,101,101,0.4);border-radius:22px;max-width:380px;width:100%;padding:28px 24px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:12px;">⚠️</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--red);margin-bottom:8px;">Warning from Admin</div>
+      <div id="warning-modal-msg" style="font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:20px;"></div>
+      <div id="warning-rename-section" style="display:none;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">You must choose a new username to continue:</div>
+        <input id="warning-new-name" type="text" placeholder="New username..." maxlength="20" style="width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;" />
+        <button onclick="submitWarningRename()" style="width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#6366f1);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Save New Username</button>
+      </div>
+      <button id="warning-dismiss-btn" onclick="dismissWarning()" style="width:100%;padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">I Understand</button>
     </div>
   </div>
 
@@ -1899,6 +1926,39 @@ service cloud.firestore {
       <div style="font-size:14px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Send a password reset email to any user. They'll receive a link to set a new password.</div>
       <div class="field"><label>User Email</label><input id="admin-reset-email" type="email" placeholder="user@example.com" /></div>
       <button onclick="adminSendPasswordReset()" style="width:100%;padding:13px;border-radius:13px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Send Reset Email</button>
+    </div>
+
+
+    <!-- WARN / RENAME USER -->
+    <p class="section-title" style="margin-top:1.5rem;">⚠️ Warn / Manage Users</p>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:1.25rem;">
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Send a warning to a user. Optionally force them to change their username before they can dismiss it.</div>
+      <div class="field"><label>User Email</label><input id="admin-warn-email" type="email" placeholder="user@example.com" /></div>
+      <div class="field"><label>Warning Message</label><textarea id="admin-warn-msg" placeholder="e.g. Your username is inappropriate. Please choose a new one." rows="3" style="width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.08);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;"></textarea></div>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);margin-bottom:14px;cursor:pointer;">
+        <input type="checkbox" id="admin-warn-force-rename" style="width:16px;height:16px;accent-color:var(--accent);" />
+        Force username change (user must pick new name to dismiss warning)
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button onclick="adminSendWarning()" style="padding:13px;border-radius:13px;background:linear-gradient(135deg,#f56565,#c53030);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">⚠️ Send Warning</button>
+        <button onclick="adminRenameUser()" style="padding:13px;border-radius:13px;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">✏️ Force Rename</button>
+      </div>
+      <div id="admin-warn-result" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+    </div>
+
+    
+    <!-- ADJUST PLAYER STATS -->
+    <p class="section-title" style="margin-top:1.5rem;">🎯 Adjust Player Stats</p>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:1.25rem;">
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">Manually set a player's XP, credits, or monthly score. Leave a field blank to leave it unchanged.</div>
+      <div class="field"><label>User Email</label><input id="admin-adj-email" type="email" placeholder="user@example.com" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="field" style="margin-bottom:0;"><label>⚡ XP</label><input id="admin-adj-xp" type="number" placeholder="e.g. 500" min="0" /></div>
+        <div class="field" style="margin-bottom:0;"><label>💰 Credits</label><input id="admin-adj-credits" type="number" placeholder="e.g. 100" min="0" /></div>
+        <div class="field" style="margin-bottom:0;"><label>📊 Monthly Score</label><input id="admin-adj-monthly" type="number" placeholder="e.g. 0" min="0" /></div>
+      </div>
+      <button onclick="adminAdjustStats()" style="width:100%;padding:13px;border-radius:13px;background:linear-gradient(135deg,#f0a050,#e53e3e);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">🎯 Apply Changes</button>
+      <div id="admin-adj-result" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
     </div>
 
     <p class="section-title">User Feedback</p>
@@ -2334,7 +2394,7 @@ auth.onAuthStateChanged(user=>{
     if(user.email==='dearen406@gmail.com'){
       document.getElementById('admin-nav-btn').style.display='flex';
     }
-    loadStats();
+    loadStats().then(()=>checkPendingWarnings());
     startUserListener();
     startPresence();
     restoreUserPreferences();
@@ -5338,6 +5398,145 @@ async function adminSendPasswordReset(){
     showToast('📧 Reset email sent to '+email);
   }catch(e){showToast('Error: '+e.message);}
 }
+// ── USERNAME CHANGE (settings) ──
+async function changeUsername(){
+  const input=document.getElementById('settings-new-name');
+  const result=document.getElementById('settings-name-result');
+  const name=input.value.trim();
+  if(!name||name.length<2){result.style.color='var(--red)';result.textContent='Name must be at least 2 characters.';return;}
+  if(name.length>20){result.style.color='var(--red)';result.textContent='Name must be 20 characters or less.';return;}
+  try{
+    await currentUser.updateProfile({displayName:name});
+    await db.collection('users').doc(currentUser.uid).update({name});
+    userStats.name=name;
+    const chip=document.getElementById('user-chip');
+    if(chip)chip.textContent=(isAdmin?'🛡️ ':'')+(userStats.avatar?.base||'🧑')+' '+name;
+    input.value='';
+    result.style.color='var(--green)';result.textContent='✓ Username updated!';
+    setTimeout(()=>{result.textContent='';},3000);
+    showToast('✏️ Username changed to '+name);
+  }catch(e){result.style.color='var(--red)';result.textContent='Error: '+e.message;}
+}
+
+// ── ADMIN: SEND WARNING ──
+async function adminSendWarning(){
+  if(!currentUser||currentUser.email!==ADMIN_EMAIL)return;
+  const email=document.getElementById('admin-warn-email').value.trim();
+  const msg=document.getElementById('admin-warn-msg').value.trim();
+  const forceRename=document.getElementById('admin-warn-force-rename').checked;
+  const res=document.getElementById('admin-warn-result');
+  if(!email||!msg){res.style.color='var(--red)';res.textContent='⚠️ Fill in email and message.';return;}
+  // Find user by email
+  const snap=await db.collection('users').where('email','==',email).get();
+  if(snap.empty){res.style.color='var(--red)';res.textContent='User not found with that email.';return;}
+  const userDoc=snap.docs[0];
+  await userDoc.ref.update({
+    warnings: firebase.firestore.FieldValue.arrayUnion({
+      msg, forceRename, sentAt:Date.now(), seen:false
+    })
+  });
+  document.getElementById('admin-warn-email').value='';
+  document.getElementById('admin-warn-msg').value='';
+  document.getElementById('admin-warn-force-rename').checked=false;
+  res.style.color='var(--green)';res.textContent='✓ Warning sent to '+email;
+  setTimeout(()=>{res.textContent='';},4000);
+  showToast('⚠️ Warning sent!');
+}
+
+// ── ADMIN: FORCE RENAME (sets a flag directly, user sees it on next load) ──
+async function adminRenameUser(){
+  if(!currentUser||currentUser.email!==ADMIN_EMAIL)return;
+  const email=document.getElementById('admin-warn-email').value.trim();
+  const res=document.getElementById('admin-warn-result');
+  if(!email){res.style.color='var(--red)';res.textContent='⚠️ Enter the user email.';return;}
+  const snap=await db.collection('users').where('email','==',email).get();
+  if(snap.empty){res.style.color='var(--red)';res.textContent='User not found.';return;}
+  const userDoc=snap.docs[0];
+  await userDoc.ref.update({
+    warnings: firebase.firestore.FieldValue.arrayUnion({
+      msg:'Your username has been flagged as inappropriate. Please choose a new one before continuing.',
+      forceRename:true, sentAt:Date.now(), seen:false
+    })
+  });
+  res.style.color='var(--green)';res.textContent='✓ Rename prompt sent to '+email;
+  setTimeout(()=>{res.textContent='';},4000);
+  showToast('✏️ Rename prompt sent!');
+}
+
+// ── WARNING MODAL: check on login ──
+
+// ── ADMIN: ADJUST PLAYER STATS ──
+async function adminAdjustStats(){
+  if(!currentUser||currentUser.email!==ADMIN_EMAIL)return;
+  const email=document.getElementById('admin-adj-email').value.trim();
+  const xpVal=document.getElementById('admin-adj-xp').value.trim();
+  const creditsVal=document.getElementById('admin-adj-credits').value.trim();
+  const monthlyVal=document.getElementById('admin-adj-monthly').value.trim();
+  const res=document.getElementById('admin-adj-result');
+  if(!email){res.style.color='var(--red)';res.textContent='⚠️ Enter a user email.';return;}
+  if(!xpVal&&!creditsVal&&!monthlyVal){res.style.color='var(--red)';res.textContent='⚠️ Fill in at least one field to change.';return;}
+  const snap=await db.collection('users').where('email','==',email).get();
+  if(snap.empty){res.style.color='var(--red)';res.textContent='No user found with that email.';return;}
+  const userDoc=snap.docs[0];
+  const updates={};
+  if(xpVal!=='')updates.xp=Math.max(0,parseInt(xpVal));
+  if(creditsVal!=='')updates.credits=Math.max(0,parseInt(creditsVal));
+  if(monthlyVal!=='')updates.monthlyScore=Math.max(0,parseInt(monthlyVal));
+  await userDoc.ref.update(updates);
+  const changed=Object.entries(updates).map(([k,v])=>`${k} → ${v}`).join(', ');
+  document.getElementById('admin-adj-email').value='';
+  document.getElementById('admin-adj-xp').value='';
+  document.getElementById('admin-adj-credits').value='';
+  document.getElementById('admin-adj-monthly').value='';
+  res.style.color='var(--green)';res.textContent='✓ Updated: '+changed;
+  setTimeout(()=>{res.textContent='';},5000);
+  showToast('🎯 Stats adjusted for '+email);
+}
+async function checkPendingWarnings(){
+  if(!currentUser)return;
+  const doc=await db.collection('users').doc(currentUser.uid).get();
+  if(!doc.exists)return;
+  const warnings=(doc.data().warnings||[]).filter(w=>!w.seen);
+  if(!warnings.length)return;
+  const w=warnings[0]; // show one at a time
+  window._pendingWarning=w;
+  window._pendingWarnings=warnings;
+  document.getElementById('warning-modal-msg').textContent=w.msg;
+  const renameSection=document.getElementById('warning-rename-section');
+  const dismissBtn=document.getElementById('warning-dismiss-btn');
+  if(w.forceRename){
+    renameSection.style.display='block';
+    dismissBtn.style.display='none';
+  } else {
+    renameSection.style.display='none';
+    dismissBtn.style.display='block';
+  }
+  document.getElementById('warning-modal').style.display='flex';
+}
+async function dismissWarning(){
+  if(!currentUser)return;
+  // Mark all unseen warnings as seen
+  const doc=await db.collection('users').doc(currentUser.uid).get();
+  const warnings=(doc.data().warnings||[]).map(w=>({...w,seen:true}));
+  await db.collection('users').doc(currentUser.uid).update({warnings});
+  document.getElementById('warning-modal').style.display='none';
+}
+async function submitWarningRename(){
+  const name=document.getElementById('warning-new-name').value.trim();
+  if(!name||name.length<2){showToast('⚠️ Please enter a valid name (min 2 chars).');return;}
+  if(name.length>20){showToast('⚠️ Max 20 characters.');return;}
+  try{
+    await currentUser.updateProfile({displayName:name});
+    await db.collection('users').doc(currentUser.uid).update({name});
+    userStats.name=name;
+    const chip=document.getElementById('user-chip');
+    if(chip)chip.textContent=(isAdmin?'🛡️ ':'')+(userStats.avatar?.base||'🧑')+' '+name;
+    await dismissWarning();
+    showToast('✏️ Username updated to '+name);
+  }catch(e){showToast('Error: '+e.message);}
+}
+
+
 
 // ── FORGOT PASSWORD (auth screen) ──
 async function doForgotPassword(){
