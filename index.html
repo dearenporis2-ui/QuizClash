@@ -4098,20 +4098,29 @@ const QUESTION_BANK={
 
 // ── ALSO: shuffle and limit to avoid repeats; prefer unseen questions ──
 const _seenQuestions = {};
+function fisherYates(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function shuffleQuestionOptions(q){
+  const indices=fisherYates([0,1,2,3].slice(0,q.options.length));
+  const newOptions=indices.map(i=>q.options[i]);
+  const newAnswer=indices.indexOf(q.answer);
+  return{...q,options:newOptions,answer:newAnswer};
+}
 function getQuestions(subj,top,diff){
   const key=`${subj}::${top}::${diff}`;
   const bank=QUESTION_BANK[key]||[];
   if(!bank.length)return null;
-  // Avoid repeating recently seen questions
   const seenKey = `seen_${key}`;
   const seen = JSON.parse(sessionStorage.getItem(seenKey)||'[]');
   const unseen = bank.filter((_,i)=>!seen.includes(i));
-  const pool = unseen.length >= 5 ? unseen : bank; // fall back to full bank if not enough unseen
-  const shuffled = [...pool].sort(()=>Math.random()-0.5).slice(0,5);
-  // Record indices as seen
+  const pool = unseen.length >= 5 ? unseen : bank;
+  const shuffled = fisherYates(pool).slice(0,5);
   const newSeen = [...new Set([...seen, ...shuffled.map(q=>bank.indexOf(q))])].slice(-bank.length);
   try { sessionStorage.setItem(seenKey, JSON.stringify(newSeen)); } catch(e){}
-  return shuffled;
+  return shuffled.map(shuffleQuestionOptions);
 }
 
 async function startQuiz(){
@@ -4119,7 +4128,8 @@ async function startQuiz(){
   setTimeout(()=>{
     const qs=getQuestions(subject,topic,difficulty);
     if(!qs){hide('quiz-loading');show('quiz-setup');showToast(`No questions yet for "${topic}" on ${difficulty} difficulty.`);return;}
-    questions=qs;currentQ=0;score=0;answered=false;_quizResultSaved=false;
+    questions=qs;currentQ=0;score=0;answered=false;
+    if(!window._isRetry){_quizResultSaved=false;}window._isRetry=false;
     // Only hide topbar now — when the actual quiz questions appear
     document.querySelector('.topbar').classList.add('hidden');
     hide('quiz-loading');show('active-quiz');quizStartTime=Date.now();
@@ -4193,7 +4203,7 @@ async function showResults(){
   playComplete();
 }
 
-function retryQuiz(){hide('quiz-result');startQuiz();}
+function retryQuiz(){hide('quiz-result');window._isRetry=true;startQuiz();}
 function backToSetup(){hide('quiz-result');show('quiz-setup');document.querySelector('.topbar').classList.remove('hidden');updateRefToolsBar(null);}
 
 // ── FEEDBACK ──
